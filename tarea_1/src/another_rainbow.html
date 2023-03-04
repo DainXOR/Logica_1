@@ -1,0 +1,196 @@
+<html>
+  <head>
+
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Dosis:600' type='text/css'>
+
+    <style>
+    :root {
+        --glow-size: 30px;
+        --border-radius: 20px;
+
+        --dark-gray: rgba(10, 10, 10, 1);
+        --dark-gray-l: rgba(15, 15, 15, 1);
+
+        --bg-color: var(--dark-gray);
+        --bg-box-color: var(--dark-gray-l);
+
+        --duration-1: 4s;
+        --duration-2: 4s;
+
+        --delay-0: 0s;
+        --delay-1: var(--duration-1);
+        --delat-2: var(--duration-2);
+
+    }
+
+    body{
+        background-color: var(--bg-color);
+
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+
+    .box{
+        width: 300px;
+        height: 300px;
+        margin: 50px auto;
+
+        border: 5px solid #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+
+        background-color: var(--bg-box-color);
+        border-radius: var(--border-radius);
+        animation: 
+        glow var(--duration-1) linear infinite, 
+        fade_in var(--duration-1) ease-out forwards, 
+        grow var(--duration-2) ease-in-out forwards var(--delay-1);
+    }
+
+    .box p{
+      height: 100%;
+      text-transform: uppercase;
+
+      position: relative;
+      text-align: center;
+      vertical-align: text-bottom;
+      
+
+      margin: 0;
+      padding: 0;
+
+      font-size: 30px;
+      font-family: 'Dosis', Helvetica, Arial, sans-serif;
+
+      color: #fff;
+      animation: 
+      text_color var(--duration-1) linear infinite, 
+      move_title var(--duration-2) ease-in-out forwards var(--delay-1);
+
+    }
+
+    @keyframes fade_in {
+        0% {
+          opacity: 0;
+        }
+        25%{
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+        
+    }
+    @keyframes grow {
+      0% {
+        width: 300px;
+        height: 300px;
+        margin: 50px auto;
+      }
+      100% {
+        width: 98%;
+        height: 100px;
+        margin: 10px auto;
+        text-align: center left;
+      }
+    }
+    @keyframes glow {
+      0% {
+          border: 5px solid rgb(255, 218, 218);
+          color: rgb(255, 218, 218);
+          box-shadow: 
+          0 0 var(--glow-size) rgba(255,0,0,1), inset 
+          0 0 var(--glow-size) rgba(255,0,0,1);
+          text-shadow: 0 0 var(--glow-size) rgba(255,0,0,1);
+      }
+      17% {
+          border: 5px solid rgb(255, 224, 193);
+          color: rgb(255, 224, 193);
+          box-shadow: 
+          0 0 var(--glow-size) rgba(255,127,0,1), inset 
+          0 0 var(--glow-size) rgba(255,127,0,1);
+          text-shadow: 0 0 var(--glow-size) rgba(255,127,0,1);
+      }
+      33% {
+          border: 5px solid rgb(255, 255, 195);
+          color: rgb(255, 255, 195);
+          box-shadow: 
+          0 0 var(--glow-size) rgba(255,255,0,1), inset 
+          0 0 var(--glow-size) rgba(255,255,0,1);
+          text-shadow: 0 0 var(--glow-size) rgba(255,255,0,1);
+      }
+      50% {
+        border: 5px solid rgb(192, 255, 192);
+        color: rgb(192, 255, 192);
+        box-shadow: 
+        0 0 var(--glow-size) rgba(0,255,0,1), inset 
+        0 0 var(--glow-size) rgba(0,255,0,1);
+        text-shadow: 0 0 var(--glow-size) rgba(0,255,0,1);
+      }
+      66% {
+        border: 5px solid rgb(188, 188, 255);
+        color: rgb(188, 188, 255);
+        box-shadow: 
+        0 0 var(--glow-size) rgba(0,0,255,1), inset 
+        0 0 var(--glow-size) rgba(0,0,255,1);
+        text-shadow: 0 0 var(--glow-size) rgba(0,0,255,1);
+      }
+      83% {
+        border: 5px solid rgb(230, 194, 255);
+        color: rgb(230, 194, 255);
+        box-shadow: 
+        0 0 var(--glow-size) rgba(75,0,130,1), inset 
+        0 0 var(--glow-size) rgba(75,0,130,1);
+        text-shadow: 0 0 var(--glow-size) rgba(75,0,130,1);
+      }
+      100% {
+        border: 5px solid rgb(255, 209, 209);
+        color: rgb(255, 218, 218);
+        box-shadow: 
+        0 0 var(--glow-size) rgba(255,0,0,1), inset 
+        0 0 var(--glow-size) rgba(255,0,0,1);
+        text-shadow: 0 0 var(--glow-size) rgba(255,0,0,1);
+      }
+    }
+    @keyframes text_color {
+      0% {
+        color: rgb(255, 218, 218);
+      }
+      17% {
+        color: rgb(255, 224, 193);
+      }
+      33% {
+        color: rgb(255, 255, 195);
+      }
+      50% {
+        color: rgb(192, 255, 192);
+      }
+      66% {
+        color: rgb(188, 188, 255);
+      }
+      83% {
+        color: rgb(230, 194, 255);
+      }
+      100% {
+        color: rgb(255, 218, 218);
+      }
+    }
+    @keyframes move_title {
+      0%{
+        text-align: center;
+      }
+      100%{
+        text-align: left;
+      }
+    }
+
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <p>GLITCH STUDIOS</p>
+    </div>
+  </body>
+</html>

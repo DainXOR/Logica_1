@@ -1,0 +1,103 @@
+.card-deck {
+  z-index: 5;
+
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+
+  background-color: #1b1a1a;
+  background-image: var(--bg-image);
+  background-size: auto 115%;
+  background-attachment: fixed;
+}
+
+.c1{
+  background-color: #1b1a1a;
+  background-image: url(../../resources/images/Horse_rider.jpg);
+  background-size: auto 100%;
+  background-position: 50%;
+}
+.c2{
+  background-color: #1b1a1a;
+  background-image: url(../../resources/images/KnY3.png);
+  background-size: auto 100%;
+  background-position: 50%;
+}
+.c3{
+  background-color: #1b1a1a;
+  background-image: url(../../resources/images/Archer.jpg);
+  background-size: auto 100%;
+  background-position: 50%;
+}
+  
+.card {
+  width: 75px;
+  height: 500px;
+  
+
+  color: #fff;
+  box-shadow: 0 0 30px #000;
+  border: 1px solid white;
+  border-radius: 50px;
+  text-align: center;
+  margin: 10px;
+
+  overflow: hidden;
+  transition: 300ms;
+}
+  
+.card:hover {
+  box-shadow: 0 0 10px #fff;
+  cursor: pointer;
+  transition: 300ms;
+}
+  
+.card img{
+  width: 100%;
+  height: auto;
+}
+  
+.card h2, .card p{
+  margin: 50px;
+  opacity: 0;
+  pointer-events: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: 'Dosis', sans-serif;
+  text-shadow: 
+  0 0 5px #000, 
+  0 0 10px #000, 
+  0 0 15px #000, 
+  0 0 20px #000, 
+  0 0 25px #000;
+
+  transition: 200ms;
+}
+
+.card h2{
+  font-size: xx-large;
+}
+
+.card p{
+  font-size: larger;
+}
+  
+.card.active {
+  width: 60%;
+  box-shadow: 0 0 10px #fff, 0 0 300px 50px #000 inset;
+  transition: 700ms;
+}
+
+.card.active:hover{
+  cursor: default;
+}
+  
+.card.active h2, .card.active p{
+  opacity: 1;
+  
+  transition: 200ms;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tangram</title>
+
+    <link rel="icon" href="../../resources/icons/logo_transparent.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Dosis:600" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap">
+
+    <link rel="stylesheet" href="../styles/tangram_index.css"></link>
+    <link rel="stylesheet" href="../styles/tangram_canvas.css"></link>
+    <link rel="stylesheet" href="../styles/figures.css"></link>
+
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+            integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+            crossorigin="anonymous"></script>
+
+    <script src="../scripts/add_random_figures.js"></script>
+    <script src="../scripts/grab_figures.js"></script>
+
+</head>
+<body>
+    <canvas id="c0"></canvas>
+    <div class="info-box">
+        <p class="info">Usa "A" y "D" para rotar las figuras.</p>
+        <p class="info">Usa "W" y "S" para cambiar su tamaño.</p>
+        <p class="info">Usa "x" y "z" para hacerlas mas pequeñas en 'x' y 'y'.</p>
+        <p class="info">Con "Shift" se haran mas grandes.</p>
+        <p class="info">Usa "R" y "F" para reflejar las figuras en 'x' y 'y'.</p>
+    </div>
+    <div class="figures-box" id="figures-box">
+    </div>
+    
+
+    <h2>Discovered</h2>
+    <div class="canvas-box">
+        <canvas id="c1"></canvas>
+        <canvas id="c2"></canvas>
+        <canvas id="c3"></canvas>
+        <canvas id="c4"></canvas>
+        <canvas id="c5"></canvas>
+        <canvas id="c6"></canvas>
+        <canvas id="c7"></canvas>
+        <canvas id="c8"></canvas>
+        <canvas id="c9"></canvas>
+    </div>
+    
+</body>
+</html>

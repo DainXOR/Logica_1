@@ -1,0 +1,89 @@
+.figures-box{
+    height: 220px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    z-index: 10;
+
+    background-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 
+    0 0 10px rgba(255, 255, 225, 0.3) inset,
+    0 0 20px rgba(255, 255, 225, 0.3) inset,
+    0 0 30px rgba(255, 255, 225, 0.3) inset,
+    0 0 40px rgba(255, 255, 225, 0.3) inset,
+    0 0 50px rgba(255, 255, 225, 0.3) inset,
+    0 0 5px rgba(255, 255, 225, 0.3),
+    0 0 10px rgba(255, 255, 225, 0.3),
+    0 0 15px rgba(255, 255, 225, 0.3),
+    0 0 20px rgba(255, 255, 225, 0.3),
+    0 0 25px rgba(255, 255, 225, 0.3);
+    /*backdrop-filter: blur(0px);*/
+
+    border-radius: 10px;
+    border: 5px solid #fff;
+
+}
+
+.figure{
+    /*border: 2px solid #000;*/
+    position: absolute;
+
+    backdrop-filter: blur(5px);
+    /*border-radius: 5px;*/
+
+    /*box-shadow: 0 0 40px rgba(255, 255, 255, 0.5) inset;*/
+
+    cursor: grab;
+
+    transition: 300ms;
+}
+
+.triangle {
+    width: 0;
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 80px solid #000000;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+.big-triangle{
+    width: 0;
+    height: 0;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 100px solid #fff;
+}
+.small-triangle{
+    width: 0;
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 50px solid #fff;
+}
+
+.square {
+    width: 50px;
+    height: 50px;
+    background-color: #fff;
+}
+
+.rectangle {
+    width: 50px;
+    height: 100px;
+    background-color: #fff;
+}
+
+.trapezoid {
+    width: 50px;
+    height: 100px;
+    clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+    background-color: #fff;
+}
+
+.grabbing {
+    cursor: grabbing;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Triangles not working :( */
+
+    transition: 100ms;
+}
+
+

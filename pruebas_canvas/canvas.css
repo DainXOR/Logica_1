@@ -1,0 +1,41 @@
+.canvas-box{
+    height: 50vh;
+    width: 100%;
+
+    display: grid;
+    justify-content: center;
+    box-sizing: border-box;
+
+
+    gap: 20px;
+    grid-template: 
+    "c1 c2 c3"
+    "c4 c5 c6"
+    "c7 c8 c9"
+    "c10 c11 c12";
+
+
+
+    background-color: var(--bg-color);
+}
+
+canvas{
+    width: 400px;
+    height: 400px;
+
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+    border: 5px solid red;
+    border-radius: 10px;
+    border-style: double;
+    box-shadow: 
+    0 0 5px rgba(255, 0, 0, 0.5),
+    0 0 10px rgba(255, 0, 0, 0.5),
+    0 0 5px rgba(255, 0, 0, 0.5) inset,
+    0 0 10px rgba(255, 0, 0, 0.5) inset;
+
+    background-color: var(--bg-color);
+
+}

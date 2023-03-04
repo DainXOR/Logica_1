@@ -1,0 +1,89 @@
+.sections{
+    z-index: 1;
+    box-sizing: border-box;
+
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+
+    margin-top: 5rem;
+    margin-left: 3rem;
+    margin-right: 3rem;
+    margin-bottom: 5rem;
+
+    background: var(--bg-image);
+    background-attachment: fixed;
+
+    background-size: auto 115%;
+
+    text-decoration: none;
+    text-align: center;
+}
+
+.sections .section{
+    z-index: 4;
+
+    position: relative;
+    background-attachment: fixed;
+
+    text-decoration: inherit;
+}
+
+.sections .section .box{
+    position: relative;
+    max-width: 200px;
+    margin: 0;
+    padding: 40px;
+    
+    box-shadow: 0 5px 10px 10px rgb(0, 0, 0, .5);
+    border-radius: 30px / 90px;
+    background: rgba(255, 255, 255, 0.1);
+
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+
+    overflow: hidden;
+    color: #fff;
+
+    font-family: 'Dosis', sans-serif;
+
+    text-shadow: 
+    0 0 5px #000, 
+    0 0 10px #000, 
+    0 0 15px #000;
+    text-transform: uppercase;
+    text-decoration: inherit;
+    
+
+    transition: 300ms;
+}
+
+.sections .b1, 
+.sections .b2{
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.sections .b3, 
+.sections .b4{
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.sections .box:hover{
+
+    transform: scale(1.1);
+    
+    transition: 300ms;
+}
+
+.sections .box .h2{
+    position: relative;
+    margin: 0 0 20px;
+    padding: 0;
+
+    font-family: inherit;
+
+    text-decoration: inherit;
+    text-transform: inherit;
+    text-align: center;
+}
