@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-family: "Poppins", sans-serif;
+
+    --bg-color: rgb(20, 20, 20);
+    --green: rgb(0, 223, 196);
+    --valid: var(--green);
+    --invalid: rgb(241, 56, 56);
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.panel{
+    z-index: 5;
+
+    padding: 40px;
+    border: 8px solid var(--green);
+    border-radius: 20px;
+    background: transparent;
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35),
+    -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
+    5px 5px 15px rgba(0, 0, 0, 0.35) inset;
+
+}
+
+.panel .Box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.panel .Box h2{
+    color: #fff;
+    font-weight: 700;
+    font-size: px;
+    letter-spacing: 0.1em;
+}
+.panel .Box h3{
+    color: #fff;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+}
+
+.panel .Box .ioBox{
+    position: relative;
+    width: 350px;
+}
+
+.panel .Box .ioBox input{
+    padding: 12px 10px 12px 48px;
+    width: 100%;
+    background-color: var(--bg-color);
+    border: 1px solid var(--green);
+    color: #fff;
+    font-weight: 300;
+    border-radius: 25px;
+    font-size: 1em;
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35);
+
+    transition: 0.5s;
+    outline: none;
+}
+
+.panel .Box .ioBox span{
+    position: absolute;
+    left: 0;
+    padding: 12px 10px 12px 48px;
+    pointer-events: none;
+    font-size: 1em;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.5);
+
+    transition: 0.5s;
+    letter-spacing: 0.06em;
+}
+
+.panel .Box .ioBox input[type="button"]{
+    background-color: var(--bg-color);
+    color: var(--green);
+    padding: 10px 0;
+    font-weight: 300;
+    cursor: pointer;
+
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35),
+    -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
+    5px 5px 15px rgba(0, 0, 0, 0.35) inset;
+
+    transition: 0.5s;
+}
+
+.panel .Box .ioBox input[type="button"]:hover{
+
+    background-color: var(--green);
+    color: var(--bg-color);
+    border: 1px solid var(--bg-color);
+
+    font-weight: 700;
+
+    transition:  0.5s;
+}
+

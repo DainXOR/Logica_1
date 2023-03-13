@@ -45,8 +45,6 @@ body::-webkit-scrollbar{
   margin-top: 27px;
   transition: 300ms;
 
-  
-
   cursor: pointer;
 }
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="../styles/bank_styles/bank_main.css"></link>
+    <link rel="stylesheet" href="../styles/bank_styles/items_visibility.css"></link>
+
+    <script src="../scripts/bank_scripts/user_data.js"></script>
+    <script src="../scripts/bank_scripts/encrypt.js"></script>
+    <script src="../scripts/bank_scripts/bank_structs.js"></script>
+    <script src="../scripts/bank_scripts/bank_main.js"></script>
+
+    <title>Bank</title>
+</head>
+<body>
+    <div class="panel">
+        <div class="Box actionBox main">
+            <h2>Menu</h2>
+            <div class="Box ioBox inputBox">
+                <input type="button" class="mainButton" id="b_transaction" value="Transactions">
+                <input type="button" class="mainButton" id="b_balance" value="Check balance">
+                <input type="button" class="mainButton" id="b_history" value="History">
+                <input type="button" class="mainButton exitButton" id="b_logout" value="Log out">
+            </div>
+        </div>
+        <div class="Box actionBox transaction">
+            <div class="Box ioBox inputBox">
+                <h2>Transactions</h2>
+                <input type="button" class="t0Button" id="b_currency_change" value="Change currency">
+                <input type="button" class="t0Button" id="b_withdraw" value="Withdraw">
+                <input type="button" class="t0Button" id="b_deposit" value="Deposit">
+                <input type="button" class="t0Button" id="b_transfer" value="Transfer">
+                <input type="button" class="t0Button backButton" id="b_back" value="Go back">
+
+            </div>
+            <div class="Box ioBox outputBox">
+                <div class="Box currencyChangeBox">
+                    <h2>Currency Change</h2>
+                </div>
+                <div class="Box withdrawBox">
+                    <h2>Withdraw</h2>
+                </div>
+                <div class="Box depositBox">
+                    <h2>Deposit</h2>
+
+                </div>
+                <div class="Box transferBox">
+                    <h2>Transfer</h2>
+
+                </div>
+
+                <input type="button" class="t1Button backButton" id="b_back" value="Go back">
+            </div>
+        </div>
+        <div class="Box actionBox balance">
+            <h2>Account Balance</h2>
+            <div class="Box ioBox outputBox">
+                <h3>Your current balance:</h3>
+                <span class="accountBalance"></span>
+                <span class="accountCurrency"></span>
+                <input type="button" class="b0Button backButton" id="b_back" value="Go back">
+            </div>
+            
+        </div>
+        <div class="Box actionBox history">
+            <h2>Transactions History</h2>
+            <div class="Box ioBox outputBox">
+                <span class="accountHistory"></span>
+                <input type="button" class="h0Button backButton" id="b_back" value="Go back">
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
