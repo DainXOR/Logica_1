@@ -1,22 +1,39 @@
+if(!localStorage.getItem("userID")){
+    localStorage.removeItem("userID");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userPass");
+    localStorage.removeItem("isNew");
+
+    window.location.href = "./bank_login.html";
+    alert("Please log in first.");
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     
-    let user = setUp();
+    let user = setUp(); // Used on eval functions
 
     document.getElementsByClassName("accountBalance").innerHTML = "Hmm";
 
     let panel = document.querySelector(".panel");
-    let mainBox = panel.querySelector(".main");
 
     let buttons = panel.querySelectorAll("input[type='button']");
 
     panel.querySelector("#b_logout").addEventListener("click", (e) => {
-        console.log("[ERROR]: Not implemented.");
+        e.preventDefault();
+
+        localStorage.removeItem("userID");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userPass");
+        localStorage.removeItem("isNew");
+
+        window.location.href = "./bank_login.html";
     });
 
     for(let i = 0; i < buttons.length; i++){
         if(buttons[i].classList.contains("backButton")){
             buttons[i].addEventListener("click", (e) => {
                 e.preventDefault();
+
                 let directParent = e.target.parentElement;
                 let grandParent = directParent.parentElement;
 
@@ -44,48 +61,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     panel.classList.remove(panel.classList[panel.classList.length - 1]);
                 }
                 panel.classList.add(newClassName);
+
+                if(elementID !== "b_transaction"){
+                    let functionCall = newClassName + "(user)";
+                    eval(functionCall);
+                }
     
             });
         }
         else if(buttons[i].classList.contains("t0Button")){
             buttons[i].addEventListener("click", (e) => {
                 e.preventDefault();
+
                 let transactionOptions = e.target.parentElement;
                 let transactionBox = transactionOptions.parentElement;
+                let tBoxClassLenght = transactionBox.classList.length;
 
-                
-                //console.log(parent.classList);
-                //console.log(e.target.parentNode.classList);
     
                 let elementID = e.target.id;
                 elementID = elementID.replace("b_", "");
 
                 let newClassName = "display" + snakeToCamel(elementID).capitalize();
-                let panelClassLenght = panel.classList.length;
     
-                if(transactionBox.classList[panelClassLenght - 1].startsWith("display")){
-                    transactionBox.classList.remove(transactionBox.classList[panelClassLenght - 1]);
+                if(transactionBox.classList[tBoxClassLenght - 1].startsWith("display")){
+                    transactionBox.classList.remove(transactionBox.classList[tBoxClassLenght - 1]);
                 }
                 transactionBox.classList.add("display");
                 transactionBox.classList.add(newClassName);
 
-                // transactionBox.children[2].classList.add("display");
-                // transactionBox.children[2].classList.add(newClassName);;
-
-                // console.log(e);
-                // console.log(transactionOptions.nextElementSibling);
-                // console.log(transactionBox.children[2]);
-    
-                // console.log(elementID);
-                // console.log(newClassName);
+                let functionCall = "do" + snakeToCamel(elementID).capitalize() + "(user)";
+                eval(functionCall);
     
             });
         }
     }
-    buttons;
-    // test(user);
-
-    
 });
 
 let bankInstance = null;
@@ -99,16 +108,80 @@ function setUp(){
     const userData = {id: localStorage["userID"], name: localStorage["userName"], pass: localStorage["userPass"]};
     const isNew = Boolean(parseInt(localStorage["isNew"]));
 
-    //localStorage.removeItem("userID");
-    //localStorage.removeItem("userName");
-    //localStorage.removeItem("userPass");
-    //localStorage.removeItem("isNew");
-
     return isNew? 
         // This should've been already created inside login page, but no read/write files here... :'(
         getBank().createNewAcount(userData["name"], userData["id"]) :
         getBank().logIn(userData["id"]);
 }
+
+
+function displayBalance(userData){
+    document.querySelector("#account_balance").innerHTML = userData.balance;
+    document.querySelector("#account_currency").innerHTML = userData.currency;
+}
+function displayHistory(userData){
+    document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
+    console.log("[ERROR]: Not implemented.");
+}
+
+function doCurrencyChange(userData){
+    let contentDiv = document.querySelector(".currencyChangeBox").children[1];
+    contentDiv.children[1].value = userData.currency;
+    contentDiv.children[0].innerHTML = userData.balance;
+
+    contentDiv.children[1].onchange = () => {
+        let finalCurrency = contentDiv.children[1].value;
+        contentDiv.children[0].innerHTML = userData.balance;
+
+        if(userData.currency !== finalCurrency){
+            getBank().changeCurrency(userData, finalCurrency);
+        }
+
+        contentDiv.children[2].innerHTML = userData.balance;
+    }
+
+    console.log("This kinda works.");
+    console.log("Better check the balance on main menu.");
+}
+function doWithdraw(userData){
+    let userBalanceSpan = document.querySelector("#w_actual_balance");
+    const withdrawButton = document.querySelector("#bw_withdraw");
+    const withdrawDropdown = document.querySelector(".withdrawBox").children[1].children[1];
+
+    userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+
+    withdrawButton.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const withdrawAmount = document.querySelector("#withdraw_amount").value;
+        const withdrawCurrency = withdrawDropdown.value;
+        
+        getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
+        userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+    });    
+}
+function doDeposit(userData){
+    let userBalanceSpan = document.querySelector("#d_actual_balance");
+    const depositButton = document.querySelector("#bd_deposit");
+    const depositDropdown = document.querySelector(".depositBox").children[1].children[1];
+
+    userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+
+    depositButton.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const depositAmount = document.querySelector("#deposit_amount").value;
+        const depositCurrency = depositDropdown.value;
+        
+        getBank().deposit(userData, depositAmount, depositCurrency);
+        userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+    });    
+}
+function doTransfer(userData){
+    console.log("[ERROR]: Not implemented.");
+}
+
+
 
 function test(actualUser){
     console.log(Boolean(parseInt(localStorage["isNew"])));
@@ -132,10 +205,6 @@ function test(actualUser){
 
 }
 
-function showBalance(ioBox){
-
-}
-
 Object.defineProperty(String.prototype, 'capitalize', {
     value: function() {
       return this.charAt(0).toUpperCase() + this.slice(1);
@@ -143,10 +212,11 @@ Object.defineProperty(String.prototype, 'capitalize', {
     enumerable: false
   });
 
-  const snakeToCamel = str =>
-  str.toLowerCase().replace(/([-_][a-z])/g, group =>
-    group
-      .toUpperCase()
-      .replace('-', '')
-      .replace('_', '')
-  );
+const snakeToCamel = str =>
+str.toLowerCase().replace(/([-_][a-z])/g, group =>
+  group
+    .toUpperCase()
+    .replace('-', '')
+    .replace('_', '')
+);
+  

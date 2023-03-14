@@ -9,6 +9,7 @@
 
     --bg-color: rgb(20, 20, 20);
     --green: rgb(0, 223, 196);
+    --purple: rgb(189, 147, 249);
     --valid: var(--green);
     --invalid: rgb(241, 56, 56);
 }
@@ -34,6 +35,7 @@ body{
     -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
     5px 5px 15px rgba(0, 0, 0, 0.35) inset;
 
+    transition: 0.5s;
 }
 
 .panel .Box{
@@ -42,6 +44,7 @@ body{
     align-items: center;
     flex-direction: column;
     gap: 25px;
+    transition: 0.5s;
 }
 
 .panel .Box h2{
@@ -57,12 +60,13 @@ body{
     letter-spacing: 0.1em;
 }
 
-.panel .Box .ioBox{
+.panel .Box{
     position: relative;
     width: 350px;
+    transition: 0.5s;
 }
 
-.panel .Box .ioBox input{
+.panel .Box input{
     padding: 12px 10px 12px 48px;
     width: 100%;
     background-color: var(--bg-color);
@@ -79,7 +83,7 @@ body{
     outline: none;
 }
 
-.panel .Box .ioBox span{
+.panel .Box span{
     position: absolute;
     left: 0;
     padding: 12px 10px 12px 48px;
@@ -92,7 +96,7 @@ body{
     letter-spacing: 0.06em;
 }
 
-.panel .Box .ioBox input[type="button"]{
+.panel .Box input[type="button"]{
     background-color: var(--bg-color);
     color: var(--green);
     padding: 10px 0;
@@ -108,7 +112,7 @@ body{
     transition: 0.5s;
 }
 
-.panel .Box .ioBox input[type="button"]:hover{
+.panel .Box input[type="button"]:hover{
 
     background-color: var(--green);
     color: var(--bg-color);
@@ -119,3 +123,51 @@ body{
     transition:  0.5s;
 }
 
+.panel .actionBox.transaction .outputBox .Box h2{
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    flex-direction: column;
+}
+
+.panel .Box.balance .outputBox .content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+.panel .Box.balance .outputBox .content h3{
+    width: max-content;
+    position: relative;
+    left: 0;
+}
+
+.panel .Box.balance .outputBox .content span{
+    padding: 0 0 0 5px;
+    width: max-content;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    font-weight: 500;
+
+    color: var(--purple);
+}
+
+.panel .Box.transaction .currencyChangeBox .content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+
+}
+
+.panel .Box.transaction .withdrawBox .content,
+.panel .Box.transaction .depositBox .content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}

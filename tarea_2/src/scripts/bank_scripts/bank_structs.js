@@ -111,20 +111,20 @@ class Bank{
         console.log("[ERROR]: Could not deposit.");
         return false;
     }
-    withdraw(userReceiver, amount, incomeCurrency){
-        const userCurrency = userReceiver.currency;
+    withdraw(userWithdrawer, amount, withdrawCurrency){
+        const userCurrency = userWithdrawer.currency;
         amount = Math.abs(amount);
 
-        if(this.changeCurrency(userReceiver, incomeCurrency)){
+        if(this.changeCurrency(userWithdrawer, withdrawCurrency)){
 
-            if(userReceiver.balance < amount){
-                this.changeCurrency(userReceiver, userCurrency);
+            if(userWithdrawer.balance < amount){
+                this.changeCurrency(userWithdrawer, userCurrency);
                 console.log("[ERROR]: Insufficient-funds.");
                 return false;
             }
 
-            userReceiver.changeBalance(userReceiver.balance - amount, this);
-            this.changeCurrency(userReceiver, userCurrency);
+            userWithdrawer.changeBalance(userWithdrawer.balance - amount, this);
+            this.changeCurrency(userWithdrawer, userCurrency);
             return true;
         }
 

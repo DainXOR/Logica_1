@@ -1,3 +1,8 @@
+localStorage.removeItem("userID");
+localStorage.removeItem("userName");
+localStorage.removeItem("userPass");
+localStorage.removeItem("isNew");
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Test account:");
     console.log("ID: 123456789");

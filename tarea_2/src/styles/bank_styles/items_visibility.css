@@ -3,23 +3,19 @@
 .panel .actionBox.history,
 
 .panel.displayTransaction .actionBox.main,
-.panel.displayTransaction .actionBox.transaction,
 .panel.displayTransaction .actionBox.balance,
 .panel.displayTransaction .actionBox.history,
 
 .panel.displayBalance .actionBox.main,
 .panel.displayBalance .actionBox.transaction,
-.panel.displayBalance .actionBox.balance,
 .panel.displayBalance .actionBox.history,
 
 .panel.displayHistory .actionBox.main,
 .panel.displayHistory .actionBox.transaction,
 .panel.displayHistory .actionBox.balance,
-.panel.displayHistory .actionBox.history,
 
 .actionBox.transaction .outputBox *,
 .actionBox.transaction.display .inputBox
-
 {
     display: none;
 
@@ -34,12 +30,15 @@
 .actionBox.transaction .inputBox,
 
 .actionBox.transaction.displayCurrencyChange .outputBox .currencyChangeBox *,
+.actionBox.transaction.displayCurrencyChange .outputBox .currencyChangeBox,
 .actionBox.transaction.displayWithdraw .outputBox .withdrawBox *,
+.actionBox.transaction.displayWithdraw .outputBox .withdrawBox,
 .actionBox.transaction.displayDeposit .outputBox .depositBox *,
-.actionBox.transaction.displayTransfer .outputBox .transferBox *
+.actionBox.transaction.displayDeposit .outputBox .depositBox,
+.actionBox.transaction.displayTransfer .outputBox .transferBox *,
+.actionBox.transaction.displayTransfer .outputBox .transferBox
 {
     display: flex;
-    flex-direction: column;
 
     transition: 0.5s;
 }

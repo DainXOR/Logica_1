@@ -23,7 +23,7 @@
             <h2>Menu</h2>
             <div class="Box ioBox inputBox">
                 <input type="button" class="mainButton" id="b_transaction" value="Transactions">
-                <input type="button" class="mainButton" id="b_balance" value="Check balance">
+                <input type="button" class="mainButton" id="b_balance" value="Balance">
                 <input type="button" class="mainButton" id="b_history" value="History">
                 <input type="button" class="mainButton exitButton" id="b_logout" value="Log out">
             </div>
@@ -41,13 +41,40 @@
             <div class="Box ioBox outputBox">
                 <div class="Box currencyChangeBox">
                     <h2>Currency Change</h2>
+                    <div class="content">
+                        <span id="cc_actual_balance" class="balanceData"></span>
+                        <select id="currency_change_dropdown" name="currencyDropdown">
+                            <option value="COP">Colombian peso</option>
+                            <option value="USD">US dollar</option>
+                        </select>
+                        <span id="cc_converted_balance" class="balanceData"></span>
+                    </div>
+                    
+
                 </div>
                 <div class="Box withdrawBox">
                     <h2>Withdraw</h2>
+                    <div class="content">
+                        <span id="w_actual_balance" class="balanceData"></span>
+                        <select id="currency_withdraw_dropdown" name="currencyDropdown">
+                            <option value="COP">Colombian peso</option>
+                            <option value="USD">US dollar</option>
+                        </select>
+                        <input id="withdraw_amount" class="withdrawAmount" type="text" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                        <input type="button" class="t1Button withdrawButton" id="bw_withdraw" value="Withdraw">
+                    </div>
                 </div>
                 <div class="Box depositBox">
                     <h2>Deposit</h2>
-
+                    <div class="content">
+                        <span id="d_actual_balance" class="balanceData"></span>
+                        <select id="currency_deposit_dropdown" name="currencyDropdown">
+                            <option value="COP">Colombian peso</option>
+                            <option value="USD">US dollar</option>
+                        </select>
+                        <input id="deposit_amount" class="depositAmount" type="text" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                        <input type="button" class="t1Button depositButton" id="bd_deposit" value="Deposit">
+                    </div>
                 </div>
                 <div class="Box transferBox">
                     <h2>Transfer</h2>
@@ -60,9 +87,11 @@
         <div class="Box actionBox balance">
             <h2>Account Balance</h2>
             <div class="Box ioBox outputBox">
-                <h3>Your current balance:</h3>
-                <span class="accountBalance"></span>
-                <span class="accountCurrency"></span>
+                <div class="content">
+                    <h3>Your current balance:</h3>
+                    <span id="account_balance" class="balanceData accountBalance"></span>
+                    <span id="account_currency" class="balanceData accountCurrency"></span>
+                </div>
                 <input type="button" class="b0Button backButton" id="b_back" value="Go back">
             </div>
             
@@ -70,7 +99,9 @@
         <div class="Box actionBox history">
             <h2>Transactions History</h2>
             <div class="Box ioBox outputBox">
-                <span class="accountHistory"></span>
+                <div class="content">
+                    <span id="h_user_history" class="accountHistory"></span>
+                </div>
                 <input type="button" class="h0Button backButton" id="b_back" value="Go back">
             </div>
         </div>
