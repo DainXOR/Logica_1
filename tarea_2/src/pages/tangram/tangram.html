@@ -13,26 +13,26 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap">
 
-    <link rel="stylesheet" href="../styles/tangram_index.css"></link>
-    <link rel="stylesheet" href="../styles/tangram_canvas.css"></link>
-    <link rel="stylesheet" href="../styles/figures.css"></link>
+    <link rel="stylesheet" href="../../styles/tangram/tangram_index.css"></link>
+    <link rel="stylesheet" href="../../styles/tangram/tangram_canvas.css"></link>
+    <link rel="stylesheet" href="../../styles/tangram/figures.css"></link>
 
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
             integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
             crossorigin="anonymous"></script>
 
-    <script src="../scripts/add_random_figures.js"></script>
-    <script src="../scripts/grab_figures.js"></script>
+    <script src="../../scripts/tangram/add_random_figures.js"></script>
+    <script src="../../scripts/tangram/grab_figures.js"></script>
 
 </head>
 <body>
     <canvas id="c0"></canvas>
     <div class="info-box">
-        <p class="info">Usa "A" y "D" para rotar las figuras.</p>
-        <p class="info">Usa "W" y "S" para cambiar su tamaño.</p>
-        <p class="info">Usa "x" y "z" para hacerlas mas pequeñas en 'x' y 'y'.</p>
-        <p class="info">Con "Shift" se haran mas grandes.</p>
-        <p class="info">Usa "R" y "F" para reflejar las figuras en 'x' y 'y'.</p>
+        <p class="info prevent-select">Usa "A" y "D" para rotar las figuras.</p>
+        <p class="info prevent-select">Usa "W" y "S" para cambiar su tamaño.</p>
+        <p class="info prevent-select">Usa "x" y "z" para hacerlas mas pequeñas en 'x' y 'y'.</p>
+        <p class="info prevent-select">Con "Shift" se haran mas grandes.</p>
+        <p class="info prevent-select">Usa "R" y "F" para reflejar las figuras en 'x' y 'y'.</p>
     </div>
     <div class="figures-box" id="figures-box">
     </div>

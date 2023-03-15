@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         grandParent.classList.remove(grandParent.classList[grandParent.classList.length - 2]);
                         grandParent.classList.remove(grandParent.classList[grandParent.classList.length - 1]);
                 }
+
+                removeListeners();
                 
             });
         }
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if(elementID !== "b_transaction"){
                     let functionCall = newClassName + "(user)";
-                    eval(functionCall);
+                    toRemoveListener(eval(functionCall));
                 }
     
             });
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 transactionBox.classList.add(newClassName);
 
                 let functionCall = "do" + snakeToCamel(elementID).capitalize() + "(user)";
-                eval(functionCall);
+                toRemoveListener(eval(functionCall));
     
             });
         }
@@ -98,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let bankInstance = null;
+let elementsWithListener = [];
 
 function getBank(){
     bankInstance = bankInstance || new Bank();
@@ -114,14 +117,37 @@ function setUp(){
         getBank().logIn(userData["id"]);
 }
 
+function toRemoveListener(element){
+    if(element === null ||element === undefined){
+        return false;
+    }
+
+    elementsWithListener.push(element);
+    return true;
+}
+
+function removeListeners(){
+    if(elementsWithListener.length === 0){
+        return false;
+    }
+
+    for(let i = elementsWithListener.length - 1; i >= 0; i--){
+        elementsWithListener[i][0].removeEventListener("click", elementsWithListener[i][1]);
+    }
+    return true;
+}
 
 function displayBalance(userData){
     document.querySelector("#account_balance").innerHTML = userData.balance;
     document.querySelector("#account_currency").innerHTML = userData.currency;
+
+    return null;
 }
 function displayHistory(userData){
     document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
     console.log("[ERROR]: Not implemented.");
+
+    return null;
 }
 
 function doCurrencyChange(userData){
@@ -142,15 +168,17 @@ function doCurrencyChange(userData){
 
     console.log("This kinda works.");
     console.log("Better check the balance on main menu.");
+    return null;
 }
 function doWithdraw(userData){
+    
     let userBalanceSpan = document.querySelector("#w_actual_balance");
     const withdrawButton = document.querySelector("#bw_withdraw");
     const withdrawDropdown = document.querySelector(".withdrawBox").children[1].children[1];
 
     userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
 
-    withdrawButton.addEventListener("click", (e) => {
+    const buttonFunction = (e) => {
         e.preventDefault();
 
         const withdrawAmount = document.querySelector("#withdraw_amount").value;
@@ -158,7 +186,12 @@ function doWithdraw(userData){
         
         getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
-    });    
+    
+    }
+
+    withdrawButton.addEventListener("click", buttonFunction);    
+
+    return [withdrawButton, buttonFunction];
 }
 function doDeposit(userData){
     let userBalanceSpan = document.querySelector("#d_actual_balance");
@@ -167,7 +200,7 @@ function doDeposit(userData){
 
     userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
 
-    depositButton.addEventListener("click", (e) => {
+    const buttonFunction = (e) => {
         e.preventDefault();
 
         const depositAmount = document.querySelector("#deposit_amount").value;
@@ -175,10 +208,16 @@ function doDeposit(userData){
         
         getBank().deposit(userData, depositAmount, depositCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
-    });    
+    }
+
+    depositButton.addEventListener("click", buttonFunction);    
+
+    return [depositButton, buttonFunction];
 }
 function doTransfer(userData){
     console.log("[ERROR]: Not implemented.");
+
+    return undefined;
 }
 
 

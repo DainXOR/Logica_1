@@ -86,17 +86,17 @@
   font-size: larger;
 }
   
-.card.active {
+.card.activeCard {
   width: 60%;
   box-shadow: 0 0 10px #fff, 0 0 300px 50px #000 inset;
   transition: 700ms;
 }
 
-.card.active:hover{
+.card.activeCard:hover{
   cursor: default;
 }
   
-.card.active h2, .card.active p{
+.card.activeCard h2, .card.activeCard p{
   opacity: 1;
   
   transition: 200ms;

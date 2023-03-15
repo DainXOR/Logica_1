@@ -7,13 +7,14 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <link rel="stylesheet" href="../styles/bank_styles/bank_main.css"></link>
-    <link rel="stylesheet" href="../styles/bank_styles/items_visibility.css"></link>
+    <link rel="stylesheet" href="../../styles/bank/bank_main.css"></link>
+    <link rel="stylesheet" href="../../styles/bank/items_visibility.css"></link>
 
-    <script src="../scripts/bank_scripts/user_data.js"></script>
-    <script src="../scripts/bank_scripts/encrypt.js"></script>
-    <script src="../scripts/bank_scripts/bank_structs.js"></script>
-    <script src="../scripts/bank_scripts/bank_main.js"></script>
+    <script src="../../scripts/other/encrypt.js"></script>
+    
+    <script src="../../scripts/bank/user_data.js"></script>
+    <script src="../../scripts/bank/bank_structs.js"></script>
+    <script src="../../scripts/bank/bank_main.js"></script>
 
     <title>Bank</title>
 </head>
@@ -60,7 +61,7 @@
                             <option value="COP">Colombian peso</option>
                             <option value="USD">US dollar</option>
                         </select>
-                        <input id="withdraw_amount" class="withdrawAmount" type="text" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                        <input type="text" class="withdrawAmount" id="withdraw_amount" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
                         <input type="button" class="t1Button withdrawButton" id="bw_withdraw" value="Withdraw">
                     </div>
                 </div>
@@ -72,7 +73,7 @@
                             <option value="COP">Colombian peso</option>
                             <option value="USD">US dollar</option>
                         </select>
-                        <input id="deposit_amount" class="depositAmount" type="text" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                        <input type="text" class="depositAmount" id="deposit_amount" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
                         <input type="button" class="t1Button depositButton" id="bd_deposit" value="Deposit">
                     </div>
                 </div>
