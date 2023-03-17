@@ -1,11 +1,7 @@
-*{
-  --bg-image: url("../../resources/images/arlequins.jpg");
-}
 
-/* Navigation bar styles */
 body {
-  background-color: #1b1a1a;
-  background: var(--bg-image);
+  background-color: var(--bg-color);
+  background: url("../../resources/images/arlequins.jpg");
   background-size: auto 115%;
   background-attachment: fixed;
 
@@ -16,29 +12,6 @@ body {
 body::-webkit-scrollbar{
   display: none;
 }
-
-
-
-
-/* Social media button styles */
-
-/* Default social media logos */
-/*
-.navbar-social a[href^="https://www.facebook.com"] {
-  background-image: url(../../resources/logos/facebook-dark.png);
-  background-size: contain;
-}
-
-.navbar-social a[href^="https://twitter.com"] {
-  background-image: url(../../resources/logos/twitter-dark.png);
-  background-size: contain;
-}
-
-.navbar-social a[href^="https://www.instagram.com"] {
-  background-image: url(../../resources/logos/instagram-dark.png);
-  background-size: contain;
-}
-*/
 
 .navbar-links {
 

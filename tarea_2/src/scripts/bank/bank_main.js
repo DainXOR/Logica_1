@@ -1,8 +1,5 @@
-if(!localStorage.getItem("userID")){
-    localStorage.removeItem("userID");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userPass");
-    localStorage.removeItem("isNew");
+if(!sessionStorage.getItem("userID")){
+    sessionStorage.clear();
 
     window.location.href = "./bank_login.html";
     alert("Please log in first.");
@@ -21,10 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     panel.querySelector("#b_logout").addEventListener("click", (e) => {
         e.preventDefault();
 
-        localStorage.removeItem("userID");
-        localStorage.removeItem("userName");
-        localStorage.removeItem("userPass");
-        localStorage.removeItem("isNew");
+        sessionStorage.clear();
 
         window.location.href = "./bank_login.html";
     });
@@ -108,8 +102,8 @@ function getBank(){
 }
 
 function setUp(){
-    const userData = {id: localStorage["userID"], name: localStorage["userName"], pass: localStorage["userPass"]};
-    const isNew = Boolean(parseInt(localStorage["isNew"]));
+    const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
+    const isNew = Boolean(parseInt(sessionStorage["isNew"]));
 
     return isNew? 
         // This should've been already created inside login page, but no read/write files here... :'(
@@ -223,7 +217,7 @@ function doTransfer(userData){
 
 
 function test(actualUser){
-    console.log(Boolean(parseInt(localStorage["isNew"])));
+    console.log(Boolean(parseInt(sessionStorage["isNew"])));
 
     console.log(actualUser.balance);
 

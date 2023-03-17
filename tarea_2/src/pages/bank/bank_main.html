@@ -8,8 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="../../resources/icons/logo_transparent.png" type="image/x-icon">
 
+    <link rel="stylesheet" href="../../styles/main/misc.css"></link>
     <link rel="stylesheet" href="../../styles/bank/bank_main.css"></link>
     <link rel="stylesheet" href="../../styles/bank/items_visibility.css"></link>
+    <link rel="stylesheet" href="../../styles/element/navbar.css"></link>
 
     <script src="../../scripts/other/encrypt.js"></script>
     
@@ -22,106 +24,111 @@
 <body>
     <nav class="navbar">
         <header class="main-page">
-            <div class="logo">
-                <img src="../resources/icons/logo_transparent.png" alt="logo">
+            <div class="logo" onclick="window.location.href = '../index.html';">
+                <img src="../../resources/icons/logo_transparent.png" alt="logo">
                 <h1>DainXOR</h1>
             </div>
         </header>
         <div class="navbar-social">
-            s<a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://twitter.com"><i class="fab fa-twitter"></i></a>
-            <a href="https://www.instagram.com"><i class="fab fa-instagram"></i></a>
+          <a href="https://github.com/DainXOR"><i class="fa-brands fa-github"></i></a>
+          <a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://twitter.com"><i class="fab fa-twitter"></i></a>
+          <a href="https://www.instagram.com/dleon_2407/"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fa-solid fa-user"></i></a>
         </div>
     </nav>
 
-    <div class="panel">
-        <div class="Box actionBox main">
-            <h2>Menu</h2>
-            <div class="Box ioBox inputBox">
-                <input type="button" class="mainButton" id="b_transaction" value="Transactions">
-                <input type="button" class="mainButton" id="b_balance" value="Balance">
-                <input type="button" class="mainButton" id="b_history" value="History">
-                <input type="button" class="mainButton exitButton" id="b_logout" value="Log out">
+    <div class="form-box">
+        <div class="panel">
+            <div class="Box actionBox main">
+                <h2>Menu</h2>
+                <div class="Box ioBox inputBox">
+                    <input type="button" class="mainButton" id="b_transaction" value="Transactions">
+                    <input type="button" class="mainButton" id="b_balance" value="Balance">
+                    <input type="button" class="mainButton" id="b_history" value="History">
+                    <input type="button" class="mainButton exitButton" id="b_logout" value="Log out">
+                </div>
             </div>
-        </div>
-        <div class="Box actionBox transaction">
-            <div class="Box ioBox inputBox">
-                <h2>Transactions</h2>
-                <input type="button" class="t0Button" id="b_currency_change" value="Change currency">
-                <input type="button" class="t0Button" id="b_withdraw" value="Withdraw">
-                <input type="button" class="t0Button" id="b_deposit" value="Deposit">
-                <input type="button" class="t0Button" id="b_transfer" value="Transfer">
-                <input type="button" class="t0Button backButton" id="b_back" value="Go back">
-
-            </div>
-            <div class="Box ioBox outputBox">
-                <div class="Box currencyChangeBox">
-                    <h2>Currency Change</h2>
-                    <div class="content">
-                        <span id="cc_actual_balance" class="balanceData"></span>
-                        <select id="currency_change_dropdown" name="currencyDropdown">
-                            <option value="COP">Colombian peso</option>
-                            <option value="USD">US dollar</option>
-                        </select>
-                        <span id="cc_converted_balance" class="balanceData"></span>
+            <div class="Box actionBox transaction">
+                <div class="Box ioBox inputBox">
+                    <h2>Transactions</h2>
+                    <input type="button" class="t0Button" id="b_currency_change" value="Change currency">
+                    <input type="button" class="t0Button" id="b_withdraw" value="Withdraw">
+                    <input type="button" class="t0Button" id="b_deposit" value="Deposit">
+                    <input type="button" class="t0Button" id="b_transfer" value="Transfer">
+                    <input type="button" class="t0Button backButton" id="b_back" value="Go back">
+    
+                </div>
+                <div class="Box ioBox outputBox">
+                    <div class="Box currencyChangeBox">
+                        <h2>Currency Change</h2>
+                        <div class="content">
+                            <span id="cc_actual_balance" class="balanceData"></span>
+                            <select id="currency_change_dropdown" name="currencyDropdown">
+                                <option value="COP">Colombian peso</option>
+                                <option value="USD">US dollar</option>
+                            </select>
+                            <span id="cc_converted_balance" class="balanceData"></span>
+                        </div>
+                        
+    
                     </div>
-                    
-
-                </div>
-                <div class="Box withdrawBox">
-                    <h2>Withdraw</h2>
-                    <div class="content">
-                        <span id="w_actual_balance" class="balanceData"></span>
-                        <select id="currency_withdraw_dropdown" name="currencyDropdown">
-                            <option value="COP">Colombian peso</option>
-                            <option value="USD">US dollar</option>
-                        </select>
-                        <input type="text" class="withdrawAmount" id="withdraw_amount" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
-                        <input type="button" class="t1Button withdrawButton" id="bw_withdraw" value="Withdraw">
+                    <div class="Box withdrawBox">
+                        <h2>Withdraw</h2>
+                        <div class="content">
+                            <span id="w_actual_balance" class="balanceData"></span>
+                            <select id="currency_withdraw_dropdown" name="currencyDropdown">
+                                <option value="COP">Colombian peso</option>
+                                <option value="USD">US dollar</option>
+                            </select>
+                            <input type="text" class="withdrawAmount" id="withdraw_amount" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                            <input type="button" class="t1Button withdrawButton" id="bw_withdraw" value="Withdraw">
+                        </div>
                     </div>
-                </div>
-                <div class="Box depositBox">
-                    <h2>Deposit</h2>
-                    <div class="content">
-                        <span id="d_actual_balance" class="balanceData"></span>
-                        <select id="currency_deposit_dropdown" name="currencyDropdown">
-                            <option value="COP">Colombian peso</option>
-                            <option value="USD">US dollar</option>
-                        </select>
-                        <input type="text" class="depositAmount" id="deposit_amount" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
-                        <input type="button" class="t1Button depositButton" id="bd_deposit" value="Deposit">
+                    <div class="Box depositBox">
+                        <h2>Deposit</h2>
+                        <div class="content">
+                            <span id="d_actual_balance" class="balanceData"></span>
+                            <select id="currency_deposit_dropdown" name="currencyDropdown">
+                                <option value="COP">Colombian peso</option>
+                                <option value="USD">US dollar</option>
+                            </select>
+                            <input type="text" class="depositAmount" id="deposit_amount" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
+                            <input type="button" class="t1Button depositButton" id="bd_deposit" value="Deposit">
+                        </div>
                     </div>
+                    <div class="Box transferBox">
+                        <h2>Transfer</h2>
+    
+                    </div>
+    
+                    <input type="button" class="t1Button backButton" id="b_back" value="Go back">
                 </div>
-                <div class="Box transferBox">
-                    <h2>Transfer</h2>
-
-                </div>
-
-                <input type="button" class="t1Button backButton" id="b_back" value="Go back">
             </div>
-        </div>
-        <div class="Box actionBox balance">
-            <h2>Account Balance</h2>
-            <div class="Box ioBox outputBox">
-                <div class="content">
-                    <h3>Your current balance:</h3>
-                    <span id="account_balance" class="balanceData accountBalance"></span>
-                    <span id="account_currency" class="balanceData accountCurrency"></span>
+            <div class="Box actionBox balance">
+                <h2>Account Balance</h2>
+                <div class="Box ioBox outputBox">
+                    <div class="content">
+                        <h3>Your current balance:</h3>
+                        <span id="account_balance" class="balanceData accountBalance"></span>
+                        <span id="account_currency" class="balanceData accountCurrency"></span>
+                    </div>
+                    <input type="button" class="b0Button backButton" id="b_back" value="Go back">
                 </div>
-                <input type="button" class="b0Button backButton" id="b_back" value="Go back">
+                
             </div>
-            
-        </div>
-        <div class="Box actionBox history">
-            <h2>Transactions History</h2>
-            <div class="Box ioBox outputBox">
-                <div class="content">
-                    <span id="h_user_history" class="accountHistory"></span>
+            <div class="Box actionBox history">
+                <h2>Transactions History</h2>
+                <div class="Box ioBox outputBox">
+                    <div class="content">
+                        <span id="h_user_history" class="accountHistory"></span>
+                    </div>
+                    <input type="button" class="h0Button backButton" id="b_back" value="Go back">
                 </div>
-                <input type="button" class="h0Button backButton" id="b_back" value="Go back">
             </div>
         </div>
     </div>
+    
     
 </body>
 </html>

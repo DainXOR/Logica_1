@@ -1,7 +1,9 @@
-localStorage.removeItem("userID");
-localStorage.removeItem("userName");
-localStorage.removeItem("userPass");
-localStorage.removeItem("isNew");
+if(sessionStorage.length === 4){
+    window.location.href = "./bank_main.html";
+}
+else {
+    sessionStorage.clear();
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Test account:");
@@ -224,10 +226,10 @@ function verifyEmail(userData, docBody){ // The verification code appears inside
 }
 
 function redirectUser(user, isNew, destinationPage){
-    localStorage.setItem("userID", [user["id"]]);
-    localStorage.setItem("userName", [user["name"]]);
-    localStorage.setItem("userPass", [user["pass"]]);
-    localStorage.setItem("isNew", isNew.toString());
+    sessionStorage.setItem("userID", [user["id"]]);
+    sessionStorage.setItem("userName", [user["name"]]);
+    sessionStorage.setItem("userPass", [user["pass"]]);
+    sessionStorage.setItem("isNew", isNew.toString());
     window.location.href = "./bank_" + destinationPage + ".html";
 }
 

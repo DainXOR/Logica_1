@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="../../resources/icons/logo_transparent.png" type="image/x-icon">
 
+    <link rel="stylesheet" href="../../styles/main/misc.css"></link>
     <link rel="stylesheet" href="../../styles/bank/bank_login.css"></link>
+    <link rel="stylesheet" href="../../styles/element/navbar.css"></link>
 
     <script src="../../scripts/other/encrypt.js"></script>
     <script src="../../scripts/bank/user_data.js"></script>
@@ -19,95 +21,96 @@
 <body>
     <nav class="navbar">
         <header class="main-page">
-            <div class="logo">
+            <div class="logo" onclick="window.location.href = '../index.html';">
                 <img src="../../resources/icons/logo_transparent.png" alt="logo">
                 <h1>DainXOR</h1>
             </div>
         </header>
         <div class="navbar-social">
-            <a href="https://github.com/DainXOR"><i class="fa-brands fa-github"></i></a>
-            <a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://twitter.com"><i class="fab fa-twitter"></i></a>
-            <a href="https://www.instagram.com"><i class="fab fa-instagram"></i></a>
+          <a href="https://github.com/DainXOR"><i class="fa-brands fa-github"></i></a>
+          <a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://twitter.com"><i class="fab fa-twitter"></i></a>
+          <a href="https://www.instagram.com/dleon_2407/"><i class="fab fa-instagram"></i></a>
         </div>
-    </nav>
-
-    <div class="container">
-        <div class="form signup">
-            <h2>Sign Up</h2>
-            <div class="inputBox">
-                <input id="su_name" class="name" type="text" placeholder=" " required pattern="^[a-zA-ZñÑ]{2,}$">
-                <i class="fa-solid fa-user"></i>
-                <span>Name</span>
-            </div>
-            <div class="inputBox">
-                <input id="su_idcard" class="idcard" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
-                <i class="fa-solid fa-id-card"></i>
-                <span>ID</span>
-            </div>
-            <div class="inputBox">
-                <input id="su_email" class="email" type="email" placeholder=" " required pattern="^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9_-]+)*@[a-zA-Z0-9]+(?:\.[a-zA-Z]+)+$">
-                <i class="fa-solid fa-envelope"></i>
-                <span>Email address</span>
-            </div>
-            <div class="inputBox">
-                <input id="su_phonenum" class="phonenum" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
-                <i class="fa-solid fa-mobile-screen"></i>
-                <span>Phone number</span>
-            </div>
-            <div class="inputBox">
-                <input id="su_password" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
-                <i class="fa-solid fa-key"></i>
-                <span>Create password</span>
-            </div>
-            <div class="inputBox">
-                <input id="su_passwordconfirm" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
-                <i class="fa-solid fa-lock"></i>
-                <span>Confirm password</span>
-            </div>
-
-            <div class="inputBox">
-                <input type="submit" value="Create Account">
-            </div>
-
-            <p>Already a member? 
-                <a href="#" class="login">Log in</a>
-            </p>
-
-        </div>
-        <div class="form signin">
-            <h2>Sign In</h2>
-            <div class="inputBox">
-                <input id="si_idcard" class="idcard" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
-                <i class="fa-solid fa-id-card"></i>
-                <span>ID</span>
-            </div>
-            <div class="inputBox">
-                <input id="si_password" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
-                <i class="fa-solid fa-key"></i>
-                <span>Password</span>
-            </div>
-            <div class="inputBox">
-                <input type="submit" value="login">
-            </div>
-
-            <p>Not registered? 
-                <a href="#" class="create">Create an account</a>
-            </p>
-        </div>
-        <div class="form emailverification">
-            <h2>Verification</h2>
-            <div class="inputBox">
-                <input id="ev_code" class="verificationCode" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6}$">
-                <i class="fa-solid fa-key"></i>
-                <span>Password</span>
-            </div>
-            <class class="inputBox">
-                <input type="submit" value="verify">
-            </class>
-        </div>
-
-    </div>
+     </nav>
     
+    <div class="form-box">
+        <div class="container">
+            <div class="form signup">
+                <h2>Sign Up</h2>
+                <div class="inputBox">
+                    <input id="su_name" class="name" type="text" placeholder=" " required pattern="^[a-zA-ZñÑ]{2,}$">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Name</span>
+                </div>
+                <div class="inputBox">
+                    <input id="su_idcard" class="idcard" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>ID</span>
+                </div>
+                <div class="inputBox">
+                    <input id="su_email" class="email" type="email" placeholder=" " required pattern="^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9_-]+)*@[a-zA-Z0-9]+(?:\.[a-zA-Z]+)+$">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>Email address</span>
+                </div>
+                <div class="inputBox">
+                    <input id="su_phonenum" class="phonenum" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <span>Phone number</span>
+                </div>
+                <div class="inputBox">
+                    <input id="su_password" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Create password</span>
+                </div>
+                <div class="inputBox">
+                    <input id="su_passwordconfirm" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Confirm password</span>
+                </div>
+
+                <div class="inputBox">
+                    <input type="submit" value="Create Account">
+                </div>
+
+                <p>Already a member? 
+                    <a href="#" class="login">Log in</a>
+                </p>
+
+            </div>
+            <div class="form signin">
+                <h2>Sign In</h2>
+                <div class="inputBox">
+                    <input id="si_idcard" class="idcard" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6,}$">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>ID</span>
+                </div>
+                <div class="inputBox">
+                    <input id="si_password" class="password" type="password" placeholder=" " required pattern="^(?=[^a-zñ]*[a-zñ])(?=[^A-ZÑ]*[A-ZÑ])(?=\D*\d)(?=[^!#%@<>$*+\-_|.&?]*[!#%@<>$*+\-_|.&?])[A-ZÑa-zñ0-9!#%@<>$*+\-_|.&?]{8,32}$">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Password</span>
+                </div>
+                <div class="inputBox">
+                    <input type="submit" value="login">
+                </div>
+
+                <p>Not registered? 
+                    <a href="#" class="create">Create an account</a>
+                </p>
+            </div>
+            <div class="form emailverification">
+                <h2>Verification</h2>
+                <div class="inputBox">
+                    <input id="ev_code" class="verificationCode" type="text" placeholder=" " required inputmode="numeric" pattern="^[0-9]{6}$">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Password</span>
+                </div>
+                <class class="inputBox">
+                    <input type="submit" value="verify">
+                </class>
+            </div>
+
+        </div>
+    </div>
 </body>
 </html>

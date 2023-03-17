@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Dosis:600');
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
+*{
+    --green: rgb(78 201 176);
+    --purple: rgb(189, 147, 249);
+    --red: rgb(241, 56, 56);
+    --gold: rgb(255, 215, 0);
+    --dark-gray: rgb(20, 20, 20);
+
+    --valid: var(--green);
+    --invalid: var(--red);
+
+    --bg-color: var(--dark-gray);
+}
