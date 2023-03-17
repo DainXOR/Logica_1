@@ -4,8 +4,6 @@
 
 /* Navigation bar styles */
 body {
-  z-index: -1;
-
   background-color: #1b1a1a;
   background: var(--bg-image);
   background-size: auto 115%;
@@ -19,74 +17,13 @@ body::-webkit-scrollbar{
   display: none;
 }
 
-.navbar {
-  z-index: 5;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #232121;
-  color: #201e1e;
-  height: 60px;
-  padding: 0 20px;
-  border-radius: 20px;
-}
-
-/* Logo styles */
-.logo{
-  display: flex;
-}
-
-.logo img {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  margin-right: 10px;
-  margin-top: 27px;
-  transition: 300ms;
-
-  cursor: pointer;
-}
-
-.logo h1{
-  color: #fff;
-  font-family: 'Oswald', sans-serif;
-  font-size: 200%;
-  font-weight: 100;
-  margin-bottom: 30px;
-
-  transition: 300ms;
-}
-
-.logo:hover img, .logo:hover h1{
-  cursor: pointer;
-  text-shadow: 0 0 10px #fff;
-
-  transition: 300ms;
-}
 
 
 /* Social media button styles */
-.navbar-social {
-  display: flex;
-}
-
-.navbar-social a {
-  width: 48px;
-  height: 48px;
-  margin-right: 10px;
-  border-radius: 50%;
-  background-color: #201e1e;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  transition: 300ms;
-}
 
 /* Default social media logos */
+/*
 .navbar-social a[href^="https://www.facebook.com"] {
   background-image: url(../../resources/logos/facebook-dark.png);
   background-size: contain;
@@ -101,19 +38,9 @@ body::-webkit-scrollbar{
   background-image: url(../../resources/logos/instagram-dark.png);
   background-size: contain;
 }
-
-.navbar-social a i {
-  display: none;
-}
-
-.navbar-social a:hover {
-  box-shadow: 0 0 10px #fff;
-  transition: 300ms;
-}
-
+*/
 
 .navbar-links {
-  z-index: 3;
 
   position: relative;
   margin-top: 20px;

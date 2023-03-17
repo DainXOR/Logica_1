@@ -1,5 +1,4 @@
 .sections{
-    z-index: 1;
     box-sizing: border-box;
 
     position: relative;
@@ -22,7 +21,6 @@
 }
 
 .sections .section{
-    z-index: 4;
 
     position: relative;
     background-attachment: fixed;

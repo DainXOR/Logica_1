@@ -1,0 +1,107 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #232121;
+    color: #201e1e;
+    height: 60px;
+    padding: 0 20px;
+    border-radius: 20px;
+  }
+  
+  /* Logo styles */
+  .logo{
+    display: flex;
+  }
+  
+  .logo img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-top: 27px;
+    transition: 300ms;
+  
+    cursor: pointer;
+  }
+  
+  .logo h1{
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 200%;
+    font-weight: 100;
+    margin-bottom: 30px;
+  
+    transition: 300ms;
+  }
+  
+  .logo:hover img, .logo:hover h1{
+    cursor: pointer;
+    text-shadow: 0 0 10px #fff;
+  
+    transition: 300ms;
+  }
+
+.navbar-social {
+    display: flex;
+  }
+  
+  .navbar-social a {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background-color: #201e1e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-position: center center;
+  
+    text-decoration: none;
+  
+    transition: 300ms;
+  }
+
+.navbar-social a i {
+    font-size: 20px;
+    transition: 0.5s;
+  }
+
+  .navbar-social a i.fa-github {
+    color: #fff;
+  }
+  
+  .navbar-social a i.fa-facebook-f {
+    color: #4267B2;
+  }
+  
+  .navbar-social a i.fa-twitter {
+    color: #1D9BF0;
+  }
+  
+  .navbar-social a i.fa-instagram {
+    color: #b734ef;
+  
+    /*
+    color: conic-gradient(
+      #405DE6,
+      #5851DB,
+      #833AB4,
+      #C13584,
+      #E1306C,
+      #FD1D1D,
+      #F56040,
+      #F77737,
+      #FCAF45,
+      #FFDC80,
+    );
+    */
+  }
+  
+  .navbar-social a:hover i {
+    text-shadow: 0 0 20px #fff;
+    font-size: 22px;
+    transition: 0.2s;
+  }
+  
