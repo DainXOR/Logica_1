@@ -11,7 +11,7 @@ nav {
 
   scroll-behavior: smooth;
 
-  overflow-y: scroll;
+  overflow-x: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -29,8 +29,8 @@ nav .logo{
 }
 
 nav .logo img {
-  width: var(--size-ic);
-  height: var(--size-ic);
+  width: var(--size-logo-ic);
+  height: var(--size-logo-ic);
   border-radius: 50%;
   margin: 0;
   transition: 300ms;
@@ -41,7 +41,7 @@ nav .logo img {
 nav .logo h1{
   color: #fff;
   font-family: 'Oswald', sans-serif;
-  font-size: var(--size-txt);
+  font-size: var(--size-logo-txt);
   font-weight: 100;
   margin: 0;
 
@@ -61,8 +61,8 @@ nav .navbar-social {
 }
 
 nav .navbar-social a {
-  width: var(--size-ic);
-  height: var(--size-ic);
+  width: var(--size-logo-ic);
+  height: var(--size-logo-ic);
   border-radius: 50%;
   background-color: #201e1e;
   display: flex;

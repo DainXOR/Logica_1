@@ -27,7 +27,7 @@
 }
   
 .card {
-  width: 75px;
+  width: clamp(10px, 7vw + 7px, 100px) ;
   height: 500px;
   
 
@@ -38,10 +38,17 @@
   text-align: center;
   margin: 10px;
 
-  overflow: hidden;
   transition: 300ms;
+
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-  
+
+.card::-webkit-scrollbar{
+  display: none;
+}
+
 .card:hover {
   box-shadow: 0 0 10px #fff;
   cursor: pointer;
@@ -54,7 +61,7 @@
 }
   
 .card h2, .card p{
-  margin: 50px;
+  margin: min(50px, 15vw) min(50px, 9vw);
   opacity: 0;
   pointer-events: none;
 
@@ -74,15 +81,15 @@
 }
 
 .card h2{
-  font-size: xx-large;
+  font-size: var(--fs-xl);
 }
 
 .card p{
-  font-size: larger;
+  font-size: var(--fs-m);
 }
   
 .card.activeCard {
-  width: 60%;
+  width: min(70%, 55rem);
   box-shadow: 0 0 10px #fff, 0 0 300px 50px #000 inset;
   transition: 700ms;
 }
