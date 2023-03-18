@@ -8,22 +8,13 @@
 }
 
 .c1{
-  background-color: #1b1a1a;
   background-image: url(../../resources/images/Horse_rider.jpg);
-  background-size: auto 100%;
-  background-position: 50%;
 }
 .c2{
-  background-color: #1b1a1a;
   background-image: url(../../resources/images/KnY3.png);
-  background-size: auto 100%;
-  background-position: 50%;
 }
 .c3{
-  background-color: #1b1a1a;
   background-image: url(../../resources/images/Archer.jpg);
-  background-size: auto 100%;
-  background-position: 50%;
 }
   
 .card {
@@ -37,6 +28,11 @@
   border-radius: 50px;
   text-align: center;
   margin: 10px;
+
+  background-color: #1b1a1a;
+  background-size: auto 100%;
+  background-position: top center;
+  background-repeat: no-repeat;
 
   transition: 300ms;
 
@@ -53,11 +49,6 @@
   box-shadow: 0 0 10px #fff;
   cursor: pointer;
   transition: 300ms;
-}
-  
-.card img{
-  width: 100%;
-  height: auto;
 }
   
 .card h2, .card p{
@@ -90,8 +81,10 @@
   
 .card.activeCard {
   width: min(70%, 55rem);
-  box-shadow: 0 0 10px #fff, 0 0 300px 50px #000 inset;
-  transition: 700ms;
+  box-shadow: 
+  0 0 10px #fff, 
+  0 0 300px 50px #000 inset;
+  transition: 800ms;
 }
 
 .card.activeCard:hover{

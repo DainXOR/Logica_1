@@ -23,7 +23,6 @@ body::-webkit-scrollbar{
   
   position: relative;
   margin-top: 20px;
-  width: 100%;
   justify-content: space-evenly;
   box-sizing: border-box;
   border-radius: 10px;
@@ -40,6 +39,8 @@ body::-webkit-scrollbar{
   padding: 10px;
   border-radius: 4px;
   min-width: 160px;
+  max-width: 350px;
+  height: 60px;
 
   flex: 1;
 
@@ -113,5 +114,6 @@ body::-webkit-scrollbar{
 }
 
 footer{
+  padding: 100px 0px;
   color: #fff;
 }
