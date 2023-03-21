@@ -4,4 +4,23 @@
 
 body{
     background-color: var(--bg-color);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.input_ecuations{
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    justify-content: left;
+    padding-bottom: 1rem;
+}
+
+.input_ecuations .get_acuations{
+    width: 100px;
 }

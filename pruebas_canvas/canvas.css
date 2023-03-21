@@ -1,31 +1,20 @@
 .canvas-box{
-    height: 50vh;
-    width: 100%;
+    width: 90%;
+    height: 90%;
 
-    display: grid;
-    justify-content: center;
-    box-sizing: border-box;
-
-
-    gap: 20px;
-    grid-template: 
-    "c1 c2 c3"
-    "c4 c5 c6"
-    "c7 c8 c9"
-    "c10 c11 c12";
-
-
-
+    display: flex;
+    
     background-color: var(--bg-color);
 }
 
 canvas{
-    width: 400px;
-    height: 400px;
+    flex: 1;
 
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
+    
 
     border: 5px solid red;
     border-radius: 10px;

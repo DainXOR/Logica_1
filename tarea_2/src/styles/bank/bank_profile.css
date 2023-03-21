@@ -1,0 +1,27 @@
+body{
+    background-color: var(--bg-color);
+}
+
+.profile_options{
+    display: grid;
+    justify-content: center;
+    align-content: center;
+
+    /*padding: auto;*/
+    grid-auto-flow: row;
+    gap: 2rem;
+}
+
+.profile_button{
+    min-width: 350px;
+    min-height: 50px;
+
+    font-size: var(--fs-s);
+    cursor: pointer;
+    color: var(--green);
+    background-color: var(--bg-color);
+    border-radius: 25px;
+    border-color: var(--green);
+    border-width: 2px;
+    box-shadow: 0 0 10px var(--green);
+}
