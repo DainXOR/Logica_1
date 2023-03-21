@@ -7,7 +7,7 @@ body{
     justify-content: center;
     align-content: center;
 
-    padding: auto;
+    padding-top: 10rem;
     grid-auto-flow: row;
     gap: 2rem;
 }
