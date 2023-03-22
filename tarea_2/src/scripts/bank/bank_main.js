@@ -9,10 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let user = setUp(); // Used on eval functions
 
-    document.getElementsByClassName("accountBalance").innerHTML = "Hmm";
-
     let panel = document.querySelector(".panel");
-
     let buttons = panel.querySelectorAll("input[type='button']");
 
     panel.querySelector("#b_logout").addEventListener("click", (e) => {
