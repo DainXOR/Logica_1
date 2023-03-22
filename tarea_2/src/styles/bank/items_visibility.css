@@ -15,11 +15,11 @@
 .panel.displayHistory .actionBox.balance,
 
 .actionBox.transaction .outputBox *,
-.actionBox.transaction.display .inputBox
+.actionBox.transaction.display .inputBox,
+.actionBox.history .outputBox *,
+.actionBox.history.display .inputBox
 {
     display: none;
-
-    transition: 0.5s;
 }
 
 .panel.displayTransaction .actionBox.transaction,
@@ -36,10 +36,13 @@
 .actionBox.transaction.displayDeposit .outputBox .depositBox *,
 .actionBox.transaction.displayDeposit .outputBox .depositBox,
 .actionBox.transaction.displayTransfer .outputBox .transferBox *,
-.actionBox.transaction.displayTransfer .outputBox .transferBox
+.actionBox.transaction.displayTransfer .outputBox .transferBox,
+
+.actionBox.history.displayHistory .outputBox .accountHistory,
+.actionBox.history.displayHistory .outputBox .accountHistory *,
+.actionBox.history.displayResume .outputBox .accountResume,
+.actionBox.history.displayResume .outputBox .accountResume *
 {
     display: flex;
-
-    transition: 0.5s;
 }
 

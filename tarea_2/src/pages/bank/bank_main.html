@@ -43,20 +43,20 @@
             <div class="Box actionBox main">
                 <h2>Menu</h2>
                 <div class="Box ioBox inputBox">
-                    <input type="button" class="mainButton" id="b_transaction" value="Transactions">
-                    <input type="button" class="mainButton" id="b_balance" value="Balance">
-                    <input type="button" class="mainButton" id="b_history" value="History">
-                    <input type="button" class="mainButton exitButton" id="b_logout" value="Log out">
+                    <button id="b_transaction"  class="mainButton"           >Transactions</button>
+                    <button id="b_balance"      class="mainButton"           >Balance</button>
+                    <button id="b_history"      class="mainButton"           >History</button>
+                    <button id="b_logout"       class="mainButton exitButton">Log out</button>
                 </div>
             </div>
             <div class="Box actionBox transaction">
                 <div class="Box ioBox inputBox">
                     <h2>Transactions</h2>
-                    <input type="button" class="t0Button" id="b_currency_change" value="Change currency">
-                    <input type="button" class="t0Button" id="b_withdraw" value="Withdraw">
-                    <input type="button" class="t0Button" id="b_deposit" value="Deposit">
-                    <input type="button" class="t0Button" id="b_transfer" value="Transfer">
-                    <input type="button" class="t0Button backButton" id="b_back" value="Go back">
+                    <button id="b_currency_change"  class="t0Button"            >Change currency</button>
+                    <button id="b_withdraw"         class="t0Button"            >Withdraw</button>
+                    <button id="b_deposit"          class="t0Button"            >Deposit</button>
+                    <button id="b_transfer"         class="t0Button"            >Transfer</button>
+                    <button id="b_back"             class="t0Button backButton" >Go back</button>
     
                 </div>
                 <div class="Box ioBox outputBox">
@@ -113,17 +113,35 @@
                         <span id="account_balance" class="balanceData accountBalance"></span>
                         <span id="account_currency" class="balanceData accountCurrency"></span>
                     </div>
-                    <input type="button" class="b0Button backButton" id="b_back" value="Go back">
+                    <button id="b_back" class="b0Button backButton">Go back</button>
                 </div>
                 
             </div>
             <div class="Box actionBox history">
-                <h2>Transactions History</h2>
+                <h2>History</h2>
+
+                <div class="Box ioBox inputBox">
+                    <button id="hb_transaction_history">History</button>
+                    <button id="hb_transaction_resume">Resume</button>
+                    <button id="b_back" class="h0Button backButton">Go back</button>
+                </div>
                 <div class="Box ioBox outputBox">
-                    <div class="content">
-                        <span id="h_user_history" class="accountHistory"></span>
+                    <div class="accountHistory">
+                        <h2>Transactions History</h2>
+                        <div class="content">
+                            <span class="history">History not avaible</span>
+                            <button id="hhb_back" class="history_button backButton">Go back</button>
+                        </div>
                     </div>
-                    <input type="button" class="h0Button backButton" id="b_back" value="Go back">
+
+                    <div class="accountResume">
+                        <h2>Transactions Resume</h2>
+                        <div class="content">
+                            <span class="resume">Resume not avaible</span>
+                            <button id="hrb_back" class="resume_button backButton">Go back</button>
+                        </div>
+                    </div>
+                    <input type="button" class="h1Button backButton" id="hdb_back" value="Go back">
                 </div>
             </div>
         </div>

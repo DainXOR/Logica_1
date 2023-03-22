@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let user = setUp(); // Used on eval functions
 
     let panel = document.querySelector(".panel");
-    let buttons = panel.querySelectorAll("input[type='button']");
+    let buttons = panel.querySelectorAll("button");
 
     panel.querySelector("#b_logout").addEventListener("click", (e) => {
         e.preventDefault();
@@ -135,7 +135,7 @@ function displayBalance(userData){
     return null;
 }
 function displayHistory(userData){
-    document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
+    //document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
     console.log("[ERROR]: Not implemented.");
 
     return null;

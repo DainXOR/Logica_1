@@ -61,7 +61,8 @@ body{
     transition: 0.5s;
 }
 
-.panel .Box input{
+.panel .Box input,
+.panel .Box button{
     padding: 12px 10px 12px 48px;
     width: 100%;
     background-color: var(--bg-color);
@@ -91,7 +92,7 @@ body{
     letter-spacing: 0.06em;
 }
 
-.panel .Box input[type="button"]{
+.panel .Box button{
     background-color: var(--bg-color);
     color: var(--green);
     padding: 10px 0;
@@ -107,7 +108,7 @@ body{
     transition: 0.5s;
 }
 
-.panel .Box input[type="button"]:hover{
+.panel .Box button:hover{
 
     background-color: var(--green);
     color: var(--bg-color);
