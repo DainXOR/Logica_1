@@ -1,0 +1,122 @@
+.form-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+
+    margin: 0;
+    padding: 2rem 0 0 0;
+}
+
+.form-box .container{
+    padding: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 5px solid var(--box-border-color);
+    border-radius: 20px;
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35),
+    -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
+    5px 5px 15px rgba(0, 0, 0, 0.35) inset;
+}
+
+.form-box .container .form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-box .container .form h2{
+    color: #fff;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+}
+
+.form-box .container .form .inputBox{
+    position: relative;
+    width: 20rem;
+
+}
+
+.form-box .container .form .inputBox span{
+    position: absolute;
+    left: 0;
+    padding: 12px 10px 12px 48px;
+    pointer-events: none;
+    font-size: 1em;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.5);
+
+    transition: 0.5s;
+    letter-spacing: 0.06em;
+}
+
+.form-box .container .form .inputBox input:valid ~ span,
+.form-box .container .form .inputBox input:focus ~ span{
+    color: var(--valid);
+    border: 1px solid var(--valid);
+    background-color: var(--bg-color);
+    transform: translateX(25px) translateY(-7px);
+    font-size: 0.6em;
+    padding: 0 8px;
+    border-radius: 10px;
+    letter-spacing: 0.1em;
+}
+
+.form-box .container .form .inputBox input:valid,
+.form-box .container .form .inputBox input:focus{
+    border: 1px solid var(--valid);
+}
+
+
+.form-box .container .form .inputBox input:not(:placeholder-shown):not(:focus):invalid ~ span{
+    color: var(--invalid);
+    border: 1px solid var(--invalid);
+    background-color: var(--bg-color);
+    transform: translateX(25px) translateY(-7px);
+    font-size: 0.6em;
+    padding: 0 8px;
+    border-radius: 10px;
+    letter-spacing: 0.1em;
+}
+
+
+.form-box .container .form .inputBox i{
+    position: absolute;
+    top: 15px;
+    left: 16px;
+    width: 25px;
+    padding: 2px 0;
+    padding-right: 8px;
+    color: var(--green);
+    border-right: 1px solid var(--green);
+}
+
+.form-box .container .form .inputBox input[type="submit"]{
+    background-color: var(--green);
+    color: var(--bg-color);
+    padding: 10px 0;
+    font-weight: 500;
+    cursor: pointer;
+
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35),
+    -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
+    5px 5px 15px rgba(0, 0, 0, 0.35) inset;
+
+}
+
+.form-box .container .form p{
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75em;
+    font-weight: 300;
+}
+
+.form-box .container .form p a{
+    font-weight: 500;
+    color: #fff;
+}

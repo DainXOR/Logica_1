@@ -5,9 +5,9 @@ nav {
   align-items: center;
   background-color: #232121;
   color: #201e1e;
-  height: 60px;
-  padding: 0 20px;
-  border-radius: 20px;
+  height: 3.5rem;
+  padding: 0 1.5rem;
+  border-radius: 1rem;
 
   scroll-behavior: smooth;
 
@@ -61,8 +61,8 @@ nav .navbar-social {
 }
 
 nav .navbar-social a {
-  width: var(--size-logo-ic);
-  height: var(--size-logo-ic);
+  width: var(--size-ic-bubble);
+  height: var(--size-ic-bubble);
   border-radius: 50%;
   background-color: #201e1e;
   display: flex;
