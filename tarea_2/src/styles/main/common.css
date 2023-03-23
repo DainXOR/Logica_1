@@ -1,8 +1,14 @@
 *{
-    font-family: "Poppins", sans-serif;
     box-sizing: border-box;
 }
 
 body{
     background-color: var(--bg-color);
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  
+}
+  
+body::-webkit-scrollbar{
+    display: none;
 }

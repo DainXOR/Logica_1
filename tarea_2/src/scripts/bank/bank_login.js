@@ -44,10 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
             verifyEmail(userData, container); // The verification code appears inside the console ;)
             
         }
-        
-        // Idk, just kick him in the ass or something...
-        console.log("Register");
-        
     });
 
     
@@ -205,6 +201,7 @@ function verifyEmail(userData, docBody){ // The verification code appears inside
     let userCode = 0;
     
     verificationCode -= verificationCode === 1_000_000? 1 : 0;
+    console.log("Your verification code:");
     console.log(verificationCode);
 
     let verificationForm = docBody.querySelector(".emailverification");
@@ -216,10 +213,9 @@ function verifyEmail(userData, docBody){ // The verification code appears inside
         userCode = document.getElementById("ev_code").value;
 
         if(verificationCode == userCode){
-            console.log("Wi di et");
             createUser(userData);
 
-            // Change when possible to only id
+            console.log("Change when possible to only id");
             redirectUser(userData, 1, "main");
         }
     });

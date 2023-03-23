@@ -1,18 +1,10 @@
 
 body {
-  background-color: var(--bg-color);
-  background: url("../../resources/images/arlequins.jpg");
+  background-image: url("../../resources/images/arlequins.jpg");
   background-size: auto 115%;
   background-attachment: fixed;
 
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
   scroll-behavior: smooth;
-}
-
-body::-webkit-scrollbar{
-  display: none;
 }
 
 .navbar-links {
