@@ -9,10 +9,7 @@
     grid-template: repeat(1, 1fr) / repeat(4, 1fr);
     gap: 3rem;
 
-    margin-top: 5rem;
-    margin-left: 3rem;
-    margin-right: 3rem;
-    margin-bottom: 5rem;
+    margin: 5rem 3rem;
 
     font-family: 'Dosis', sans-serif;
     text-decoration: none;
@@ -33,13 +30,12 @@
 .sections .section{
 
     position: relative;
-
     text-decoration: inherit;
+    border-radius: 30px / 90px;
 }
 
 .sections .section .box{
     position: relative;
-    max-width: 200px;
     margin: 0;
     padding: 40px;
     
@@ -50,7 +46,6 @@
     border-top: 1px solid rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(4px);
 
-    
     color: #fff;
 
     font-family: 'Dosis', sans-serif;
