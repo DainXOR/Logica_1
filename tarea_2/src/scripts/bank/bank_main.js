@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 let grandParent = directParent.parentElement;
 
                 if(e.target.classList[0][1] == 0){
-                    panel.classList.remove(panel.classList[1]);
+                    const classListSize = panel.classList.length;
+                    const classToRemove = panel.classList[classListSize - 1];
+                    panel.classList.remove(classToRemove);
                 }
                 else if(
                     parseInt(e.target.classList[0][1]) >= 1 && 

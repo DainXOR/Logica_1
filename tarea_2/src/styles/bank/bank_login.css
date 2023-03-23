@@ -1,0 +1,11 @@
+.container .form.signup,
+.container .form.emailverification,
+.container.signupForm .form.signin,
+.container.verificationForm .form.signin{
+    display: none;
+}
+
+.container.signupForm .form.signup,
+.container.verificationForm .form.emailverification{
+    display: flex;
+}

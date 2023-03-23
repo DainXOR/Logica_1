@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   
     let signupForm = container.querySelector(".signup");
-    let submitRegister = signupForm.querySelector("input[type='submit']");
+    let submitRegister = signupForm.querySelector(".submit");
 
     submitRegister.addEventListener("click", (e) => {
         e.preventDefault();
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
     let signinForm = container.querySelectorAll(".signin")[0];
-    let submitLogin = signinForm.querySelector("input[type='submit']");
+    let submitLogin = signinForm.querySelector(".submit");
 
     // Login
     submitLogin.addEventListener("click", (e) => {
@@ -208,7 +208,7 @@ function verifyEmail(userData, docBody){ // The verification code appears inside
     console.log(verificationCode);
 
     let verificationForm = docBody.querySelector(".emailverification");
-    let submitVerification = verificationForm.querySelector("input[type='submit']");
+    let submitVerification = verificationForm.querySelector(".submit");
 
     submitVerification.addEventListener("click", (e) => {
         e.preventDefault();

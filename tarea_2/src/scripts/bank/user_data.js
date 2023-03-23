@@ -66,9 +66,26 @@ let externalUserData = new Map([
         "pass": "mangledDummyPassword",
     }
    ],
+   ["6969", {
+    "name": "Admin", 
+    "id": "6969", 
+    "email": "admin.admin@dpmail.com",
+    "phone": "3006096969",
+    "pass": "mangledPass",
+}
+],
 ]);
 
 let bankData = new Map([
+    ["6969", {
+        "name": "Admin", 
+        "id": "6969", 
+        "pass": "mangledPass",
+        "code": "mangledBD93F9Admin6969",
+        "balance": "69000000",
+        "currency": "COP"
+    }
+    ],
     ["50331778", {
         "name": "Daniel", 
         "id": "50331778",

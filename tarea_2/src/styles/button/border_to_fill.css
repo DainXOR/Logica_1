@@ -1,0 +1,33 @@
+button.color-border-hfill{
+    padding: 10px 0;
+    border: none;
+    width: 100%;
+    background-color: rgb(20, 20, 20);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #fff;
+    font-weight: 300;
+    border-radius: 25px;
+    font-size: 1em;
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35);
+
+    transition: 0.5s;
+    outline: none;
+}
+
+button.color-border-hfill:hover{
+    background-color: var(--green);
+    color: var(--bg-color);
+    padding: 10px 0;
+    font-weight: 500;
+    cursor: pointer;
+
+    box-shadow: 
+    -5px -5px 15px rgba(255, 255, 255, 0.1),
+    5px 5px 15px rgba(0, 0, 0, 0.35),
+    -5px -5px 15px rgba(255, 255, 255, 0.1) inset,
+    5px 5px 15px rgba(0, 0, 0, 0.35) inset;
+
+    transition: 0.5s;
+}
