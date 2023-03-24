@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pageBody = document.querySelector(".page-body");
     let menuBody = pageBody.querySelector(".menu-body");
+
     let mainButtons = menuBody.querySelectorAll(".main-button");
     let secondaryButtons = menuBody.querySelectorAll(".secondary-button");
 
@@ -20,20 +21,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const buttonID = mainButtons[i].id;
             const sectionName = buttonID.replace("b_", "");
-            const sectionDisplay = "display" + sectionName.capitalize();
+            const sectionDisplay = "display-" + sectionName;
             let pageClasses = pageBody.classList;
+            let pageClassSize = pageClasses.length;
 
-            pageBody.classList.toggle(sectionDisplay);
-            mainButtons[i].classList.toggle("display");
+            if(pageClasses[pageClassSize - 1].startsWith("display") && pageClasses[pageClassSize - 1] !== sectionDisplay){
+                pageClasses.remove(pageClasses[pageClassSize - 1]);
+            }
+            pageClasses.toggle(sectionDisplay);
 
-            for (let i = 0; i < secondaryButtons.length; i++) {
-                if (secondaryButtons[i].classList[1] === "secondary-" + sectionName) {
-                    secondaryButtons[i].classList.toggle("display");
-                } 
-                else if (secondaryButtons[i].classList.contains("display")){
-                    secondaryButtons[i].classList.toggle("display");
+            for (let j = 0; j < mainButtons.length; j++) {
+                if(mainButtons[j].classList.contains("display") && i !== j){
+                    mainButtons[j].classList.toggle("display");
+                    break;
                 }
             }
+            mainButtons[i].classList.toggle("display");
+
+            for (let j = 0; j < secondaryButtons.length; j++) {
+                if (secondaryButtons[j].classList.contains("secondary-" + sectionName)) {
+                    secondaryButtons[j].classList.toggle("display");
+                    secondaryButtons[j].style.transitionDelay = j/40 + "s";
+                    
+                } 
+                else if (secondaryButtons[j].classList.contains("display")){
+                    secondaryButtons[j].classList.toggle("display");
+                    secondaryButtons[j].style.transitionDelay = j/40 + "s";
+                }
+                
+            }
+
+            
+            
+            
+
         });
     }
 
@@ -254,3 +275,11 @@ str.toLowerCase().replace(/([-_][a-z])/g, group =>
     .replace('_', '')
 );
   
+const delay = ms => new Promise(res => setTimeout(res, ms));
+function wait(ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < start + ms) {
+      end = new Date().getTime();
+   }
+ }

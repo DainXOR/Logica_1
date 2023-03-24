@@ -28,8 +28,6 @@ body{
     display: grid;
     grid-auto-flow: row;
 
-    border: 20px var(--green) !important;
-
     width: clamp(5rem, 20vw + 2rem, 15rem);
     height: fit-content;
 }
@@ -51,9 +49,17 @@ body{
     margin: 0.1rem;
 
     color: var(--green);
+    background-color: transparent;
 
     font-size: var(--fs-ms);
     font-weight: 500;
+}
+
+.button-menu .ioBox .main-button.display{
+    color: var(--bg-color);
+    background-color: var(--green);
+
+    transition: 0.5s;
 }
 
 .button-menu .ioBox .main-button:hover{
@@ -83,7 +89,9 @@ body{
     height: 30px;
     margin: 0.1rem;
 
-    color: var(--green);
+    color: var(--bg-color);
+    background-color: var(--green);
+    border: 2px 0 var(--green);
 
     font-size: var(--fs-s);
     font-weight: 500;
@@ -92,8 +100,8 @@ body{
 }
 
 .button-menu .ioBox .secondary-button.display:hover {
-    color: var(--bg-color);
-    background-color: var(--green);
+    color: var(--green);
+    background-color: transparent;
 
     transition: 0.5s;
 }
