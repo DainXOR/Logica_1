@@ -11,7 +11,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pageBody = document.querySelector(".page-body");
     let menuBody = pageBody.querySelector(".menu-body");
-    let buttons = menuBody.querySelectorAll("input[type='button']");
+    let mainButtons = menuBody.querySelectorAll(".main-button");
+    let secondaryButtons = menuBody.querySelectorAll(".secondary-button");
+
+    for(let i = 0; i < mainButtons.length; i++){
+        mainButtons[i].addEventListener("click", (e) => {
+            e.preventDefault();
+
+            const buttonID = mainButtons[i].id;
+            const sectionName = buttonID.replace("b_", "");
+            const sectionDisplay = "display" + sectionName.capitalize();
+            let pageClasses = pageBody.classList;
+
+            pageBody.classList.toggle(sectionDisplay);
+            mainButtons[i].classList.toggle("display");
+
+            for (let i = 0; i < secondaryButtons.length; i++) {
+                if (secondaryButtons[i].classList[1] === "secondary-" + sectionName) {
+                    secondaryButtons[i].classList.toggle("display");
+                } 
+                else if (secondaryButtons[i].classList.contains("display")){
+                    secondaryButtons[i].classList.toggle("display");
+                }
+            }
+        });
+    }
 
     pageBody.querySelector("#b_logout").addEventListener("click", (e) => {
         e.preventDefault();
