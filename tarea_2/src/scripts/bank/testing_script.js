@@ -9,10 +9,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let user = setUp(); // Used on eval functions
 
-    let panel = document.querySelector(".panel");
-    let buttons = panel.querySelectorAll("button");
+    let pageBody = document.querySelector(".page-body");
+    let menuBody = pageBody.querySelector(".menu-body");
+    let buttons = menuBody.querySelectorAll("input[type='button']");
 
-    panel.querySelector("#b_logout").addEventListener("click", (e) => {
+    pageBody.querySelector("#b_logout").addEventListener("click", (e) => {
         e.preventDefault();
 
         sessionStorage.clear();
@@ -21,41 +22,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     for(let i = 0; i < buttons.length; i++){
-        if(buttons[i].classList.contains("backButton")){
-            buttons[i].addEventListener("click", (e) => {
-                e.preventDefault();
-
-                let directParent = e.target.parentElement;
-                let grandParent = directParent.parentElement;
-
-                if(e.target.classList[0][1] == 0){
-                    const classListSize = panel.classList.length;
-                    const classToRemove = panel.classList[classListSize - 1];
-                    panel.classList.remove(classToRemove);
-                }
-                else if(
-                    parseInt(e.target.classList[0][1]) >= 1 && 
-                    grandParent.classList.contains("display")){
-
-                        grandParent.classList.remove(grandParent.classList[grandParent.classList.length - 2]);
-                        grandParent.classList.remove(grandParent.classList[grandParent.classList.length - 1]);
-                }
-
-                removeListeners();
-                
-            });
-        }
-        else if(buttons[i].classList.contains("mainButton") && buttons[i].id !== "b_logout"){
+        if(buttons[i].classList.contains("main-button") && buttons[i].id !== "b_logout"){
             buttons[i].addEventListener("click", (e) => {
                 e.preventDefault();
     
                 let elementID = e.target.id;
                 let newClassName = "display" + elementID.replace("b_", "").capitalize();
+                let pageClasses = pageBody.classList;
     
-                if(panel.classList[panel.classList.length - 1].startsWith("display")){
-                    panel.classList.remove(panel.classList[panel.classList.length - 1]);
+                if(pageClasses[pageClasses.length - 1].startsWith("display")){
+                    pageClasses.remove(pageClasses[pageClasses.length - 1]);
                 }
-                panel.classList.add(newClassName);
+                pageClasses.add(newClassName);
 
                 if(elementID !== "b_transaction"){
                     let functionCall = newClassName + "(user)";

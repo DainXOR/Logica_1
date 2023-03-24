@@ -4,14 +4,102 @@ body{
 
 .page-body{
     margin: 0;
-    padding: 0;
+    padding: 2rem 0 0 0;
+
+    display: grid;
+    grid-template-areas: 
+    "content menu";
+
+    height: fit-content;
 }
 
 .page-body .page-section{
-    display: grid;
-    grid-auto-flow: column;
+    grid-area: content;
     
 }
+
+.page-body .menu-body{
+    grid-area: menu;
+    
+    justify-self: right;
+}
+
+.page-body .menu-body .ioBox{
+    display: grid;
+    grid-auto-flow: row;
+
+    border: 20px var(--green) !important;
+
+    width: clamp(5rem, 20vw + 2rem, 15rem);
+    height: fit-content;
+}
+
+.button-menu .ioBox input[type="button"]{
+    background-color: transparent;
+    border-color: transparent;
+    box-sizing: border-box;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.button-menu .ioBox .main-button{
+    height: 30px;
+    margin: 0.1rem;
+
+    color: var(--green);
+
+    font-size: var(--fs-ms);
+    font-weight: 500;
+}
+
+.button-menu .ioBox .main-button:hover{
+    color: var(--bg-color);
+    background-color: var(--green);
+
+    transition: 0.5s;
+}
+
+.button-menu .ioBox .main-button:active{
+    background-color: aqua !important;
+}
+
+.button-menu .ioBox .secondary-button {
+    border: 0;
+    padding: 0;
+    height: 0;
+
+    color: transparent;
+
+    font-size: 0;
+    font-weight: 0;
+
+    transition: 0.3s;
+}
+.button-menu .ioBox .secondary-button.display {
+    height: 30px;
+    margin: 0.1rem;
+
+    color: var(--green);
+
+    font-size: var(--fs-s);
+    font-weight: 500;
+
+    transition: 0.3s;
+}
+
+.button-menu .ioBox .secondary-button.display:hover {
+    color: var(--bg-color);
+    background-color: var(--green);
+
+    transition: 0.5s;
+}
+
+
+
 
 .panel{
 
