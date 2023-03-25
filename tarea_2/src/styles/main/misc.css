@@ -20,8 +20,11 @@
     --border-color: var(--gray);
 
     --main-color: var(--green);
-    --secundary-color: var(--purple);
-    --details-color: var(--purple);
+    --secondary-color: var(--purple);
+    --third-color: #fff;
+
+    --focus-color: var(--secondary-color);
+    --details-color: var(--red);
 
 
     --size-logo-ic: clamp(1rem, 5vw + 0.5rem, 3rem);

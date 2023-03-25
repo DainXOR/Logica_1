@@ -32,15 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
             pageClasses.add(sectionDisplay);
 
 
-
+            // Main buttons activation
             for (let j = 0; j < mainButtons.length; j++) {
-                if(mainButtons[j].classList.contains("display") && i !== j){
+                if(mainButtons[j].classList.contains("display")){
                     mainButtons[j].classList.toggle("display");
                     break;
                 }
             }
             mainButtons[i].classList.add("display");
 
+            // Secondary buttons reaction to main buttons changes
             for (let j = 0; j < secondaryButtons.length; j++) {
                 if (secondaryButtons[j].classList.contains("secondary-" + sectionName)) {
                     secondaryButtons[j].classList.add("display");
