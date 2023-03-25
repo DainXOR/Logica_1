@@ -25,10 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
             let pageClasses = pageBody.classList;
             let pageClassSize = pageClasses.length;
 
-            if(pageClasses[pageClassSize - 1].startsWith("display") && pageClasses[pageClassSize - 1] !== sectionDisplay){
+            // Set section .page-button is displaying
+            if(pageClasses[pageClassSize - 1].startsWith("display")){
                 pageClasses.remove(pageClasses[pageClassSize - 1]);
             }
-            pageClasses.toggle(sectionDisplay);
+            pageClasses.add(sectionDisplay);
+
+
 
             for (let j = 0; j < mainButtons.length; j++) {
                 if(mainButtons[j].classList.contains("display") && i !== j){
@@ -36,33 +39,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 }
             }
-            mainButtons[i].classList.toggle("display");
+            mainButtons[i].classList.add("display");
 
             for (let j = 0; j < secondaryButtons.length; j++) {
                 if (secondaryButtons[j].classList.contains("secondary-" + sectionName)) {
-                    secondaryButtons[j].classList.toggle("display");
+                    secondaryButtons[j].classList.add("display");
                     secondaryButtons[j].style.transitionDelay = j/40 + "s";
-                    
                 } 
                 else if (secondaryButtons[j].classList.contains("display")){
                     secondaryButtons[j].classList.toggle("display");
                     secondaryButtons[j].style.transitionDelay = j/40 + "s";
                 }
-                
             }
+        });
+    }
 
-            
-            
-            
+    for (let i = 0; i < secondaryButtons.length; i++) {
+        secondaryButtons[i].addEventListener("click", (e) => {
+            e.preventDefault();
 
         });
+        
     }
 
     pageBody.querySelector("#b_logout").addEventListener("click", (e) => {
         e.preventDefault();
-
         sessionStorage.clear();
-
         window.location.href = "./bank_login.html";
     });
 

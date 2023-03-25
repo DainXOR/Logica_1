@@ -64,13 +64,13 @@ body{
 
 .button-menu .ioBox .main-button:hover{
     color: var(--bg-color);
-    background-color: var(--green);
+    background-color: var(--main-color);
 
     transition: 0.5s;
 }
 
 .button-menu .ioBox .main-button:active{
-    background-color: aqua !important;
+    background-color: var(--actualy-green) !important;
 }
 
 .button-menu .ioBox .secondary-button {
@@ -90,8 +90,8 @@ body{
     margin: 0.1rem;
 
     color: var(--bg-color);
-    background-color: var(--green);
-    border: 2px 0 var(--green);
+    background-color: var(--main-color);
+    border: 2px var(--main-color);
 
     font-size: var(--fs-s);
     font-weight: 500;
@@ -100,7 +100,7 @@ body{
 }
 
 .button-menu .ioBox .secondary-button.display:hover {
-    color: var(--green);
+    color: var(--main-color);
     background-color: transparent;
 
     transition: 0.5s;
