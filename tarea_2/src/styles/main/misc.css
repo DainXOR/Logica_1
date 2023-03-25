@@ -10,21 +10,32 @@
     --purple: rgb(189, 147, 249);
     --red: rgb(241, 56, 56);
     --gold: rgb(255, 215, 0);
-    --dark-gray: rgb(20, 20, 20);
-    --gray: rgb(30, 30, 30);
+    --dark-gray: rgb(10, 10, 10);
+    --gray: rgb(15, 15, 15);
+    --light-gray: rgb(40, 40, 40);
 
     --valid: var(--green);
     --invalid: var(--red);
+    
+    --main-bg-color: var(--dark-gray);
+    --second-bg-color: var(--gray);
 
-    --bg-color: var(--dark-gray);
     --border-color: var(--gray);
 
-    --main-color: var(--green);
-    --secondary-color: var(--purple);
+    --main-color: var(--gold);
+    --secondary-color: var(--light-gray);
     --third-color: #fff;
 
-    --focus-color: var(--secondary-color);
+    --focus-color: var(--main-color);
     --details-color: var(--red);
+
+    --main-font-color: #fff;
+    --second-font-color: var(--gold);
+    --important-font-color: var(--red);
+
+    --button-bg-color: var(--main-bg-color);
+    --button-font-color: var(--main-font-color);
+    --button-border-color: var(--main-color);
 
 
     --size-logo-ic: clamp(1rem, 5vw + 0.5rem, 3rem);

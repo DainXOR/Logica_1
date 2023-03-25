@@ -3,7 +3,7 @@
 }
 
 body{
-    background-color: var(--bg-color);
+    background-color: var(--main-bg-color);
     -ms-overflow-style: none;
     scrollbar-width: none;
   

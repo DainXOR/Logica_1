@@ -1,7 +1,7 @@
-.display-home .page-section:not(:has(.home-body)),
-.display-transactions .page-section:not(:has(.transactions-body)),
-.display-balance .page-section:not(:has(.balance-body)),
-.display-history .page-section:not(:has(.history-body)) {
+.display-home .page-section:not(:is(.home-body)),
+.display-transactions .page-section:not(:is(.transactions-body)),
+.display-balance .page-section:not(:is(.balance-body)),
+.display-history .page-section:not(:is(.history-body)) {
     opacity: 0;
     visibility: hidden;
     height: 0;
