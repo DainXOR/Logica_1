@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             mainButtons[i].classList.add("display");
+            eval(`subroutine${sectionName.capitalize()}(user)`);
 
             // Secondary buttons reaction to main buttons changes
             for (let j = 0; j < secondaryButtons.length; j++) {
@@ -156,13 +157,20 @@ function removeListeners(){
     return true;
 }
 
-function displayBalance(userData){
-    document.querySelector("#account_balance").innerHTML = userData.balance;
-    document.querySelector("#account_currency").innerHTML = userData.currency;
+
+function subroutineHome(userData){
+    return false;
+}
+function subroutineTransactions(userData){
+    return false;
+}
+function subroutineBalance(userData){
+    document.querySelector(".account-balance").innerHTML = userData.balance;
+    document.querySelector(".account-currency").innerHTML = userData.currency;
 
     return null;
 }
-function displayHistory(userData){
+function subroutineHistory(userData){
     //document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
     console.log("[ERROR]: Not implemented.");
 
