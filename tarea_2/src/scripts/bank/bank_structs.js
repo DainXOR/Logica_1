@@ -145,6 +145,9 @@ class Bank{
         return SecurityManager.hashData(secretCode);
     }
 
+    static previewCurrencyChange(amount, from, to){
+        return amount * Bank.#convertionRates[from + "_" + to];
+    }
 
     static #convertionRates = {
         USD_COP: 4739.34,
@@ -161,3 +164,12 @@ class Bank{
     }
 }
 
+class Transaction{
+    constructor({userID, name, timeStamp, location, information}){
+        this.userID = userID;
+        this.action = name;
+        this.timeStamp = timeStamp;
+        this.location = location;
+        this.additionalInfo = information;
+    }
+}

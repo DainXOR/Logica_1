@@ -8,6 +8,13 @@ if(!sessionStorage.getItem("userID")){
 document.addEventListener('DOMContentLoaded', function() {
     
     let user = setUp(); // Used on eval functions
+    let position = null;
+
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition((p)=>{position = p;});
+    }
+
+    console.log(transactionsRecord);
 
     let pageBody = document.querySelector(".page-body");
     let menuBody = pageBody.querySelector(".menu-body");
@@ -24,6 +31,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const sectionDisplay = "display-" + sectionName;
             let pageClasses = pageBody.classList;
             let pageClassSize = pageClasses.length;
+
+            transactionsRecord.push(new Transaction({
+                userID: user.id, 
+                name: sectionName, 
+                timeStamp: +(new Date()),
+                location: position.coords
+            }));
+        
+            console.log(transactionsRecord);
 
             // Set section .page-button is displaying
             if(pageClasses[pageClassSize - 1].startsWith("display")){
@@ -69,7 +85,11 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.clear();
         window.location.href = "./bank_login.html";
     });
-
+    
+    
+    
+    
+    /*
     for(let i = 0; i < buttons.length; i++){
         if(buttons[i].classList.contains("main-button") && buttons[i].id !== "b_logout"){
             buttons[i].addEventListener("click", (e) => {
@@ -117,10 +137,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    */
 });
 
 let bankInstance = null;
 let elementsWithListener = [];
+
+let transactionsRecord = [];
 
 function getBank(){
     bankInstance = bankInstance || new Bank();
@@ -135,6 +158,18 @@ function setUp(){
         // This should've been already created inside login page, but no read/write files here... :'(
         getBank().createNewAcount(userData["name"], userData["id"]) :
         getBank().logIn(userData["id"]);
+}
+
+function recordTransaction(userData, transactionName, extraInfo = ""){
+    transactionsRecord.push(new Transaction({
+        userID: userData.id, 
+        name: transactionName, 
+        timeStamp: +(new Date()),
+        location: position.coords,
+        information: extraInfo
+    }));
+
+    console.log(transactionsRecord);
 }
 
 function toRemoveListener(element){
@@ -167,37 +202,51 @@ function subroutineTransactions(userData){
 function subroutineBalance(userData){
     document.querySelector(".account-balance").innerHTML = userData.balance;
     document.querySelector(".account-currency").innerHTML = userData.currency;
+    recordTransaction(userData, "check_balance");
 
     return null;
 }
 function subroutineHistory(userData){
     //document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
+    recordTransaction(userData, "check_history");
     console.log("[ERROR]: Not implemented.");
 
     return null;
 }
 
-function doCurrencyChange(userData){
+function setupCurrencyChange(userData){
     let contentDiv = document.querySelector(".currencyChangeBox").children[1];
-    contentDiv.children[1].value = userData.currency;
+
     contentDiv.children[0].innerHTML = userData.balance;
+    contentDiv.children[1].value = userData.currency;
 
     contentDiv.children[1].onchange = () => {
-        let finalCurrency = contentDiv.children[1].value;
+        
+        const balancePreview = Bank.previewCurrencyChange(userData.balance, initialCurrency, finalCurrency);
+        
         contentDiv.children[0].innerHTML = userData.balance;
+        contentDiv.children[2].innerHTML = balancePreview;
+    }
 
-        if(userData.currency !== finalCurrency){
+    document.querySelector("#b_change_currency").addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const initialCurrency = userData.currency;
+        const finalCurrency = contentDiv.children[1].value;
+
+        if(initialCurrency !== finalCurrency){
             getBank().changeCurrency(userData, finalCurrency);
         }
 
-        contentDiv.children[2].innerHTML = userData.balance;
-    }
+        contentDiv.children[0].innerHTML = userData.balance;
+        contentDiv.children[2].innerHTML = balancePreview;
+        recordTransaction(userData, "change_currency", `${initialCurrency} -> ${finalCurrency}`);
+    });
 
-    console.log("This kinda works.");
-    console.log("Better check the balance on main menu.");
+    console.log("Doing it this way feels wrong...");
     return null;
 }
-function doWithdraw(userData){
+function setupWithdraw(userData){
     
     let userBalanceSpan = document.querySelector("#w_actual_balance");
     const withdrawButton = document.querySelector("#bw_withdraw");
@@ -211,9 +260,10 @@ function doWithdraw(userData){
         const withdrawAmount = document.querySelector("#withdraw_amount").value;
         const withdrawCurrency = withdrawDropdown.value;
         
-        getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
+        const success = getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
-    
+
+        recordTransaction(userData, "do_withdraw", success? "Denied" : "Approved");
     }
 
     withdrawButton.addEventListener("click", buttonFunction);    
@@ -233,8 +283,10 @@ function doDeposit(userData){
         const depositAmount = document.querySelector("#deposit_amount").value;
         const depositCurrency = depositDropdown.value;
         
-        getBank().deposit(userData, depositAmount, depositCurrency);
+        const success = getBank().deposit(userData, depositAmount, depositCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+
+        recordTransaction(userData, "do_withdraw", success? "Denied" : "Approved");
     }
 
     depositButton.addEventListener("click", buttonFunction);    
@@ -242,10 +294,18 @@ function doDeposit(userData){
     return [depositButton, buttonFunction];
 }
 function doTransfer(userData){
+    let receiver = null;
     console.log("[ERROR]: Not implemented.");
+
+    const success = false;
+
+    let transactionInfo = success? "Denied. " : "Approved. ";
+    transactionInfo += `Receiver:{ ID: ${receiver}, Name: ${receiver}}`;
+    recordTransaction(userData, "do_withdraw", transactionInfo);
 
     return undefined;
 }
+
 
 
 
