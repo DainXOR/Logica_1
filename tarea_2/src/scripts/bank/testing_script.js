@@ -8,13 +8,10 @@ if(!sessionStorage.getItem("userID")){
 document.addEventListener('DOMContentLoaded', function() {
     
     let user = setUp(); // Used on eval functions
-    let position = null;
 
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition((p)=>{position = p;});
     }
-
-    console.log(transactionsRecord);
 
     let pageBody = document.querySelector(".page-body");
     let menuBody = pageBody.querySelector(".menu-body");
@@ -31,15 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const sectionDisplay = "display-" + sectionName;
             let pageClasses = pageBody.classList;
             let pageClassSize = pageClasses.length;
-
-            transactionsRecord.push(new Transaction({
-                userID: user.id, 
-                name: sectionName, 
-                timeStamp: +(new Date()),
-                location: position.coords
-            }));
-        
-            console.log(transactionsRecord);
 
             // Set section .page-button is displaying
             if(pageClasses[pageClassSize - 1].startsWith("display")){
@@ -141,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let bankInstance = null;
-let elementsWithListener = [];
-
+let position = null;
+let elementsWithListener = []; // To delete
 let transactionsRecord = [];
 
 function getBank(){
