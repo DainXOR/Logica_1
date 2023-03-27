@@ -68,6 +68,12 @@
                     <div class="content-body">
                         <p>Welcome to my bank page!</p>
                         <p>Right now is under development, but I'm working to get all basic features ASAP.</p>
+                        <p>The features you can access in this moment are:</p>
+                        <ul>
+                            <li>Change currency</li>
+                            <li>Check balance</li>
+                            <li>Check history (complete)</li>
+                        </ul>
                         <div class="ioBox outputBox">
                         </div>
                     </div>
@@ -80,7 +86,34 @@
                         <h3>Transactions</h3>
                     </div>
                     <div class="content-body">
-                        <div class="ioBox outputBox">
+                        <p>Not avaible.</p>
+                        <div class="ioBox outputBox"></div>
+                        <div class="subsections">
+                            <section class="subsection currency-change">
+                                <h4>Currency Change</h4>
+                                <div class="ioBox">
+                                    <div class="inputBox">
+                                        <select class="currency-dropdown">
+                                            <option value="COP">Colombian peso</option>
+                                            <option value="USD">US dollar</option>
+                                        </select>
+                                        <button id="b-change-currency">Change currency</button>
+                                    </div>
+                                    <div class="outputBox">
+                                        <span class="balance-data actual-balance"></span>
+                                        <span class="balance-data converted-balance"></span>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="subsection withdraw">
+                                <h4>Withdraw</h4>
+                            </section>
+                            <section class="subsection deposit">
+                                <h4>Deposit</h4>
+                            </section>
+                            <section class="subsection transfer">
+                                <h4>Transfer</h4>
+                            </section>
                         </div>
                     </div>
                 </div>
@@ -101,12 +134,13 @@
                 </div>
             </div>
     
-            <div class="page-section history-body">
+            <div class="page-section history-body"> 
                 <div class="content">
                     <div class="content-title">
                         <h3>History</h3>
                     </div>
                     <div class="content-body">
+                        <p>WIP</p>
                         <div class="ioBox outputBox">
                             <ul class="record-list">
                             </ul>

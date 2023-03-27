@@ -7,7 +7,8 @@ if(!sessionStorage.getItem("userID")){
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    let user = setUp(); // Used on eval functions
+    let user = setupUser(); // Used on eval functions
+    setupTransactions(user);
 
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition((p)=>{position = p;});
@@ -138,7 +139,7 @@ function getBank(){
     return bankInstance;
 }
 
-function setUp(){
+function setupUser(){
     transactionsRecord = [];
     const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
     const isNew = Boolean(parseInt(sessionStorage["isNew"]));
@@ -215,10 +216,16 @@ function removeListeners(){
 
 
 function subroutineHome(userData){
-    return false;
+    return true;
 }
 function subroutineTransactions(userData){
-    return false;
+    let outputBox = document.querySelector(".transactions-body .outputBox");
+    outputBox.innerHTML = 
+    "Select the transaction you want to perform.<br>" +
+    "Keep in mind, if you want to transfer to an account of a different bank, " +
+    "the transaction may contain charges.";
+
+    return true;
 }
 function subroutineBalance(userData){
     document.querySelector(".account-balance").innerHTML = userData.balance;
@@ -249,36 +256,60 @@ function subroutineHistory(userData){
     return null;
 }
 
+function setupTransactions(userData){
+    let success = true;
+
+    let buttonMenu = document.querySelector(".button-menu .inputBox");
+    let secondaryButtons = buttonMenu.querySelectorAll(".secondary-button");
+
+
+    success &= setupCurrencyChange(userData);
+    //success &= setupDeposit(userData);
+    //success &= setupWithdraw(userData);
+    //success &= setupTransfer(userData);
+
+    return success;
+}
 function setupCurrencyChange(userData){
-    let contentDiv = document.querySelector(".currencyChangeBox").children[1];
+    let ioBox = document.querySelector(".subsections .currency-change .ioBox");
+    let outputBox = ioBox.querySelector(".outputBox");
+    let inputBox = ioBox.querySelector(".inputBox");
 
-    contentDiv.children[0].innerHTML = userData.balance;
-    contentDiv.children[1].value = userData.currency;
+    let dropdownCurrencyMenu = inputBox.querySelector(".currency-dropdown");
+    let actualBalance = outputBox.querySelector(".actual-balance");
+    let convertedBalance = outputBox.querySelector(".converted-balance");
 
-    contentDiv.children[1].onchange = () => {
+    actualBalance.innerHTML = `${userData.balance} ${userData.currency}`;
+    convertedBalance.innerHTML = `${userData.balance} ${dropdownCurrencyMenu.value}`;
+
+    //outputBox.innerHTML = userData.balance;
+    //sectionCC.value = userData.currency;
+    function showChange(){
+        const initialCurrency = userData.currency;
+        const finalCurrency = dropdownCurrencyMenu.value;
         
         const balancePreview = Bank.previewCurrencyChange(userData.balance, initialCurrency, finalCurrency);
         
-        contentDiv.children[0].innerHTML = userData.balance;
-        contentDiv.children[2].innerHTML = balancePreview;
+        actualBalance.innerHTML = `${userData.balance} ${initialCurrency}`;
+        convertedBalance.innerHTML = `${balancePreview} ${finalCurrency}`;
     }
 
-    document.querySelector("#b_change_currency").addEventListener("click", (e) => {
+    dropdownCurrencyMenu.onchange = showChange;
+
+    inputBox.querySelector("#b-change-currency").addEventListener("click", (e) => {
         e.preventDefault();
 
         const initialCurrency = userData.currency;
-        const finalCurrency = contentDiv.children[1].value;
+        const finalCurrency = dropdownCurrencyMenu.value;
 
         if(initialCurrency !== finalCurrency){
             getBank().changeCurrency(userData, finalCurrency);
         }
 
-        contentDiv.children[0].innerHTML = userData.balance;
-        contentDiv.children[2].innerHTML = balancePreview;
+        showChange();
         storeRecord(userData, "change_currency", `${initialCurrency} -> ${finalCurrency}`);
     });
 
-    console.log("Doing it this way feels wrong...");
     return null;
 }
 function setupWithdraw(userData){
@@ -371,8 +402,7 @@ Object.defineProperty(String.prototype, 'capitalize', {
       return this.charAt(0).toUpperCase() + this.slice(1);
     },
     enumerable: false
-  });
-
+});
 const snakeToCamel = str =>
 str.toLowerCase().replace(/([-_][a-z])/g, group =>
   group
@@ -380,7 +410,7 @@ str.toLowerCase().replace(/([-_][a-z])/g, group =>
     .replace('-', '')
     .replace('_', '')
 );
-  
+
 const delay = ms => new Promise(res => setTimeout(res, ms));
 function wait(ms){
     var start = new Date().getTime();

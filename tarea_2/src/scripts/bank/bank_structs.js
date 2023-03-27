@@ -154,7 +154,7 @@ class Bank{
     }
 
     static previewCurrencyChange(amount, from, to){
-        return amount * Bank.#convertionRates[from + "_" + to];
+        return from === to? amount : amount * Bank.#convertionRates[from + "_" + to];
     }
 
     static #convertionRates = {
