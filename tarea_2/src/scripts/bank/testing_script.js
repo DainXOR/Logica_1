@@ -139,6 +139,7 @@ function getBank(){
 }
 
 function setUp(){
+    transactionsRecord = [];
     const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
     const isNew = Boolean(parseInt(sessionStorage["isNew"]));
 
@@ -148,17 +149,50 @@ function setUp(){
         getBank().logIn(userData["id"]);
 }
 
-function recordTransaction(userData, transactionName, extraInfo = ""){
+function storeRecord(userData, transactionName, extraInfo = ""){
     transactionsRecord.push(new Transaction({
         userID: userData.id, 
         name: transactionName, 
         timeStamp: +(new Date()),
-        location: position.coords,
+        location: position === null? null : position.coords,
         information: extraInfo
     }));
 
     console.log(transactionsRecord);
 }
+function getRecord(){
+    let recordList = [];
+    let recordString = "";
+
+    for (let i = 0; i < transactionsRecord.length; i++) {
+        const recordData = transactionsRecord[i];
+        let aux;
+
+        aux = getBank().getUserData(recordData.userID);
+        let userName = aux[0];
+        recordString += `<1>${userName}</1>`;
+
+        aux = recordData.action.split("_");
+        let action = aux[0];
+        let transaction = aux[1];
+        recordString += ` <2>${transaction.capitalize()}:${action.capitalize()}</2>`;
+
+        let timeStampFormated = new Date(recordData.timeStamp) + "";
+        timeStampFormated = timeStampFormated.replace(/\ (\([-'a-zA-ZÀ-ÿ\ ]+\))/, "");
+        recordString += ` <3>${timeStampFormated}</3>`;
+
+        let location = recordData.location;
+        if(location !== null){
+            recordString += ` <4><lat>${location.latitude}</lat> <long>${location.longitude}</long></4>`;
+        }
+
+        recordList.push(recordString);
+        recordString = "";
+    }
+
+    return recordList;
+}
+
 
 function toRemoveListener(element){
     if(element === null ||element === undefined){
@@ -168,7 +202,6 @@ function toRemoveListener(element){
     elementsWithListener.push(element);
     return true;
 }
-
 function removeListeners(){
     if(elementsWithListener.length === 0){
         return false;
@@ -190,14 +223,28 @@ function subroutineTransactions(userData){
 function subroutineBalance(userData){
     document.querySelector(".account-balance").innerHTML = userData.balance;
     document.querySelector(".account-currency").innerHTML = userData.currency;
-    recordTransaction(userData, "check_balance");
+    storeRecord(userData, "check_balance");
 
     return null;
 }
 function subroutineHistory(userData){
-    //document.querySelector("#h_user_history").innerHTML = "This feature is not working.";
-    recordTransaction(userData, "check_history");
-    console.log("[ERROR]: Not implemented.");
+    let outputBoxList = document.querySelector(".history-body .outputBox ul");
+    //let outputBoxList = outputBox.querySelector("ul");
+    let userHistory = getRecord();
+
+    for (let i = 0; i < userHistory.length; i++) {
+        let record = userHistory[i];
+
+        for (let j = 1; j < 5; j++) {
+            record = record.replace(`<${j}>`, `<p class='c${j}'>`);
+        }
+        record = record.replace(/(<\/[0-9]>)/, `</p>`);
+        userHistory[i] = `<li>${record}</li>`;
+    };
+
+    console.log(userHistory.join(""));
+
+    outputBoxList.innerHTML = userHistory.join("");
 
     return null;
 }
@@ -228,7 +275,7 @@ function setupCurrencyChange(userData){
 
         contentDiv.children[0].innerHTML = userData.balance;
         contentDiv.children[2].innerHTML = balancePreview;
-        recordTransaction(userData, "change_currency", `${initialCurrency} -> ${finalCurrency}`);
+        storeRecord(userData, "change_currency", `${initialCurrency} -> ${finalCurrency}`);
     });
 
     console.log("Doing it this way feels wrong...");
@@ -251,14 +298,14 @@ function setupWithdraw(userData){
         const success = getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
 
-        recordTransaction(userData, "do_withdraw", success? "Denied" : "Approved");
+        storeRecord(userData, "do_withdraw", success? "Denied" : "Approved");
     }
 
     withdrawButton.addEventListener("click", buttonFunction);    
 
     return [withdrawButton, buttonFunction];
 }
-function doDeposit(userData){
+function setupDeposit(userData){
     let userBalanceSpan = document.querySelector("#d_actual_balance");
     const depositButton = document.querySelector("#bd_deposit");
     const depositDropdown = document.querySelector(".depositBox").children[1].children[1];
@@ -274,14 +321,14 @@ function doDeposit(userData){
         const success = getBank().deposit(userData, depositAmount, depositCurrency);
         userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
 
-        recordTransaction(userData, "do_withdraw", success? "Denied" : "Approved");
+        storeRecord(userData, "do_withdraw", success? "Denied" : "Approved");
     }
 
     depositButton.addEventListener("click", buttonFunction);    
 
     return [depositButton, buttonFunction];
 }
-function doTransfer(userData){
+function setupTransfer(userData){
     let receiver = null;
     console.log("[ERROR]: Not implemented.");
 
@@ -289,7 +336,7 @@ function doTransfer(userData){
 
     let transactionInfo = success? "Denied. " : "Approved. ";
     transactionInfo += `Receiver:{ ID: ${receiver}, Name: ${receiver}}`;
-    recordTransaction(userData, "do_withdraw", transactionInfo);
+    storeRecord(userData, "do_withdraw", transactionInfo);
 
     return undefined;
 }

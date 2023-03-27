@@ -133,6 +133,14 @@ class Bank{
             
     }
 
+    getUserData(userID){
+        return [
+            this.#getBankData("").get(userID).name,
+            this.#getBankData("").get(userID).balance,
+            this.#getBankData("").get(userID).currency
+        ]
+    }
+
     #getBankData(path){
         return bankData;
     }

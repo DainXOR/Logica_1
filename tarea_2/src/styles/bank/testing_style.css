@@ -143,7 +143,9 @@ body{
 }
 .page-section .content-body .ioBox h4{
     margin: 0;
-    
+}
+.page-section .content-body .ioBox ul{
+    flex: 1;
 }
 
 .page-section .content-body .balance-data{
