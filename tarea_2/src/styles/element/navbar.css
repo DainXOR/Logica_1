@@ -85,6 +85,10 @@ nav .navbar-social a i.fa-github {
   color: #fff;
 }
 
+nav .navbar-social a i.fa-linkedin-in {
+  color: #003cb4;
+}
+
 nav .navbar-social a i.fa-facebook-f {
   color: #4267B2;
 }
