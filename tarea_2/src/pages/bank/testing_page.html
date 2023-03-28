@@ -70,8 +70,10 @@
                         <p>The features you can access in this moment are:</p>
                         <ul>
                             <li>Change currency</li>
+                            <li>Do deposit</li>
+                            <li>Do withdraw</li>
                             <li>Check balance</li>
-                            <li>Check history (complete)</li>
+                            <li>Check history (complete info)</li>
                         </ul>
                         <div class="ioBox outputBox">
                         </div>
@@ -104,14 +106,23 @@
                                     </div>
                                 </div>
                             </section>
-                            <section class="subsection withdraw">
-                                <h4>Withdraw</h4>
-                            </section>
                             <section class="subsection deposit">
                                 <h4>Deposit</h4>
+                                <div class="ioBox">
+                                    <input id="deposit-amount" type="text" placeholder="10000" required inputmode="numeric" pattern="^[0-9]{5,}$">
+                                    <button id="b-deposit">Deposit</button>
+                                </div>
+                            </section>
+                            <section class="subsection withdraw">
+                                <h4>Withdraw</h4>
+                                <div class="ioBox">
+                                    <input id="withdraw-amount" type="text" placeholder="10000" required inputmode="numeric" pattern="^[0-9]{5,}$">
+                                    <button id="b-withdraw">Withdraw</button>
+                                </div>
                             </section>
                             <section class="subsection transfer">
                                 <h4>Transfer</h4>
+                                <p>Currently not avaible.</p>
                             </section>
                         </div>
                     </div>

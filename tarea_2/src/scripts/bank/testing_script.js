@@ -139,17 +139,6 @@ function getBank(){
     return bankInstance;
 }
 
-function setupUser(){
-    transactionsRecord = [];
-    const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
-    const isNew = Boolean(parseInt(sessionStorage["isNew"]));
-
-    return isNew? 
-        // This should've been already created inside login page, but no read/write files here... :'(
-        getBank().createNewAcount(userData["name"], userData["id"]) :
-        getBank().logIn(userData["id"]);
-}
-
 function storeRecord(userData, transactionName, extraInfo = ""){
     transactionsRecord.push(new Transaction({
         userID: userData.id, 
@@ -158,8 +147,6 @@ function storeRecord(userData, transactionName, extraInfo = ""){
         location: position === null? null : position.coords,
         information: extraInfo
     }));
-
-    console.log(transactionsRecord);
 }
 function getRecord(){
     let recordList = [];
@@ -236,7 +223,6 @@ function subroutineBalance(userData){
 }
 function subroutineHistory(userData){
     let outputBoxList = document.querySelector(".history-body .outputBox ul");
-    //let outputBoxList = outputBox.querySelector("ul");
     let userHistory = getRecord();
 
     for (let i = 0; i < userHistory.length; i++) {
@@ -249,13 +235,20 @@ function subroutineHistory(userData){
         userHistory[i] = `<li>${record}</li>`;
     };
 
-    console.log(userHistory.join(""));
-
     outputBoxList.innerHTML = userHistory.join("");
-
     return null;
 }
 
+function setupUser(){
+    transactionsRecord = [];
+    const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
+    const isNew = Boolean(parseInt(sessionStorage["isNew"]));
+
+    return isNew? 
+        // This should've been already created inside login page, but no read/write files here... :'(
+        getBank().createNewAcount(userData["name"], userData["id"]) :
+        getBank().logIn(userData["id"]);
+}
 function setupTransactions(userData){
     let success = true;
 
@@ -264,8 +257,8 @@ function setupTransactions(userData){
 
 
     success &= setupCurrencyChange(userData);
-    //success &= setupDeposit(userData);
-    //success &= setupWithdraw(userData);
+    success &= setupDeposit(userData);
+    success &= setupWithdraw(userData);
     //success &= setupTransfer(userData);
 
     return success;
@@ -282,8 +275,6 @@ function setupCurrencyChange(userData){
     actualBalance.innerHTML = `${userData.balance} ${userData.currency}`;
     convertedBalance.innerHTML = `${userData.balance} ${dropdownCurrencyMenu.value}`;
 
-    //outputBox.innerHTML = userData.balance;
-    //sectionCC.value = userData.currency;
     function showChange(){
         const initialCurrency = userData.currency;
         const finalCurrency = dropdownCurrencyMenu.value;
@@ -299,65 +290,56 @@ function setupCurrencyChange(userData){
     inputBox.querySelector("#b-change-currency").addEventListener("click", (e) => {
         e.preventDefault();
 
+        let valueChanged = false;
         const initialCurrency = userData.currency;
         const finalCurrency = dropdownCurrencyMenu.value;
 
         if(initialCurrency !== finalCurrency){
             getBank().changeCurrency(userData, finalCurrency);
+            valueChanged = true;
         }
 
         showChange();
-        storeRecord(userData, "change_currency", `${initialCurrency} -> ${finalCurrency}`);
+        storeRecord(userData, "change_currency", `${initialCurrency}->${finalCurrency},${valueChanged}`);
     });
 
-    return null;
+    return true;
+}
+function setupDeposit(userData){
+
+    const depositButton = document.querySelector("#b-deposit");
+
+    const buttonFunction = (e) => {
+        e.preventDefault();
+
+        const depositAmount = document.querySelector("#deposit-amount");
+        const success = getBank().deposit(userData, depositAmount.value, userData.currency);
+
+        storeRecord(userData, "do_deposit", `${success}`);
+    }
+
+    depositButton.addEventListener("click", buttonFunction);
+    return true;
 }
 function setupWithdraw(userData){
     
-    let userBalanceSpan = document.querySelector("#w_actual_balance");
-    const withdrawButton = document.querySelector("#bw_withdraw");
-    const withdrawDropdown = document.querySelector(".withdrawBox").children[1].children[1];
-
-    userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+    const withdrawButton = document.querySelector("#b-withdraw");
+    const withdrawAmount = document.querySelector("#withdraw-amount");
 
     const buttonFunction = (e) => {
         e.preventDefault();
 
-        const withdrawAmount = document.querySelector("#withdraw_amount").value;
-        const withdrawCurrency = withdrawDropdown.value;
-        
-        const success = getBank().withdraw(userData, withdrawAmount, withdrawCurrency);
-        userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
+        const success = getBank().withdraw(userData, withdrawAmount.value, userData.currency);
 
-        storeRecord(userData, "do_withdraw", success? "Denied" : "Approved");
+        if(!success){
+            // TODO: Handle issue
+        }
+
+        storeRecord(userData, "do_withdraw", `${success}`);
     }
 
-    withdrawButton.addEventListener("click", buttonFunction);    
-
-    return [withdrawButton, buttonFunction];
-}
-function setupDeposit(userData){
-    let userBalanceSpan = document.querySelector("#d_actual_balance");
-    const depositButton = document.querySelector("#bd_deposit");
-    const depositDropdown = document.querySelector(".depositBox").children[1].children[1];
-
-    userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
-
-    const buttonFunction = (e) => {
-        e.preventDefault();
-
-        const depositAmount = document.querySelector("#deposit_amount").value;
-        const depositCurrency = depositDropdown.value;
-        
-        const success = getBank().deposit(userData, depositAmount, depositCurrency);
-        userBalanceSpan.innerHTML = "Actual balance: " + userData.balance + " " + userData.currency;
-
-        storeRecord(userData, "do_withdraw", success? "Denied" : "Approved");
-    }
-
-    depositButton.addEventListener("click", buttonFunction);    
-
-    return [depositButton, buttonFunction];
+    withdrawButton.addEventListener("click", buttonFunction); 
+    return true;
 }
 function setupTransfer(userData){
     let receiver = null;
