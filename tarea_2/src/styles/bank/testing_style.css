@@ -154,9 +154,15 @@ body{
     color: var(--second-font-color) !important;
 }
 
+.page-section .content-body .outputBox{
+    width: 450px;
+}
 
 
 
+footer{
+    padding: 100px;
+}
 
 
 

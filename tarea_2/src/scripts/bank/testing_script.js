@@ -1,9 +1,9 @@
-if(!sessionStorage.getItem("userID")){
-    sessionStorage.clear();
-
-    window.location.href = "./bank_login.html";
-    alert("Please log in first.");
-}
+//if(!sessionStorage.getItem("userID")){
+//    sessionStorage.clear();
+//
+//    window.location.href = "./bank_login.html";
+//    alert("Please log in first.");
+//}
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -222,26 +222,70 @@ function subroutineBalance(userData){
     return null;
 }
 function subroutineHistory(userData){
-    let outputBoxList = document.querySelector(".history-body .outputBox ul");
+    let outputBoxList = document.querySelector(".history-body .outputBox.complete ul");
+    let formatedHistory = [];
     let userHistory = getRecord();
 
     for (let i = 0; i < userHistory.length; i++) {
         let record = userHistory[i];
 
         for (let j = 1; j < 5; j++) {
-            record = record.replace(`<${j}>`, `<p class='c${j}'>`);
+            record = record.replace(`<${j}>`, `<span class='c${j}'>`);
         }
-        record = record.replace(/(<\/[0-9]>)/, `</p>`);
-        userHistory[i] = `<li>${record}</li>`;
+        record = record.replace(/(<\/[0-9]>)/g, `</span><br>`);
+        formatedHistory[userHistory.length - (i + 1)] = `<li>${record}</li>`;
+    };
+    outputBoxList.innerHTML = formatedHistory.join("");
+
+
+    outputBoxList = document.querySelector(".history-body .outputBox.resume ul");
+    let operationCount = new Map();
+    formatedHistory = [];
+
+    for (let i = 0; i < userHistory.length; i++) {
+        let record = userHistory[i];
+
+        let [what, operation] = record.match(/[a-zA-Z]+:[a-zA-Z]+/)[0].split(":");
+
+        if(!operationCount.has(operation)){
+            operationCount.set(operation, 0);
+        }
+        operationCount.set(operation, operationCount.get(operation) + 1); // 🤮
     };
 
-    outputBoxList.innerHTML = userHistory.join("");
+    operationCount[Symbol.iterator] = function* () {
+        yield* [...this.entries()].sort((a, b) => a[1] - b[1]);
+    }
+
+    let pos = operationCount.size;
+
+    for (let [operation, reps] of operationCount) {
+        let record = `<span class='c1'>${pos}</span>`;
+        record += `<span class='c2'>${operation}</span>`;
+        record += `<span class='c3'>${reps}</span>`;
+        record += setPosIcon(`<span class='c4'><i></i></span>`, pos);
+
+        formatedHistory.push(`<li>${record}</li>`);
+        pos -= 1;
+    }
+
+    outputBoxList.innerHTML = formatedHistory.reverse().join("");
+
     return null;
 }
 
 function setupUser(){
     transactionsRecord = [];
-    const userData = {id: sessionStorage["userID"], name: sessionStorage["userName"], pass: sessionStorage["userPass"]};
+    sessionStorage.setItem("userID", "6969");
+    sessionStorage.setItem("userName", "Admin");
+    sessionStorage.setItem("userPass", "Pass");
+    sessionStorage.setItem("isNew", "0");
+
+    const userData = {
+        id: sessionStorage["userID"], 
+        name: sessionStorage["userName"], 
+        pass: sessionStorage["userPass"]
+    };
     const isNew = Boolean(parseInt(sessionStorage["isNew"]));
 
     return isNew? 
@@ -315,7 +359,7 @@ function setupDeposit(userData){
         const depositAmount = document.querySelector("#deposit-amount");
         const success = getBank().deposit(userData, depositAmount.value, userData.currency);
 
-        storeRecord(userData, "do_deposit", `${success}`);
+        storeRecord(userData, "deposit_balance", `${success}`);
     }
 
     depositButton.addEventListener("click", buttonFunction);
@@ -335,7 +379,7 @@ function setupWithdraw(userData){
             // TODO: Handle issue
         }
 
-        storeRecord(userData, "do_withdraw", `${success}`);
+        storeRecord(userData, "withdraw_balance", `${success}`);
     }
 
     withdrawButton.addEventListener("click", buttonFunction); 
@@ -349,12 +393,27 @@ function setupTransfer(userData){
 
     let transactionInfo = success? "Denied. " : "Approved. ";
     transactionInfo += `Receiver:{ ID: ${receiver}, Name: ${receiver}}`;
-    storeRecord(userData, "do_withdraw", transactionInfo);
+    storeRecord(userData, "transfer_balance", transactionInfo);
 
     return undefined;
 }
 
 
+function setPosIcon(element, position){
+    switch (position) { // fa-solid fa-ranking-star, fa-solid fa-star, fa-regular fa-star-half-stroke
+        case 1:{
+            return element.replace("<i></i>", "<i class='fa-solid fa-ranking-star'></i>");
+        }
+        case 2:{
+            return element.replace("<i></i>", "<i class='fa-solid fa-star'></i>");
+        }
+        case 3:{
+            return element.replace("<i></i>", "<i class='fa-regular fa-star-half-stroke'></i>");
+        }
+        default:
+            return element.replace("<i></i>", "<i class='fa-regular fa-star'></i>");
+    }
+}
 
 
 function test(actualUser){

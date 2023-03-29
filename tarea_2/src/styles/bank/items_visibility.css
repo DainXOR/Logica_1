@@ -9,14 +9,17 @@
     transition: 0.5s;
 }
 
-.page-section.home-body,
-.page-section.transactions-body,
-.page-section.balance-body,
-.page-section.history-body {
+.page-section:is(
+    home-body, 
+    transactions-body, 
+    balance-body, 
+    history-body
+    ){
     opacity: 1;
     visibility: visible;
     transition: 1.0s;
 }
+
 
 
 
