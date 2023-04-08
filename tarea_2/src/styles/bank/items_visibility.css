@@ -1,42 +1,69 @@
-.panel .actionBox.transaction,
+.display-home .page-section:not(:is(.home-body)),
+.display-transactions .page-section:not(:is(.transactions-body)),
+.display-balance .page-section:not(:is(.balance-body)),
+.display-history .page-section:not(:is(.history-body)) {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    overflow-y: hidden;
+    transition: 0.5s;
+}
+
+.page-section:is(
+    home-body, 
+    transactions-body, 
+    balance-body, 
+    history-body
+    ){
+    opacity: 1;
+    visibility: visible;
+    transition: 1.0s;
+}
+
+
+
+
+
+
+.panel .actionBox.transactions,
 .panel .actionBox.balance,
 .panel .actionBox.history,
 
-.panel.displayTransaction .actionBox.main,
-.panel.displayTransaction .actionBox.balance,
-.panel.displayTransaction .actionBox.history,
+.panel.displayTransactions .actionBox.main,
+.panel.displayTransactions .actionBox.balance,
+.panel.displayTransactions .actionBox.history,
 
 .panel.displayBalance .actionBox.main,
-.panel.displayBalance .actionBox.transaction,
+.panel.displayBalance .actionBox.transactions,
 .panel.displayBalance .actionBox.history,
 
 .panel.displayHistory .actionBox.main,
-.panel.displayHistory .actionBox.transaction,
+.panel.displayHistory .actionBox.transactions,
 .panel.displayHistory .actionBox.balance,
 
-.actionBox.transaction .outputBox *,
-.actionBox.transaction.display .inputBox,
+.actionBox.transactions .outputBox *,
+.actionBox.transactions.display .inputBox,
 .actionBox.history .outputBox *,
 .actionBox.history.display .inputBox
 {
     display: none;
 }
 
-.panel.displayTransaction .actionBox.transaction,
+.panel.displayTransactions .actionBox.transactions,
 .panel.displayBalance .actionBox.balance,
 .panel.displayHistory .actionBox.history,
 
-.actionBox.transaction.display .outputBox > *,
-.actionBox.transaction .inputBox,
+.actionBox.transactions.display .outputBox > *,
+.actionBox.transactions .inputBox,
 
-.actionBox.transaction.displayCurrencyChange .outputBox .currencyChangeBox *,
-.actionBox.transaction.displayCurrencyChange .outputBox .currencyChangeBox,
-.actionBox.transaction.displayWithdraw .outputBox .withdrawBox *,
-.actionBox.transaction.displayWithdraw .outputBox .withdrawBox,
-.actionBox.transaction.displayDeposit .outputBox .depositBox *,
-.actionBox.transaction.displayDeposit .outputBox .depositBox,
-.actionBox.transaction.displayTransfer .outputBox .transferBox *,
-.actionBox.transaction.displayTransfer .outputBox .transferBox,
+.actionBox.transactions.displayCurrencyChange .outputBox .currencyChangeBox *,
+.actionBox.transactions.displayCurrencyChange .outputBox .currencyChangeBox,
+.actionBox.transactions.displayWithdraw .outputBox .withdrawBox *,
+.actionBox.transactions.displayWithdraw .outputBox .withdrawBox,
+.actionBox.transactions.displayDeposit .outputBox .depositBox *,
+.actionBox.transactions.displayDeposit .outputBox .depositBox,
+.actionBox.transactions.displayTransfer .outputBox .transferBox *,
+.actionBox.transactions.displayTransfer .outputBox .transferBox,
 
 .actionBox.history.displayHistory .outputBox .accountHistory,
 .actionBox.history.displayHistory .outputBox .accountHistory *,

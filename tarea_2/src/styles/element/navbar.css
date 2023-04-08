@@ -1,4 +1,4 @@
-nav {
+.dain-navbar-style {
   display: flex;
   gap: 1rem;
   justify-content: space-between;
@@ -16,19 +16,19 @@ nav {
   scrollbar-width: none;
 }
 
-nav::-webkit-scrollbar{
+.dain-navbar-style::-webkit-scrollbar{
   display: none;
 }
 
 
-nav .logo{
+.dain-navbar-style .logo{
   display: flex;
   gap: 0.5rem;
   align-items: center;
   width: fit-content;
 }
 
-nav .logo img {
+.dain-navbar-style .logo img {
   width: var(--size-logo-ic);
   height: var(--size-logo-ic);
   border-radius: 50%;
@@ -38,7 +38,7 @@ nav .logo img {
   cursor: pointer;
 }
 
-nav .logo h1{
+.dain-navbar-style .logo h1{
   color: #fff;
   font-family: 'Oswald', sans-serif;
   font-size: var(--size-logo-txt);
@@ -48,19 +48,19 @@ nav .logo h1{
   transition: 300ms;
 }
 
-nav .logo:hover img, .logo:hover h1{
+.dain-navbar-style .logo:hover img, .logo:hover h1{
   cursor: pointer;
   text-shadow: 0 0 10px #fff;
 
   transition: 300ms;
 }
 
-nav .navbar-social {
+.dain-navbar-style .navbar-social {
   display: flex;
   gap: 0.5rem;
 }
 
-nav .navbar-social a {
+.dain-navbar-style .navbar-social a {
   width: var(--size-ic-bubble);
   height: var(--size-ic-bubble);
   border-radius: 50%;
@@ -75,25 +75,25 @@ nav .navbar-social a {
 
   transition: 300ms;
 }
-nav .navbar-social a i {
-  color: #00FF80;
+.dain-navbar-style .navbar-social a i {
+  color: var(--main-color);
   font-size: var(--size-ic-small);
   transition: 0.5s;
 }
 
-nav .navbar-social a i.fa-github {
+.dain-navbar-style .navbar-social a i.fa-github {
   color: #fff;
 }
 
-nav .navbar-social a i.fa-facebook-f {
-  color: #4267B2;
+.dain-navbar-style .navbar-social a i.fa-linkedin-in {
+  color: #0A66C2;
 }
 
-nav .navbar-social a i.fa-twitter {
-  color: #1D9BF0;
+.dain-navbar-style .navbar-social a i.fa-discord {
+  color: #5865F2;
 }
 
-nav .navbar-social a i.fa-instagram {
+.dain-navbar-style .navbar-social a i.fa-instagram {
   color: #b734ef;
 
   /*
@@ -112,7 +112,7 @@ nav .navbar-social a i.fa-instagram {
   */
 }
 
-nav .navbar-social a:hover i {
+.dain-navbar-style .navbar-social a:hover i {
   text-shadow: 0 0 20px #fff;
   font-size: calc(var(--size-ic-small) + 0.1rem);
   transition: 0.2s;

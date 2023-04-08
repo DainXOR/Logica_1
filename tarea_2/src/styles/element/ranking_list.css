@@ -1,0 +1,52 @@
+ul.ranking-style{
+    position: relative;
+    width: 450px;
+    margin: 100px auto 0;
+    padding: 10px;
+    box-sizing: border-box;
+
+    background-color: var(--main-bg-color);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5) inset;
+}
+
+ul.ranking-style li{
+    display: flex;
+    background-color: rgba(255, 215, 0, 0.2);
+    padding: 10px 20px;
+    color: var(--main-bg-color);
+    margin: 5px 0;
+
+    transition: 0.5s;
+}
+
+ul.ranking-style li:nth-child(1){
+    background-color: rgba(255, 215, 0, 0.8);
+}
+ul.ranking-style li:nth-child(2){
+    background-color: rgba(255, 215, 0, 0.6);
+}
+ul.ranking-style li:nth-child(3){
+    background-color: rgba(255, 215, 0, 0.4);
+}
+
+ul.ranking-style li span:nth-child(1){
+    width: 30px;
+}
+ul.ranking-style li span:nth-child(2){
+    width: 150px;
+}
+ul.ranking-style li span:nth-child(3){
+    margin-left: auto;
+}
+ul.ranking-style li span:nth-child(4){
+    margin-left: auto;
+}
+
+ul.ranking-style li:hover{
+    color: var(--main-color);
+    transform: scale(1.06);
+    background-color: var(--main-bg-color);
+    border: 3px solid var(--main-color);
+
+    transition: 0.5s;
+}

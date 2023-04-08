@@ -1,3 +1,4 @@
+/*
 document.addEventListener('DOMContentLoaded', function() {
 
     function createFigure(figuresBox, figureType) {
@@ -155,15 +156,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const figuresBox = document.getElementById('figures-box');
+    // const figuresBox = document.getElementById('figures-box');
 
-    createFigure(figuresBox, "triangle");
-    createFigure(figuresBox, "square");
-    createFigure(figuresBox, "triangle");
-    createFigure(figuresBox, "triangle");
-    createFigure(figuresBox, "square");
-    createFigure(figuresBox, "triangle");
-    createFigure(figuresBox, "rectangle");
+    // createFigure(figuresBox, "triangle");
+    // createFigure(figuresBox, "square");
+    // createFigure(figuresBox, "triangle");
+    // createFigure(figuresBox, "triangle");
+    // createFigure(figuresBox, "square");
+    // createFigure(figuresBox, "triangle");
+    // createFigure(figuresBox, "rectangle");
 
 });
 
+*/

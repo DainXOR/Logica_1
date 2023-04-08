@@ -7,25 +7,27 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="../../resources/icons/logo_transparent.png" type="image/x-icon">
+    
+    <link rel="stylesheet" href="../../styles/element/navbar.css"></link>
+    <link rel="stylesheet" href="../../styles/element/ranking_list.css"></link>
 
     <link rel="stylesheet" href="../../styles/main/common.css"></link>
     <link rel="stylesheet" href="../../styles/main/misc.css"></link>
 
-    <link rel="stylesheet" href="../../styles/bank/bank_main.css"></link>
+    <link rel="stylesheet" href="../../styles/bank/testing_style.css"></link>
     <link rel="stylesheet" href="../../styles/bank/items_visibility.css"></link>
     
-    <link rel="stylesheet" href="../../styles/element/navbar.css"></link>
 
     <script src="../../scripts/other/encrypt.js"></script>
     
     <script src="../../scripts/bank/user_data.js"></script>
     <script src="../../scripts/bank/bank_structs.js"></script>
-    <script src="../../scripts/bank/bank_main.js"></script>
+    <script src="../../scripts/bank/testing_script.js"></script>
 
     <title>xBank</title>
 </head>
 <body>
-    <nav class="navbar">
+    <nav class="dain-navbar-style">
         <header class="main-page">
             <div class="logo" onclick="window.location.href = '../index.html';">
                 <img src="../../resources/icons/logo_transparent.png" alt="logo">
@@ -34,123 +36,137 @@
         </header>
         <div class="navbar-social">
           <a href="https://github.com/DainXOR"><i class="fa-brands fa-github"></i></a>
-          <a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
-          <a href="https://twitter.com"><i class="fab fa-twitter"></i></a>
+          <a href="https://co.linkedin.com/in/daniel-le%C3%B3n-danzo-49078b26b"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="https://discordapp.com/users/448580924859351060"><i class="fa-brands fa-discord"></i></a>
           <a href="https://www.instagram.com/dleon_2407/"><i class="fab fa-instagram"></i></a>
           <a href="./bank_profile.html"><i class="fa-solid fa-user"></i></a>
         </div>
     </nav>
 
-    <div class="form-box menu">
-        <div class="panel main-menu ioBox">
-            <div class="Box actionBox main">
-                <h2>Menu</h2>
-                <div class="Box ioBox inputBox">
-                    <button id="b_transaction"  class="mainButton"           >Transactions</button>
-                    <button id="b_balance"      class="mainButton"           >Balance</button>
-                    <button id="b_history"      class="mainButton"           >History</button>
-                    <button id="b_logout"       class="mainButton exitButton">Log out</button>
-                </div>
+    <div class="page-body display-home">
+        <div class="menu-body button-menu">
+            <div class="ioBox inputBox">
+                <input id="b_home"          type="button"   class="main-button display"    value="Home"></input>
+                <input id="b_transactions"  type="button"   class="main-button"            value="Transactions"></input>
+                    <input id="b_currency_change"   type="button"   class="secondary-button secondary-transactions"    value="Change currency"></input>
+                    <input id="b_withdraw"          type="button"   class="secondary-button secondary-transactions"    value="Withdraw"></input>
+                    <input id="b_deposit"           type="button"   class="secondary-button secondary-transactions"    value="Deposit"></input>
+                    <input id="b_transfer"          type="button"   class="secondary-button secondary-transactions"    value="Transfer"></input>
+                <input id="b_balance"       type="button"   class="main-button"            value="Balance"></input>
+                <input id="b_history"       type="button"   class="main-button"            value="History"></input>
+                    <input id="b_resume_history"    type="button"   class="secondary-button secondary-history selected"    value="Resume"></input>
+                    <input id="b_complete_history"  type="button"   class="secondary-button secondary-history"    value="All history"></input>
+                <input id="b_logout"        type="button"   class="main-button exitButton" value="Log out"></input>
             </div>
-            <div class="Box actionBox transaction">
-                <div class="Box ioBox inputBox">
-                    <h2>Transactions</h2>
-                    <button id="b_currency_change"  class="t0Button"            >Change currency</button>
-                    <button id="b_withdraw"         class="t0Button"            >Withdraw</button>
-                    <button id="b_deposit"          class="t0Button"            >Deposit</button>
-                    <button id="b_transfer"         class="t0Button"            >Transfer</button>
-                    <button id="b_back"             class="t0Button backButton" >Go back</button>
-    
-                </div>
-                <div class="Box ioBox outputBox">
-                    <div class="Box currencyChangeBox">
-                        <h2>Currency Change</h2>
-                        <div class="content">
-                            <span id="cc_actual_balance" class="balanceData"></span>
-                            <select id="currency_change_dropdown" name="currencyDropdown">
-                                <option value="COP">Colombian peso</option>
-                                <option value="USD">US dollar</option>
-                            </select>
-                            <span id="cc_converted_balance" class="balanceData"></span>
-                        </div>
-                        
-    
-                    </div>
-                    <div class="Box withdrawBox">
-                        <h2>Withdraw</h2>
-                        <div class="content">
-                            <span id="w_actual_balance" class="balanceData"></span>
-                            <select id="currency_withdraw_dropdown" name="currencyDropdown">
-                                <option value="COP">Colombian peso</option>
-                                <option value="USD">US dollar</option>
-                            </select>
-                            <input type="text" class="withdrawAmount" id="withdraw_amount" placeholder="Amount to withdraw" required inputmode="numeric" pattern="^[0-9]{6,}$">
-                            <input type="button" class="t1Button withdrawButton" id="bw_withdraw" value="Withdraw">
-                        </div>
-                    </div>
-                    <div class="Box depositBox">
-                        <h2>Deposit</h2>
-                        <div class="content">
-                            <span id="d_actual_balance" class="balanceData"></span>
-                            <select id="currency_deposit_dropdown" name="currencyDropdown">
-                                <option value="COP">Colombian peso</option>
-                                <option value="USD">US dollar</option>
-                            </select>
-                            <input type="text" class="depositAmount" id="deposit_amount" placeholder="Amount to deposit" required inputmode="numeric" pattern="^[0-9]{6,}$">
-                            <input type="button" class="t1Button depositButton" id="bd_deposit" value="Deposit">
-                        </div>
-                    </div>
-                    <div class="Box transferBox">
-                        <h2>Transfer</h2>
-    
-                    </div>
-    
-                    <input type="button" class="t1Button backButton" id="b_back" value="Go back">
-                </div>
-            </div>
-            <div class="Box actionBox balance">
-                <h2>Account Balance</h2>
-                <div class="Box ioBox outputBox">
-                    <div class="content">
-                        <h3>Your current balance:</h3>
-                        <span id="account_balance" class="balanceData accountBalance"></span>
-                        <span id="account_currency" class="balanceData accountCurrency"></span>
-                    </div>
-                    <button id="b_back" class="b0Button backButton">Go back</button>
-                </div>
-                
-            </div>
-            <div class="Box actionBox history">
-                <h2>History</h2>
+        </div>
 
-                <div class="Box ioBox inputBox">
-                    <button id="hb_transaction_history">History</button>
-                    <button id="hb_transaction_resume">Resume</button>
-                    <button id="b_back" class="h0Button backButton">Go back</button>
+        <div class="sections">
+            <div class="page-section home-body">
+                <div class="content">
+                    <div class="content-title">
+                        <h3>Home</h3>
+                    </div>
+                    <div class="content-body">
+                        <p>Welcome to my bank page!</p>
+                        <p>Right now is under development, but I'm working to get all basic features ASAP.</p>
+                        <p>The features you can access in this moment are:</p>
+                        <ul>
+                            <li>Change currency</li>
+                            <li>Do deposit</li>
+                            <li>Do withdraw</li>
+                            <li>Check balance</li>
+                            <li>Check history (complete)</li>
+                            <li>Check history (resume)</li>
+                        </ul>
+                        <div class="ioBox outputBox">
+                        </div>
+                    </div>
                 </div>
-                <div class="Box ioBox outputBox">
-                    <div class="accountHistory">
-                        <h2>Transactions History</h2>
-                        <div class="content">
-                            <span class="history">History not avaible</span>
-                            <button id="hhb_back" class="history_button backButton">Go back</button>
+            </div>
+    
+            <div class="page-section transactions-body">
+                <div class="content">
+                    <div class="content-title">
+                        <h3>Transactions</h3>
+                    </div>
+                    <div class="content-body">
+                        <p></p>
+                        <div class="ioBox outputBox"></div>
+                        <div class="subsections">
+                            <section class="subsection currency-change">
+                                <h4>Currency Change</h4>
+                                <div class="ioBox">
+                                    <div class="inputBox">
+                                        <select class="currency-dropdown">
+                                            <option value="COP">Colombian peso</option>
+                                            <option value="USD">US dollar</option>
+                                        </select>
+                                        <button id="b-change-currency">Change currency</button>
+                                    </div>
+                                    <div class="outputBox">
+                                        <span class="balance-data actual-balance"></span>
+                                        <span class="balance-data converted-balance"></span>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="subsection deposit">
+                                <h4>Deposit</h4>
+                                <div class="ioBox">
+                                    <input id="deposit-amount" type="text" placeholder="10000" required inputmode="numeric" pattern="^[0-9]{5,}$">
+                                    <button id="b-deposit">Deposit</button>
+                                </div>
+                            </section>
+                            <section class="subsection withdraw">
+                                <h4>Withdraw</h4>
+                                <div class="ioBox">
+                                    <input id="withdraw-amount" type="text" placeholder="10000" required inputmode="numeric" pattern="^[0-9]{5,}$">
+                                    <button id="b-withdraw">Withdraw</button>
+                                </div>
+                            </section>
+                            <section class="subsection transfer">
+                                <h4>Transfer</h4>
+                                <p>Currently not avaible.</p>
+                            </section>
                         </div>
                     </div>
-
-                    <div class="accountResume">
-                        <h2>Transactions Resume</h2>
-                        <div class="content">
-                            <span class="resume">Resume not avaible</span>
-                            <button id="hrb_back" class="resume_button backButton">Go back</button>
+                </div>
+            </div>
+    
+            <div class="page-section balance-body">
+                <div class="content">
+                    <div class="content-title">
+                        <h3>Balance</h3>
+                    </div>
+                    <div class="content-body">
+                        <div class="ioBox outputBox">
+                            <h4>Your current balance:</h4>
+                            <span class="account-balance balance-data">0</span>
+                            <span class="account-currency balance-data">COP</span>
                         </div>
                     </div>
-                    <input type="button" class="h1Button backButton" id="hdb_back" value="Go back">
+                </div>
+            </div>
+    
+            <div class="page-section history-body"> 
+                <div class="content">
+                    <div class="content-title">
+                        <h3>History</h3>
+                    </div>
+                    <div class="content-body">
+                        <p></p>
+                        <div class="ioBox outputBox complete">
+                            <ul class="record-list">
+                            </ul>
+                        </div>
+                        <div class="ioBox outputBox resume">
+                            <ul class="record-list ranking-style">
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
     </div>
-    
-    
+    <footer></footer>
 </body>
 </html>

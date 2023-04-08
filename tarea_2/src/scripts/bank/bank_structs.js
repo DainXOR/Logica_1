@@ -133,6 +133,14 @@ class Bank{
             
     }
 
+    getUserData(userID){
+        return [
+            this.#getBankData("").get(userID).name,
+            this.#getBankData("").get(userID).balance,
+            this.#getBankData("").get(userID).currency
+        ]
+    }
+
     #getBankData(path){
         return bankData;
     }
@@ -145,6 +153,9 @@ class Bank{
         return SecurityManager.hashData(secretCode);
     }
 
+    static previewCurrencyChange(amount, from, to){
+        return from === to? amount : amount * Bank.#convertionRates[from + "_" + to];
+    }
 
     static #convertionRates = {
         USD_COP: 4739.34,
@@ -161,3 +172,12 @@ class Bank{
     }
 }
 
+class Transaction{
+    constructor({userID, name, timeStamp, location, information}){
+        this.userID = userID;
+        this.action = name;
+        this.timeStamp = timeStamp;
+        this.location = location;
+        this.additionalInfo = information;
+    }
+}

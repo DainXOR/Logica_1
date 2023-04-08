@@ -3,15 +3,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const randNum = getRandomNumber(0, 5);
     const figureSelected = figureTypes[randNum];
+    const figureBase = getFigureBase(figureSelected);
 
     // Create a new figure element
-    var figure = document.createElement("div");
-    figure.classList.add("figure", figureSelected);
+    let figureElement = document.createElement("div");
+    figureElement.classList.add("figure", figureSelected);
 
-    // Set random color
-    var color = getRandomColor();
-    figuresBox.appendChild(figure);
-    figure.style.borderBottomColor = color;
+    let figure = eval(`new ${figureBase}(figureSelected, getRandomColor())`);
+    figure.HTML = figureElement;
+
+    figuresBox.appendChild(figure.HTML);
     //figure.style.backdropFilter("blur(5px)");
 
     switch (figureSelected) {
@@ -36,14 +37,14 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
       case "trapezoid":{
-        figure.style.backgroundColor = color;
+        // figure.style.backgroundColor = color;
 
         figure.style.width = 120 + "px";
         figure.style.height = 80 + "px";
         break;
       }
       case "rectangle":{
-        figure.style.backgroundColor = color;
+        // figure.style.backgroundColor = color;
         figure.style.width = 80 + "px";
         figure.style.height = 120 + "px";
 
@@ -53,13 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
       case "square":{
-        figure.style.backgroundColor = color;
+        // figure.style.backgroundColor = color;
         figure.style.width = 80 + "px";
         figure.style.height = 80 + "px";
         break;
       }
       case "romboid":{
-        figure.style.backgroundColor = color;
+        // figure.style.backgroundColor = color;
         figure.style.width = 80 + "px";
         figure.style.height = 80 + "px";
         figure.style.transform = "rotate(45deg)";
@@ -70,24 +71,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Get the coordinates of the figures-box
-    var boxCoords = figuresBox.getBoundingClientRect();
+    let boxCoords = figuresBox.getBoundingClientRect();
     const margin = 20;
 
     // Set random position within the box
-    var overlap = true;
+    let overlap = true;
+    let posX;
+    let posY;
+    
     while (overlap) {
-      var posX = getRandomNumber(boxCoords.left + margin, (boxCoords.right - margin) - figure.offsetWidth);
-      var posY = getRandomNumber(boxCoords.top + margin, (boxCoords.bottom - margin) - figure.offsetHeight);
+      posX = getRandomNumber(boxCoords.left + margin, (boxCoords.right - margin) - figureElement.offsetWidth);
+      posY = getRandomNumber(boxCoords.top + margin, (boxCoords.bottom - margin) - figureElement.offsetHeight);
       overlap = false;
 
       // Check if new figure overlaps with any existing figures
-      var figures = document.querySelectorAll('.figure');
+      let figures = document.querySelectorAll('.figure');
       for (let i = 0, len = figures.length; i < len; i++) {
         let existingFigure = figures[i];
         let existingBox = existingFigure.getBoundingClientRect();
       
-        if (posX < existingBox.right && posX + figure.offsetWidth > existingBox.left &&
-          posY < existingBox.bottom && posY + figure.offsetHeight > existingBox.top) {
+        if (posX < existingBox.right && posX + figureElement.offsetWidth > existingBox.left &&
+          posY < existingBox.bottom && posY + figureElement.offsetHeight > existingBox.top) {
           overlap = true;
           break;
         }
@@ -98,11 +102,10 @@ document.addEventListener('DOMContentLoaded', function() {
     figure.style.top = posY + "px";
   }
 
-
   function getRandomColor() {
-    var letters = "0123456789ABCDEF";
-    var color = "#";
-    for (var i = 0; i < 6; i++) {
+    let letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
     color += "A7"; // Opacity 
@@ -113,12 +116,35 @@ document.addEventListener('DOMContentLoaded', function() {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  function getFigureBase(name){
+    switch (name) {
+      case "triangle":{
+        return "Triangle";
+      }
+
+      case "rectangle":
+      case "square":
+      case "trapezoid":
+      case "romboid":{
+        return "Square";
+      }
+
+      case "pentagon":
+      case "hexagon":
+      case "heptagon":
+      case "octagon":
+    
+      default:
+        return "Figure";
+    }
+  }
+  
   const figureTypes = ["triangle", "square", "rectangle", "triangle", "trapezoid", "romboid"];
   const figuresBox = document.getElementById('figures-box');
 
   // Create 10 figures
-  for (var i = 0; i < 15; i++) {
+  for (let i = 0; i < 15; i++) {
     createFigure(figuresBox, figureTypes);
   }
-});
   
+});
