@@ -1,9 +1,9 @@
-//if(!sessionStorage.getItem("userID")){
-//    sessionStorage.clear();
-//
-//    window.location.href = "./bank_login.html";
-//    alert("Please log in first.");
-//}
+if(!sessionStorage.getItem("userID")){
+    sessionStorage.clear();
+
+    window.location.href = "./bank_login.html";
+    alert("Please log in first.");
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     
