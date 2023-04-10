@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     switch (figureSelected) {
       case "triangle":{
+        figure.style.width = 80 + "px";
+        figure.style.height = 80 + "px";
+
         switch(getRandomNumber(0, 3)){
           case 0:{
             figure.style.transform = "rotate(90deg)";
@@ -72,35 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Get the coordinates of the figures-box
-    let boxCoords = figuresBox.getBoundingClientRect();
-    const margin = 20;
-
-    // Set random position within the box
-    let overlap = true;
-    let posX;
-    let posY;
-    
-    while (overlap) {
-      posX = getRandomNumber(boxCoords.left + margin, (boxCoords.right - margin) - figureElement.offsetWidth);
-      posY = getRandomNumber(boxCoords.top + margin, (boxCoords.bottom - margin) - figureElement.offsetHeight);
-      overlap = false;
-
-      // Check if new figure overlaps with any existing figures
-      let figures = document.querySelectorAll('.figure');
-      for (let i = 0, len = figures.length; i < len; i++) {
-        let existingFigure = figures[i];
-        let existingBox = existingFigure.getBoundingClientRect();
-      
-        if (posX < existingBox.right && posX + figureElement.offsetWidth > existingBox.left &&
-          posY < existingBox.bottom && posY + figureElement.offsetHeight > existingBox.top) {
-          overlap = true;
-          break;
-        }
-      }
-    }
-
-    figure.style.left = posX + "px";
-    figure.style.top = posY + "px";
+    undoOverlaps(figure, figuresBox);
   }
 
   function getRandomColor() {
@@ -139,6 +114,38 @@ document.addEventListener('DOMContentLoaded', function() {
         return "Figure";
     }
   }
+
+  function undoOverlaps(figure, figuresContainer) {
+    let boxCoords = figuresContainer.getBoundingClientRect();
+    const margin = 20;
+  
+    // Set random position within the box
+    let overlap = true;
+    let posX;
+    let posY;
+  
+    while (overlap) {
+      posX = getRandomNumber(boxCoords.left + margin, (boxCoords.right - margin) - figure.HTML.offsetWidth);
+      posY = getRandomNumber(boxCoords.top + margin, (boxCoords.bottom - margin) - figure.HTML.offsetHeight);
+      overlap = false;
+  
+      // Check if new figure overlaps with any existing figures
+      let figures = document.querySelectorAll('.figure');
+      for (let i = 0, len = figures.length; i < len; i++) {
+        let existingFigure = figures[i];
+        let existingBox = existingFigure.getBoundingClientRect();
+  
+        if (posX < existingBox.right && posX + figure.HTML.offsetWidth > existingBox.left &&
+          posY < existingBox.bottom && posY + figure.HTML.offsetHeight > existingBox.top) {
+          overlap = true;
+          break;
+        }
+      }
+    }
+  
+    figure.style.left = posX + "px";
+    figure.style.top = posY + "px";
+  }
   
   const figureTypes = ["triangle", "square", "rectangle", "triangle", "trapezoid", "romboid"];
   const figuresBox = document.getElementById('figures-box');
@@ -149,3 +156,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
 });
+
+

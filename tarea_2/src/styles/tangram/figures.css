@@ -44,18 +44,12 @@
 }
 
 .square {
-    width: 50px;
-    height: 50px;
 }
 
 .rectangle {
-    width: 50px;
-    height: 100px;
 }
 
 .trapezoid {
-    width: 50px;
-    height: 100px;
     clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
 }
 
