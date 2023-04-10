@@ -9,8 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let figureElement = document.createElement("div");
     figureElement.classList.add("figure", figureSelected);
 
-    let figure = eval(`new ${figureBase}(figureSelected, getRandomColor())`);
+    let figure = eval(`new ${figureBase}(figureSelected)`);
     figure.HTML = figureElement;
+    figure.setFillingColor(getRandomColor());
 
     figuresBox.appendChild(figure.HTML);
     //figure.style.backdropFilter("blur(5px)");
