@@ -58,18 +58,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         break;
       }
+      case "romboid":{
+        figure.style.transform = "rotate(45deg)";
+      }
       case "square":{
         figure.style.width = 80 + "px";
         figure.style.height = 80 + "px";
         break;
       }
-      case "romboid":{
-        // figure.style.backgroundColor = color;
-        figure.style.width = 80 + "px";
-        figure.style.height = 80 + "px";
-        figure.style.transform = "rotate(45deg)";
-        break;
-      }
+      
       default:
         break;
     }

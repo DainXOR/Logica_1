@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
   //const triangle = document.querySelector('.figure');
   const figures = document.getElementsByClassName('figure');
+  let topIndex = 0;
 
   for(var i = 0; i < figures.length; i++) {
 
@@ -19,7 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
     figure.addEventListener('mousedown', (event) => {
       $(figure).addClass("grabbing");
 
-      figure.style.zIndex = 100;
+      if(figure.style.zIndex > topIndex){
+        topIndex = figure.style.zIndex;
+      }
+      else {
+        topIndex += 1;
+        figure.style.zIndex = topIndex;
+      }
 
       // Get the current position of the mouse and the triangle
       mouseX = event.clientX;
@@ -58,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Remove the mousemove event listener
       $(figure).removeClass("grabbing");
-      figure.style.zIndex = 1;
       document.removeEventListener('mousemove', handleMouseMove);
     });
 
