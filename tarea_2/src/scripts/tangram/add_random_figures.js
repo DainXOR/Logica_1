@@ -38,14 +38,18 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
       case "trapezoid":{
-        // figure.style.backgroundColor = color;
-
-        figure.style.width = 120 + "px";
-        figure.style.height = 80 + "px";
+        if (getRandomNumber(0, 1) === 1) {
+          figure.style.width = 120 + "px";
+          figure.style.height = 80 + "px";
+        }
+        else {
+          figure.style.width = 80 + "px";
+          figure.style.height = 120 + "px";
+        }
+        
         break;
       }
       case "rectangle":{
-        // figure.style.backgroundColor = color;
         figure.style.width = 80 + "px";
         figure.style.height = 120 + "px";
 
@@ -55,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
       case "square":{
-        // figure.style.backgroundColor = color;
         figure.style.width = 80 + "px";
         figure.style.height = 80 + "px";
         break;
