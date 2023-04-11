@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let mouseY = 0;
     let triangleX = 0;
     let triangleY = 0;
-    let isAPressed = false;
-    let isDPressed = false;
 
     // Add a mousedown event listener to the triangle
     figure.addEventListener('mousedown', (event) => {
@@ -49,10 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const deltaX = newMouseX - mouseX;
       const deltaY = newMouseY - mouseY;
     
-      console.log(figure);
-      console.log("Delta X: " + deltaX);
-      console.log("Delta Y: " + deltaY);
-      console.log("\n");
+      // console.log(figure);
+      // console.log("Delta X: " + deltaX);
+      // console.log("Delta Y: " + deltaY);
+      // console.log("\n");
 
       // Update the position of the triangle
       figure.style.left = triangleX + deltaX + 'px';
