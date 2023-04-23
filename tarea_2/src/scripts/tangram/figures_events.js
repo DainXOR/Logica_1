@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     
+  const figuresArray = generateFigures(15);
+
   //const triangle = document.querySelector('.figure');
-  const figures = document.getElementsByClassName('figure');
+  //const figures = document.getElementsByClassName('figure');
   let topIndex = 0;
 
-  for(var i = 0; i < figures.length; i++) {
+  for(var i = 0; i < figuresArray.length; i++) {
 
-    const figure = figures[i];
+    //const figure = figures[i];
+    const figure = figuresArray[i].HTML;
 
     // Define variables to store the position of the mouse and the triangle
     let mouseX = 0;
