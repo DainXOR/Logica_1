@@ -6,6 +6,7 @@ class Paddle {
     constructor(x, y, width, height, color) {
         this.x = x;
         this.y = y;
+        this.move = 0;
         this.width = width;
         this.height = height;
         this.color = color;
@@ -20,11 +21,21 @@ class Paddle {
     }
   
     moveUp() {
-        this.y -= 10;
+        this.move = -10;
     }
   
     moveDown() {
-        this.y += 10;
+        this.move = 10;
+    }
+
+    update(canvas, moveDirection){
+
+        this.move = 10 - (10 * moveDirection);
+
+        if (!((this.y > canvas.height - this.height && this.move > 0) || (this.y < 0 && this.move < 0))){
+            this.y += this.move;
+        }
+
     }
 
 }
@@ -52,6 +63,7 @@ class Ball {
         this.x += this.dx;
         this.y += this.dy;
 
+
         if (this.x > canvas.width - this.radius || this.x < this.radius) {
             // Game over
             return false;
@@ -70,12 +82,12 @@ class Ball {
         const hitLeft = leftBorder <= paddleL.x + paddleL.width && leftBorder >= paddleL.x;
         const insideHeightLeft = this.y >= paddleL.y && this.y <= (paddleL.y + paddleL.height);
 
-        if ((hitRight && insideHeightRight) || 
-            (hitLeft && insideHeightLeft)) {
+        if ((hitRight && insideHeightRight) || (hitLeft && insideHeightLeft)) {
             this.dx = -(this.dx * 1.02);
-        }
 
-        console.log(this.dx);
+            this.dy += (hitRight * paddleR.move * 0.2) + (hitLeft * paddleL.move * 0.2);
+
+        }
 
         return true;
     }

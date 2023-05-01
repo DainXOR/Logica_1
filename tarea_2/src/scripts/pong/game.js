@@ -14,20 +14,22 @@ function update(ballObj, paddleLeftObj, paddleRightObj, keyPresses, canvas) {
 
         switch(key){
             case "w":
-                paddleLeftObj.moveUp();
+                paddleLeftObj.update(canvas, 2);
                 continue;
             case "s":
-                paddleLeftObj.moveDown();
+                paddleLeftObj.update(canvas, 0);
                 continue;
 
             case "ArrowUp":
-                paddleRightObj.moveUp();
+                paddleRightObj.update(canvas, 2);
                 continue;
             case "ArrowDown":
-                paddleRightObj.moveDown();
+                paddleRightObj.update(canvas, 0);
                 continue;
 
             default:
+                paddleLeftObj.update(canvas, 1);
+                paddleRightObj.update(canvas, 1);
                 continue;
         }
     }
