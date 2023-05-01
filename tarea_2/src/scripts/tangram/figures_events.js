@@ -1,25 +1,47 @@
-document.addEventListener('DOMContentLoaded', function() {
+function dropAnimation(){
+
+}
+
+//function 
+
+function addListeners(figuresArray) {
     
+<<<<<<< Updated upstream:tarea_2/src/scripts/tangram/figures_events.js
+  const figuresArray = generateFigures(15);
+
+=======
+<<<<<<< Updated upstream:tarea_2/src/scripts/tangram/grab_figures.js
+=======
+  // const figuresArray = generateFigures(15);
+
+>>>>>>> Stashed changes:tarea_2/src/scripts/tangram/figures_events.js
+>>>>>>> Stashed changes:tarea_2/src/scripts/tangram/grab_figures.js
   //const triangle = document.querySelector('.figure');
-  const figures = document.getElementsByClassName('figure');
+  //const figures = document.getElementsByClassName('figure');
+  let topIndex = 0;
 
-  for(var i = 0; i < figures.length; i++) {
+  for(var i = 0; i < figuresArray.length; i++) {
 
-    const figure = figures[i];
+    //const figure = figures[i];
+    const figure = figuresArray[i].HTML;
 
     // Define variables to store the position of the mouse and the triangle
     let mouseX = 0;
     let mouseY = 0;
     let triangleX = 0;
     let triangleY = 0;
-    let isAPressed = false;
-    let isDPressed = false;
 
     // Add a mousedown event listener to the triangle
     figure.addEventListener('mousedown', (event) => {
       $(figure).addClass("grabbing");
 
-      figure.style.zIndex = 100;
+      if(figure.style.zIndex > topIndex){
+        topIndex = figure.style.zIndex;
+      }
+      else {
+        topIndex += 1;
+        figure.style.zIndex = topIndex;
+      }
 
       // Get the current position of the mouse and the triangle
       mouseX = event.clientX;
@@ -42,10 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const deltaX = newMouseX - mouseX;
       const deltaY = newMouseY - mouseY;
     
-      console.log(figure);
-      console.log("Delta X: " + deltaX);
-      console.log("Delta Y: " + deltaY);
-      console.log("\n");
+      // console.log(figure);
+      // console.log("Delta X: " + deltaX);
+      // console.log("Delta Y: " + deltaY);
+      // console.log("\n");
 
       // Update the position of the triangle
       figure.style.left = triangleX + deltaX + 'px';
@@ -58,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Remove the mousemove event listener
       $(figure).removeClass("grabbing");
-      figure.style.zIndex = 1;
       document.removeEventListener('mousemove', handleMouseMove);
     });
 
@@ -119,4 +140,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
   };
-});
+}

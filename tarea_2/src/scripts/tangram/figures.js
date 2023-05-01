@@ -439,9 +439,16 @@ class Figure{
 
     setFillingColor(colorFilling){
         this.#fillingColor = colorFilling;
+        if(this.#represented !== null){
+            this.style.backgroundColor = this.#fillingColor;
+        }
     }
     setBorderColor(colorBorder){
         this.#borderColor = colorBorder;
+        if(this.#represented !== null){
+            this.style.borderColor = this.#borderColor;
+        }
+        
     }
     setVertexes(...vertexes){
         this.vertexes = this.checkVertexVector(vertexes);
