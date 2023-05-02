@@ -5,7 +5,43 @@ const borderDistance = 10;
 const borderLeftDistance = borderDistance;
 const borderRightDistance = paddleWidth + borderDistance;
 
-function update(ballObj, paddleLeftObj, paddleRightObj, keyPresses, canvas) {
+const BALLS_MAX = 10;
+const BALL_GEN_RATE = 500;
+
+let playerScores = [0, 0];
+
+let ballCount = 0;
+
+function getRandomColor() {
+    let letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    // color += "A7"; // Opacity 
+    return color;
+}
+function generateBall(canvas, context){
+
+    let ball = new Ball(canvas.width / 2, canvas.height / 2, 10, getRandomColor());
+    ball.draw(context);
+    return ball;
+}
+
+function addScore(playerNumber){ // if statement is python slow, array indexing better <3
+    playerScores[--playerNumber]++;
+
+    let scoreP1 = document.getElementById("score-player-1");
+    let scoreP2 = document.getElementById("score-player-2");
+
+    scoreP1.innerHTML = "Puntaje jugador 1: " + playerScores[0];
+    scoreP2.innerHTML = "Puntaje jugador 2: " + playerScores[1];
+
+    console.log("Player 1: " + playerScores[0]);
+    console.log("Player 2: " + playerScores[1]);
+}
+
+function update(paddleLeftObj, paddleRightObj, ballList, keyPresses, canvas) {
 
     for(const key in keyPresses){
         if(!keyPresses[key]){
@@ -33,10 +69,17 @@ function update(ballObj, paddleLeftObj, paddleRightObj, keyPresses, canvas) {
                 continue;
         }
     }
-    
-    return ballObj.update(canvas, paddleLeftObj, paddleRightObj);
 
-
+    for(let i = 0; i < ballList.length; i++){
+        const result = ballList[i].update(canvas, paddleLeftObj, paddleRightObj);
+        if(!result[0]){
+            ballList.splice(i, 1);
+            ballCount--;
+            addScore(result[1])
+            continue;
+        }
+    }
+    return ballCount != 0;
 }
 
 function draw(context, ...toDraw){
@@ -49,11 +92,10 @@ function draw(context, ...toDraw){
 function clear(context, canvas){
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
-
-function loop(b, pl, pr, kp, cv, ctx) {
-    const state = update(b, pl, pr, kp, cv);
-    clear(ctx, cv);
-    draw(ctx, b, pl, pr);
+function loop(paddleLeft, paddleRight, balls, keyPresses, canvas, context) {
+    const state = update(paddleLeft, paddleRight, balls, keyPresses, canvas);
+    clear(context, canvas);
+    draw(context, paddleLeft, paddleRight, ...balls);
 
     return state;
 }
@@ -63,13 +105,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
     let context = canvas.getContext('2d');
     let keyEventQueue = {};
 
-    let ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 'red');
     let paddleLeft = new Paddle(borderLeftDistance, (canvas.height / 2) - (paddleHight / 2), 
                                 paddleWidth, paddleHight, 'white');
     let paddleRight = new Paddle(canvas.width - borderRightDistance, canvas.height / 2 - (paddleHight / 2), 
                                 paddleWidth, paddleHight, 'white');
 
-    ball.draw(context);
     paddleLeft.draw(context);
     paddleRight.draw(context);
 
@@ -81,12 +121,24 @@ document.addEventListener("DOMContentLoaded", ()=>{
         keyEventQueue[event.key] = false;
     });
 
+    let ballsArray = [generateBall(canvas, context)];
+    ballCount = 1;
+
+    let ballTimer = 0;
+
     function loopWrap(){
-        if(loop(ball, paddleLeft, paddleRight, keyEventQueue, canvas, context)){
-            //requestAnimationFrame(loopWrap);
+        if(loop(paddleLeft, paddleRight, ballsArray, keyEventQueue, canvas, context)){
+            if(ballCount < BALLS_MAX && ballTimer >= BALL_GEN_RATE){
+                ballsArray.push(generateBall(canvas, context));
+                ballTimer = 0;
+                ballCount++;
+            }
+
+            ballTimer++;
+            requestAnimationFrame(loopWrap);
         }
 
-        requestAnimationFrame(loopWrap);
+        //requestAnimationFrame(loopWrap);
     }
 
     loopWrap();

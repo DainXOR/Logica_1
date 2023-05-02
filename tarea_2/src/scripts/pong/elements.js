@@ -2,6 +2,11 @@ function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function pickRandom(...choices){
+    const choice = Math.round(getRandomNumber(0, choices.length - 1));
+    return choices[choice];
+}
+
 class Paddle {
     constructor(x, y, width, height, color) {
         this.x = x;
@@ -42,20 +47,20 @@ class Paddle {
 
 class Ball {
     constructor(x, y, radius, color) {
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-      this.color = color;
-      this.dx = 4.0; // x velocity
-      this.dy = getRandomNumber(-5, 5); // y velocity
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.dx = pickRandom(-3, 3); // x velocity
+        this.dy = getRandomNumber(-4, 4); // y velocity
     }
   
     draw(ctx) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-      ctx.closePath();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
     }
   
     update(canvas, paddleL, paddleR) {
@@ -64,9 +69,9 @@ class Ball {
         this.y += this.dy;
 
 
-        if (this.x > canvas.width - this.radius || this.x < this.radius) {
+        if (this.x > canvas.width - this.radius || this.x < 0) {
             // Game over
-            return false;
+            return [false, (this.x > 0) + ((this.x < 0) * 2)];
         }
         else if (this.y > canvas.height - this.radius || 
                 this.y < this.radius){
@@ -83,12 +88,12 @@ class Ball {
         const insideHeightLeft = this.y >= paddleL.y && this.y <= (paddleL.y + paddleL.height);
 
         if ((hitRight && insideHeightRight) || (hitLeft && insideHeightLeft)) {
-            this.dx = -(this.dx * 1.02);
+            this.dx = -(this.dx * 1.01);
 
-            this.dy += (hitRight * paddleR.move * 0.2) + (hitLeft * paddleL.move * 0.2);
+            this.dy += (hitRight * paddleR.move * 0.3) + (hitLeft * paddleL.move * 0.3);
 
         }
 
-        return true;
+        return [true, 0];
     }
   }

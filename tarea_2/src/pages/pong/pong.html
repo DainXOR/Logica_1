@@ -14,7 +14,13 @@
     <style>
         body{
             display: flex;
-            justify-content: center;
+            justify-content: space-evenly;
+
+        }
+
+        p{
+          color: #fff;
+          font-size: xx-large;
         }
 
         #pong-canvas {
@@ -22,10 +28,18 @@
           width: 45rem;
           height: 45rem;
         }
+
+
       </style>
 </head>
 <body>
-    <canvas id="pong-canvas" width="1000" height="1000"></canvas>
+  <p id="score-player-1">Puntaje jugador 1: 0</p>
+  <canvas id="pong-canvas" width="1000" height="1000">
+    Press the space bar to start
+  </canvas>
+  <p id="score-player-2">Puntaje jugador 2: 0</p>
+
+
     <script src="../../scripts/pong/elements.js"></script>
     <script src="../../scripts/pong/game.js"></script>
 </body>
