@@ -14,8 +14,10 @@
     <style>
         body{
             display: flex;
-            justify-content: space-evenly;
-
+            flex-direction: column;
+            align-items: stretch;
+            margin: 0;
+            padding: 0;
         }
 
         p{
@@ -23,21 +25,56 @@
           font-size: xx-large;
         }
 
+        #canvas-wrapper{
+          position: relative;
+        }
+
+        #game-start-text{
+          margin: 3px;
+          padding: 0;
+          align-self: center;
+        }
+
+        #ball-record-text{
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -140%);
+        }
+
+        #game-elements{
+            display: flex;
+            justify-content: space-around;
+        }
+
         #pong-canvas {
           border: 1px solid white;
-          width: 45rem;
-          height: 45rem;
+          width: 44rem;
+          height: 44rem;
         }
 
 
       </style>
 </head>
 <body>
-  <p id="score-player-1">Puntaje jugador 1: 0</p>
-  <canvas id="pong-canvas" width="1000" height="1000">
-    Press the space bar to start
-  </canvas>
-  <p id="score-player-2">Puntaje jugador 2: 0</p>
+  <p id="game-start-text">Presiona la barra espaciadora para jugar</p>
+  <div id="game-elements">
+    <div id="player-left-text">
+      <p id="score-player-1">Puntaje jugador 1: 0</p>
+      <p id="score-player-1">Up: W</p>
+      <p id="score-player-1">Down: S</p>
+    </div>
+    <div id="canvas-wrapper">
+      <canvas id="pong-canvas" width="1000" height="1000"></canvas>
+      <p id="ball-record-text">0</p>
+    </div>
+    <div id="player-left-text">
+      <p id="score-player-2">Puntaje jugador 2: 0</p>
+      <p id="score-player-1">Up: Arrow up</p>
+      <p id="score-player-1">Down: Arrow down</p>
+    </div>
+  </div>
+  
 
 
     <script src="../../scripts/pong/elements.js"></script>

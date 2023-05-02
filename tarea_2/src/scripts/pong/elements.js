@@ -88,7 +88,8 @@ class Ball {
         const insideHeightLeft = this.y >= paddleL.y && this.y <= (paddleL.y + paddleL.height);
 
         if ((hitRight && insideHeightRight) || (hitLeft && insideHeightLeft)) {
-            this.dx = -(this.dx * 1.01);
+            let multiplier = Math.abs(this.dx) <= 20? 1.01 : 1;
+            this.dx = -(this.dx * multiplier);
 
             this.dy += (hitRight * paddleR.move * 0.3) + (hitLeft * paddleL.move * 0.3);
 

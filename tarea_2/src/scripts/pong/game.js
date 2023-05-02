@@ -36,9 +36,6 @@ function addScore(playerNumber){ // if statement is python slow, array indexing 
 
     scoreP1.innerHTML = "Puntaje jugador 1: " + playerScores[0];
     scoreP2.innerHTML = "Puntaje jugador 2: " + playerScores[1];
-
-    console.log("Player 1: " + playerScores[0]);
-    console.log("Player 2: " + playerScores[1]);
 }
 
 function update(paddleLeftObj, paddleRightObj, ballList, keyPresses, canvas) {
@@ -99,6 +96,20 @@ function loop(paddleLeft, paddleRight, balls, keyPresses, canvas, context) {
 
     return state;
 }
+function updateBallAmount(element, count){
+    element.innerHTML = count;
+
+    switch(count){
+        case 2: element.style.color = '#fff'; break;
+        case 3: 
+        case 4: element.style.color = '#ff0'; break;
+        case 5:
+        case 7: element.style.color = '#f70'; break;
+        case 8: element.style.color = '#f00'; break;
+        default: break;
+    }
+
+}
 
 document.addEventListener("DOMContentLoaded", ()=>{
     let canvas = document.getElementById('pong-canvas');
@@ -114,12 +125,22 @@ document.addEventListener("DOMContentLoaded", ()=>{
     paddleRight.draw(context);
 
     window.addEventListener('keydown', function (event) {
-        keyEventQueue[event.key] = true;
+        if(event.key === "w" || event.key === "s" || event.key === "ArrowUp" || event.key === "ArrowDown"){
+            keyEventQueue[event.key] = true;
+        }else{
+            keyEventQueue[0] = true;
+        }
     });
     
     window.addEventListener('keyup', function (event) {
-        keyEventQueue[event.key] = false;
+        if(event.key === "w" || event.key === "s" || event.key === "ArrowUp" || event.key === "ArrowDown"){
+            keyEventQueue[event.key] = false;
+        }else{
+            keyEventQueue[0] = false;
+        }
     });
+
+    let ballAmout = document.getElementById("ball-record-text");
 
     let ballsArray = [generateBall(canvas, context)];
     ballCount = 1;
@@ -127,6 +148,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     let ballTimer = 0;
 
     function loopWrap(){
+        updateBallAmount(ballAmout, ballCount);
+        
+
         if(loop(paddleLeft, paddleRight, ballsArray, keyEventQueue, canvas, context)){
             if(ballCount < BALLS_MAX && ballTimer >= BALL_GEN_RATE){
                 ballsArray.push(generateBall(canvas, context));
@@ -136,12 +160,31 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
             ballTimer++;
             requestAnimationFrame(loopWrap);
+        } else {
+            function restartGame(event){
+                if(event.key === " "){
+                    window.removeEventListener('keydown', restartGame);
+                    ballsArray = [generateBall(canvas, context)];
+                    ballCount = 1;
+                    ballTimer = 0
+                    playerScores = [0, 0];
+                    addScore(3);
+                    loopWrap();
+                }
+            }
+            window.addEventListener('keydown', restartGame);
         }
-
-        //requestAnimationFrame(loopWrap);
     }
 
-    loopWrap();
+    function startGame(event){
+        if(event.key === " "){
+            window.removeEventListener('keydown', startGame);
+            loopWrap();
+        }
+    }
+    
+
+    window.addEventListener('keydown', startGame);
 
 });
 
