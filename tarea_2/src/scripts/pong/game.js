@@ -29,7 +29,7 @@ function generateBall(canvas, context){
 }
 
 function addScore(playerNumber){ // if statement is python slow, array indexing better <3
-    playerScores[--playerNumber]++;
+    playerScores[playerNumber]++;
 
     let scoreP1 = document.getElementById("score-player-1");
     let scoreP2 = document.getElementById("score-player-2");

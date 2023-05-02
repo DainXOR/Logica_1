@@ -71,7 +71,7 @@ class Ball {
 
         if (this.x > canvas.width - this.radius || this.x < 0) {
             // Game over
-            return [false, (this.x > 0) + ((this.x < 0) * 2)];
+            return [false, +(this.x < 0)];
         }
         else if (this.y > canvas.height - this.radius || 
                 this.y < this.radius){
