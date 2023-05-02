@@ -6,6 +6,15 @@ function pickRandom(...choices){
     const choice = Math.round(getRandomNumber(0, choices.length - 1));
     return choices[choice];
 }
+function getRandomAvoid(min, max, ...toAvoid){
+    const avoidArray = [...toAvoid];
+    let value = 0;
+    do{
+        value = getRandomNumber(min, max);
+    }while(avoidArray.includes(value));
+
+    return value;
+}
 
 class Paddle {
     constructor(x, y, width, height, color) {
@@ -52,7 +61,7 @@ class Ball {
         this.radius = radius;
         this.color = color;
         this.dx = pickRandom(-3, 3); // x velocity
-        this.dy = getRandomNumber(-4, 4); // y velocity
+        this.dy = getRandomAvoid(-4, 4, 0); // y velocity
     }
   
     draw(ctx) {

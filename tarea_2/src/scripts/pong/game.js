@@ -76,6 +76,9 @@ function update(paddleLeftObj, paddleRightObj, ballList, keyPresses, canvas) {
             continue;
         }
     }
+
+    paddleLeftObj.update(canvas, 1);
+    paddleRightObj.update(canvas, 1);
     return ballCount != 0;
 }
 
@@ -104,8 +107,10 @@ function updateBallAmount(element, count){
         case 3: 
         case 4: element.style.color = '#ff0'; break;
         case 5:
-        case 7: element.style.color = '#f70'; break;
-        case 8: element.style.color = '#f00'; break;
+        case 7: element.style.color = '#f90'; break;
+        case 8:
+        case 9: element.style.color = '#f30'; break;
+        case 10: element.style.color = '#f00'; break;
         default: break;
     }
 
@@ -160,7 +165,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
             ballTimer++;
             requestAnimationFrame(loopWrap);
-        } else {
+        } else { // Idk man, this feels wrong
             function restartGame(event){
                 if(event.key === " "){
                     window.removeEventListener('keydown', restartGame);
