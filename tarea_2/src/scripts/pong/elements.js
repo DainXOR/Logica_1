@@ -1,7 +1,6 @@
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
 function pickRandom(...choices){
     const choice = Math.round(getRandomNumber(0, choices.length - 1));
     return choices[choice];
@@ -32,14 +31,6 @@ class Paddle {
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.closePath();
-    }
-  
-    moveUp() {
-        this.move = -10;
-    }
-  
-    moveDown() {
-        this.move = 10;
     }
 
     update(canvas, moveDirection){
@@ -100,7 +91,7 @@ class Ball {
             let multiplier = Math.abs(this.dx) <= 20? 1.01 : 1;
             this.dx = -(this.dx * multiplier);
 
-            this.dy += (hitRight * paddleR.move * 0.3) + (hitLeft * paddleL.move * 0.3);
+            this.dy += ((hitRight * paddleR.move) + (hitLeft * paddleL.move)) * 0.3;
 
         }
 

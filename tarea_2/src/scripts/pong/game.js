@@ -177,6 +177,15 @@ document.addEventListener("DOMContentLoaded", ()=>{
                     loopWrap();
                 }
             }
+            if(playerScores[0] > playerScores[1]){
+                ballCount = "Jugador 1 gana!";
+            }else if (playerScores[0] < playerScores[1]){
+                ballCount = "Jugador 2 gana!";
+            } else {
+                ballCount = "Empate!";
+            }
+            updateBallAmount(ballAmout, ballCount);
+
             window.addEventListener('keydown', restartGame);
         }
     }
@@ -188,8 +197,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
         }
     }
     
-
     window.addEventListener('keydown', startGame);
 
 });
-
