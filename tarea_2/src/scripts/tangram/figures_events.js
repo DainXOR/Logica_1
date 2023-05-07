@@ -1,23 +1,5 @@
-function dropAnimation(){
-
-}
-
-//function 
-
 function addListeners(figuresArray) {
-    
-<<<<<<< Updated upstream:tarea_2/src/scripts/tangram/figures_events.js
-  const figuresArray = generateFigures(15);
 
-=======
-<<<<<<< Updated upstream:tarea_2/src/scripts/tangram/grab_figures.js
-=======
-  // const figuresArray = generateFigures(15);
-
->>>>>>> Stashed changes:tarea_2/src/scripts/tangram/figures_events.js
->>>>>>> Stashed changes:tarea_2/src/scripts/tangram/grab_figures.js
-  //const triangle = document.querySelector('.figure');
-  //const figures = document.getElementsByClassName('figure');
   let topIndex = 0;
 
   for(var i = 0; i < figuresArray.length; i++) {
