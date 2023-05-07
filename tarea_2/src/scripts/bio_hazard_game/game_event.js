@@ -125,8 +125,11 @@ class EventBus{
     subscribers = [];
     events = new EventArray();
 
+    objectEventList = "genericEventList";
+
     EventBus(type = "generic"){
         this.eventType = type;
+        this.objectEventList = type + "EventList";
     }
 
     isSubscribed(sub){
@@ -156,9 +159,9 @@ class EventBus{
 
     sendNextEvent(){
         this.subscribers.forEach(sub => {
-            sub.getEvent(this.events.get());
+            sub[this.objectEventList].push(this.events.get());
         });
-        this.events.shift();
+        this.events.dispatch();
     }
 
     sendAllEvents(){
@@ -208,7 +211,10 @@ class EventPublisher{
         return result;
     }
     unsubscribe(sub, eventType){
-        return this.eventLines[eventType].unsubscribe(sub);
+        if(this.isSubscribed(sub, eventType)){
+            return this.eventLines[eventType].unsubscribe(sub);
+        }
+        return false;
     }
 
     newEvent(event){
