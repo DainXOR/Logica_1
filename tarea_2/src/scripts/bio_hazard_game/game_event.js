@@ -1,56 +1,55 @@
 class GameEvent{
-    #type = "generic";
-    #source = null;
-    #destination = null;
-    #timeStamp = 0;
-    #expiracyDate = -1;
-    #cyclesAge = 0;
+    constructor(type = "generic", src = null, dest = null, expiracy = -1){
 
-    GameEvent(type = "generic", src = null, dest = null, expiracy = -1){
-        this.#type = type;
-        this.#source = src;
-        this.#destination = dest;
+        expiracy = expiracy <= 0? -100_000 : expiracy;
 
-        this.#timeStamp = +(new Date());
-        this.#expiracyDate = +(new Date()) + expiracy;
+        this.type = type;
+        this.source = src;
+        this.destination = dest;
+
+        this.timeStamp = +(new Date());
+        this.expiracyDate = +(new Date()) + expiracy;
+
+        this.cyclesAge = 0;
     }
 
-    getType(){return this.#type;}
-    getSource(){return this.#source;}
-    getDestination(){return this.#destination;}
-    getTimeStamp(){return this.#timeStamp;}
-    getExpiracyDate(){return this.#expiracyDate;}
-    getCyclesAge(){return this.#cyclesAge;}
+    getType(){return this.type;}
+    getSource(){return this.source;}
+    getDestination(){return this.destination;}
+    getTimeStamp(){return this.timeStamp;}
+    getExpiracyDate(){return this.expiracyDate;}
+    getCyclesAge(){return this.cyclesAge;}
 
     addAge(){
-        this.#cyclesAge += 1;
+        this.cyclesAge += 1;
     }
 
     longevity(){
-        return +(new Date()) - this.#timeStamp;
+        return +(new Date()) - this.timeStamp;
     }
     expires(){
-        return this.#timeStamp > this.#expiracyDate;
+        return this.timeStamp > this.expiracyDate;
     }
     expired(){
-        return this.expires() && +(new Date()) < this.#expiracyDate;
+        return this.expires() && +(new Date()) < this.expiracyDate;
     }
 }
 
 class EventArray{
-    events = [new GameEvent()];
-    nullEvent = new GameEvent("none");
-    #ignored = [new GameEvent()];
+    constructor(...events){
+        this.events = [new GameEvent()];
+        this.nullEvent = new GameEvent("none");
+        this.ignored = [new GameEvent()];
+        this.checkState = false;
 
-    checkState = false;
-
-    EventArray(...events){
-        this.events.pop();
-        this.#ignored.pop();
+        this.events.shift();
+        this.ignored.shift();
 
         if(events.length !== 0){
             this.events = [...events];
         }
+
+        return this;
     }
 
     // Add / remove element methods
@@ -69,8 +68,8 @@ class EventArray{
         return this.events.shift();
     }
     reset(){
-        this.events = this.#ignored;
-        this.#ignored = [];
+        this.events = this.ignored;
+        this.ignored = [];
     }
 
     get(){
@@ -84,7 +83,7 @@ class EventArray{
     ignore(){
         let e = this.shift();
         e.addAge();
-        this.#ignored.push(e);
+        this.ignored.push(e);
         return;
     }
 
@@ -111,7 +110,7 @@ class EventArray{
     }
 
     // Get info methods
-    length(){
+    get length(){
         return this.events.length;
     }
     finish(){
@@ -121,15 +120,12 @@ class EventArray{
 }
 
 class EventBus{
-    eventType = "generic";
-    subscribers = [];
-    events = new EventArray();
-
-    objectEventList = "genericEventList";
-
-    EventBus(type = "generic"){
+    constructor(type = "generic"){
         this.eventType = type;
-        this.objectEventList = type + "EventList";
+        this.subscribers = [];
+        this.events = new EventArray();
+
+        return this;
     }
 
     isSubscribed(sub){
@@ -159,7 +155,10 @@ class EventBus{
 
     sendNextEvent(){
         this.subscribers.forEach(sub => {
-            sub[this.objectEventList].push(this.events.get());
+            // eval(```sub.${this.eventListName}.push(this.events.get());```)
+            // console.log(sub.getEventList(this.eventListName));
+            // console.log(sub[this.eventListName]);
+            sub.getEventList(this.eventType)?.push(this.events.get());
         });
         this.events.dispatch();
     }
@@ -173,11 +172,15 @@ class EventBus{
 }
 
 class EventPublisher{
-    events = new EventArray();
-    eventLines = {"generic": new EventBus()};
+    constructor(){
+        this.events = new EventArray();
+        this.eventLines = {"generic": new EventBus()};
+
+        return this;
+    }
 
     isSubscribed(sub, eventType){
-        return this.eventLines[eventType].isSubscribed(sub);
+        return (eventType in this.eventLines) && this.eventLines[eventType].isSubscribed(sub);
     }
 
     checkSubscription(sub, eventType){
@@ -196,9 +199,10 @@ class EventPublisher{
     }
 
     subscribe(sub, eventType){
+
         let result = this.checkSubscription(sub, eventType);
 
-        if(result >= 0b10){
+        if(result >= 0b010){
             return result;
         }
 
@@ -223,21 +227,29 @@ class EventPublisher{
 
     notifyNextEvent(){
         if(this.events.finish()){
-            return;
+            return false;
         }
 
-        this.eventLines.forEach(bus =>{
-            bus.newEvent(this.events.get());
-        });
-        this.events.dispatch();
+        const eventType = this.events.get().type;
+        this.eventLines[eventType].newEvent(this.events.get());
+        this.eventLines["generic"].newEvent(this.events.dispatch());
+
+        this.eventLines[eventType].sendNextEvent();
+        this.eventLines["generic"].sendNextEvent();
+
+        return true;
     }
 
     notifyAllEvents(){
         while(!this.events.finish()) {
-            this.eventLines.forEach(bus =>{
-                bus.newEvent(this.events.get());
-            });
-            this.events.dispatch();
+            const event = this.events.dispatch();
+
+            this.eventLines[event.type].newEvent(event);
+            this.eventLines["generic"].newEvent(event);
+        }
+
+        for(let type in this.eventLines){
+            this.eventLines[type].sendAllEvents();
         }
     }
 }
