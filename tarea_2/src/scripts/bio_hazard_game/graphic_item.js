@@ -1,8 +1,8 @@
 class GraphicItem{
-    constructor(pos = new Vector3()){
+    constructor(pos = new Vector3(), h = 0, w = 0){
         this.pos = pos;
-        this.heigh = 0;
-        this.width = 0;
+        this.heigh = h;
+        this.width = w;
 
         this.texture = "";
         this.textureState = 0;
@@ -16,7 +16,7 @@ class GraphicItem{
 
     }
 
-    getEventList(listName){return null;}
+    getEventList(listName){return genericEventList;}
 
     setTexture(texture){this.texture = texture;}
     setTextureStateData(maxStates, ...maxStateFrames){
@@ -47,7 +47,7 @@ class GraphicItem{
     draw(context){}
     
     update(dt){ // dt = delta seconds, arguments = [canvas, context]
-        if(this.genericEventList.finish()){
+        if(!this.genericEventList.finish()){
             this.onEvent();
         }
 

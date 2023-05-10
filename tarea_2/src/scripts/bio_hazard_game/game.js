@@ -16,18 +16,24 @@ publisher.subscribe(e4, "generic");
 console.log(publisher.unsubscribe(e3, "generic"));
 console.log(publisher.unsubscribe(e3, "keypress"));
 
-// publisher.newEvent(new GameEvent("keypress"));
-publisher.newEvent(new GameEvent("generic", e1, e3));
-publisher.notifyAllEvents();
 
-console.log(e1.genericEventList);
-console.log(e2.genericEventList);
-console.log(e3.genericEventList);
-console.log(e4.genericEventList);
+document.addEventListener("keypress", (event)=>{
+    publisher.newEvent(new GameEvent("keypress", event));
 
-console.log(e1);
-console.log(e2);
-console.log(e3);
-console.log(e4);
+    if(event.key === "s"){
+        publisher.startNotifications();
+        console.log("Notifications enabled!");
+    }
+    if(event.key === "p"){
+        publisher.stopNotifications();
+        console.log("Notifications stopped!");
+    }
 
+    if(event.key === "i"){
+        console.log("In queue: " + publisher.events.events.length);
+    }
+});
 
+function gameLoop(){
+
+}

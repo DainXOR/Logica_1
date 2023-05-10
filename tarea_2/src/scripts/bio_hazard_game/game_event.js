@@ -1,9 +1,10 @@
 class GameEvent{
-    constructor(type = "generic", src = null, dest = null, expiracy = -1){
+    constructor(type = "generic", info = null, src = null, dest = null, expiracy = -1){
 
         expiracy = expiracy <= 0? -100_000 : expiracy;
 
         this.type = type;
+        this.eventInfo = info;
         this.source = src;
         this.destination = dest;
 
@@ -14,6 +15,7 @@ class GameEvent{
     }
 
     getType(){return this.type;}
+    getInfo(){return this.eventInfo;}
     getSource(){return this.source;}
     getDestination(){return this.destination;}
     getTimeStamp(){return this.timeStamp;}
@@ -48,8 +50,6 @@ class EventArray{
         if(events.length !== 0){
             this.events = [...events];
         }
-
-        return this;
     }
 
     // Add / remove element methods
@@ -155,9 +155,6 @@ class EventBus{
 
     sendNextEvent(){
         this.subscribers.forEach(sub => {
-            // eval(```sub.${this.eventListName}.push(this.events.get());```)
-            // console.log(sub.getEventList(this.eventListName));
-            // console.log(sub[this.eventListName]);
             sub.getEventList(this.eventType)?.push(this.events.get());
         });
         this.events.dispatch();
@@ -176,7 +173,8 @@ class EventPublisher{
         this.events = new EventArray();
         this.eventLines = {"generic": new EventBus()};
 
-        return this;
+        this.enfID = 0;
+        this.ennfID = 0;
     }
 
     isSubscribed(sub, eventType){
@@ -226,6 +224,7 @@ class EventPublisher{
     }
 
     notifyNextEvent(){
+        console.log(this.events);
         if(this.events.finish()){
             return false;
         }
@@ -237,10 +236,13 @@ class EventPublisher{
         this.eventLines[eventType].sendNextEvent();
         this.eventLines["generic"].sendNextEvent();
 
+        console.log("Next dispatched!");
         return true;
     }
 
     notifyAllEvents(){
+        const dispatchedEvents = this.events.length;
+
         while(!this.events.finish()) {
             const event = this.events.dispatch();
 
@@ -251,5 +253,27 @@ class EventPublisher{
         for(let type in this.eventLines){
             this.eventLines[type].sendAllEvents();
         }
+
+        console.log("Dispatched: " + dispatchedEvents);
     }
+
+    startNotifications(){
+        let thisReference = this;
+
+        function notifyAllWrapper(){
+            thisReference.notifyAllEvents();
+        }
+
+        function notifyNextWrapper(){
+            thisReference.notifyNextEvent();
+        }
+
+        this.enfID = setInterval(notifyAllWrapper, 500 * 10);
+        this.ennfID = setInterval(notifyNextWrapper, 50 * 10);
+    }
+    stopNotifications(){
+        clearInterval(this.enfID);
+        clearInterval(this.ennfID);
+    }
+
 }
