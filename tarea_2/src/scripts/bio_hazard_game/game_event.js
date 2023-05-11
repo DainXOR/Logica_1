@@ -75,6 +75,9 @@ class EventArray{
     get(){
         return this.events[0];
     }
+    getLast(){
+        return this.events[this.length - 1];
+    }
 
     // Handle methods
     dispatch(){
@@ -224,7 +227,7 @@ class EventPublisher{
     }
 
     notifyNextEvent(){
-        console.log(this.events);
+        // console.log(this.events);
         if(this.events.finish()){
             return false;
         }
@@ -236,7 +239,7 @@ class EventPublisher{
         this.eventLines[eventType].sendNextEvent();
         this.eventLines["generic"].sendNextEvent();
 
-        console.log("Next dispatched!");
+        // console.log("Next dispatched!");
         return true;
     }
 
@@ -254,10 +257,14 @@ class EventPublisher{
             this.eventLines[type].sendAllEvents();
         }
 
-        console.log("Dispatched: " + dispatchedEvents);
+        // console.log("Dispatched: " + dispatchedEvents);
     }
 
-    startNotifications(){
+    startNotifications(debugDelayMultiplier = 0){
+        if(this.enfID !== 0 || this.ennfID !== 0){
+            return;
+        }
+
         let thisReference = this;
 
         function notifyAllWrapper(){
@@ -268,8 +275,8 @@ class EventPublisher{
             thisReference.notifyNextEvent();
         }
 
-        this.enfID = setInterval(notifyAllWrapper, 500 * 10);
-        this.ennfID = setInterval(notifyNextWrapper, 50 * 10);
+        this.enfID = setInterval(notifyAllWrapper, 500 * debugDelayMultiplier);
+        this.ennfID = setInterval(notifyNextWrapper, 50 * debugDelayMultiplier);
     }
     stopNotifications(){
         clearInterval(this.enfID);

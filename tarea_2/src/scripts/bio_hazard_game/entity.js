@@ -5,30 +5,19 @@ class Entity extends GraphicItem{
 
         this.id = generateID("e" + idComponent);
 
-        this.aabb = new AABB(this.pos, radius);
+        this.aabb = new AABB(pos, radius);
     
         this.genericEventList = new EventArray();
     }
 
-    setPos(...coords){
-        let newPosVector = new Vector3();
-        if(coords.length >= 2){
-            newPosVector = new Vector3(...coords);
-        } else if(coords[0] instanceof Vector3){
-            newPosVector = coords[0];
-        }
-
-        this.pos = newPosVector;
+    setPos(x = 0, y = 0, z = 0){
+        this.pos = new Vector3(x, y, z);
 
         this.aabb.center.x = this.pos.x + (this.width * 0.5);
         this.aabb.center.y = this.pos.y + (this.heigh * 0.5);
     }
     setAABBRadius(newRadius){
         this.aabb.radius = newRadius;
-    }
-
-    getEventList(eventName){
-        return this.genericEventList;
     }
 
     isLiving(){return false;}
@@ -60,11 +49,14 @@ class LivingEntity extends Entity {
 
         if (speedSqrX + speedSqrY > (this.maxSpeed * this.maxSpeed)){
             const speedNorm = Math.sqrt(speedSqrX + speedSqrY);
-            speedSqrX /= speedNorm;
-            speedSqrY /= speedNorm;
+            speedVector.x /= speedNorm;
+            speedVector.y /= speedNorm;
+
+            speedVector.x *= this.maxSpeed;
+            speedVector.y *= this.maxSpeed;
         }
 
-        return new Vector3(speedSqrX, speedSqrY, 0);
+        return new Vector3(speedVector.x, speedVector.y, 0);
     }
 
     move(dt){
@@ -81,8 +73,6 @@ class LivingEntity extends Entity {
 
     update(dt){
         this.move(dt);
-        
-
     }
 }
 
@@ -112,8 +102,33 @@ class Proyectile extends Entity {
 
 class PlayerEntity extends LivingEntity {
 
-    constructor(pos){
-        super(pos, 8, 5, "PE");
+    constructor(pos = new Vector3()){
+        super(pos, 8, 5, 100, "PE");
+
+        this.collisionEventList = new EventArray();
+        this.mousemoveEventList = new EventArray();
+        this.targetPos = new Vector3(pos.x, pos.y, pos.z);
+        // You know js is shit when all params are references
+    }
+
+    getEventList(eventName){
+        switch(eventName){
+            case "collision": return this.collisionEventList;
+            case "mousemove": return this.mousemoveEventList;
+            default: return this.genericEventList;
+        }
+    }
+
+    followTarget(){
+        if(!this.mousemoveEventList.finish()){
+            this.targetPos = this.mousemoveEventList.getLast().eventInfo;
+            this.mousemoveEventList.reset();
+        }
+
+        const xDistance = this.targetPos.x - this.pos.x;
+        const yDistance = this.targetPos.y - this.pos.y;
+
+        return new Vector3(xDistance, yDistance, 0);
 
     }
 
@@ -121,7 +136,7 @@ class PlayerEntity extends LivingEntity {
 
 class EnemyEntity extends LivingEntity {
     constructor(pos){
-        super(pos, 10, 5, "EE");
+        super(pos, 10, 5, 5, "EE");
         
     }
 }

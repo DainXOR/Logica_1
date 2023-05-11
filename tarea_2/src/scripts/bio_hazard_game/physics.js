@@ -4,15 +4,13 @@ class Vector3{
     z = 0;
 
     constructor(...args){
-        if(args[0] instanceof Vector3){
-            this.x = args[0].x;
-            this.y = args[0].y;
-            this.z = args[0].z;
-        } else if(args.length === 3) {
-            this.x = args[0];
-            this.y = args[1];
-            this.z = args[2];
+        if(args.length === 0){
+            return;
         }
+
+        this.x = args[0];
+        this.y = args[1];
+        this.z = args[2];
     }
 }
 
