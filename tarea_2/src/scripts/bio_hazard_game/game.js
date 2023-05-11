@@ -44,22 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     let lastTime = 0;
-    publisher.startNotifications(0.1);
+
     function gameLoop(time){
         dt = time - lastTime;
         lastTime = time;
     
-        player.update(dt);
-        // console.log(player.pos);
+        player.update(dt / 100);
     
         clear(ctx, cnv);
-        draw(player.pos, ctx);
+        player.draw(ctx);
         
         requestAnimationFrame(gameLoop);
     
     }
-    
-    gameLoop(0);
+
+    // publisher.startNotifications(0);
+    // gameLoop(0);
     
 
 });

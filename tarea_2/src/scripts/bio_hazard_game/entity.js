@@ -103,7 +103,7 @@ class Proyectile extends Entity {
 class PlayerEntity extends LivingEntity {
 
     constructor(pos = new Vector3()){
-        super(pos, 8, 5, 100, "PE");
+        super(pos, 20, 10, 100, "PE");
 
         this.collisionEventList = new EventArray();
         this.mousemoveEventList = new EventArray();
@@ -130,6 +130,16 @@ class PlayerEntity extends LivingEntity {
 
         return new Vector3(xDistance, yDistance, 0);
 
+    }
+
+    draw(ctx){
+        console.log(this.pos);
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.closePath();
     }
 
 }
