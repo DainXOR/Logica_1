@@ -5,7 +5,6 @@ function generateID(idString){
 
     return result;
 }
-
 function toNumbers(string){
     let result = "";
     for(let i = 0; i < string.length; i++){
@@ -14,7 +13,6 @@ function toNumbers(string){
 
     return result;
 }
-
 function toASCII(char){
     return char.charCodeAt();
 }

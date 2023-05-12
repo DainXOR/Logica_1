@@ -8,8 +8,14 @@ class GameEvent{
         this.source = src;
         this.destination = dest;
 
-        this.timeStamp = +(new Date());
-        this.expiracyDate = +(new Date()) + expiracy;
+        if(type === "none"){
+            this.timeStamp = 0;
+            this.expiracyDate = 0;
+    
+        } else{
+            this.timeStamp = +(new Date());
+            this.expiracyDate = +(new Date()) + expiracy;
+        }
 
         this.cyclesAge = 0;
     }
@@ -38,6 +44,9 @@ class GameEvent{
 }
 
 class EventArray{
+
+    static noneEvent = new GameEvent("none");
+
     constructor(...events){
         this.events = [new GameEvent()];
         this.nullEvent = new GameEvent("none");
@@ -73,9 +82,15 @@ class EventArray{
     }
 
     get(){
+        if (this.length === 0) {
+            return EventArray.noneEvent;
+        }
         return this.events[0];
     }
     getLast(){
+        if (this.length === 0){
+            return EventArray.noneEvent;
+        }
         return this.events[this.length - 1];
     }
 
@@ -103,10 +118,10 @@ class EventArray{
             switch (action) {
                 case "dispatch": return this.dispatch();
                 case "ignore": return this.ignore();
-                case "discard": this.dispatch(); return this.nullEvent;
+                case "discard": this.dispatch(); return EventArray.noneEvent;
                 case "get": return this.get();
                 case "next": this.ignore(); return this.get();
-                case "reset": this.reset(); return this.nullEvent;
+                case "reset": this.reset(); return EventArray.noneEvent;
                 default: return this.nullEvent;
             }
         }
@@ -158,15 +173,21 @@ class EventBus{
 
     sendNextEvent(){
         this.subscribers.forEach(sub => {
-            sub.getEventList(this.eventType)?.push(this.events.get());
+            sub.getEventList(this.eventType).push(this.events.get());
         });
         this.events.dispatch();
     }
 
     sendAllEvents(){
-        for (let i = 0; i < this.events.length; i++) {
-            this.sendNextEvent();
-        }
+        this.subscribers.forEach(sub => {
+            sub.getEventList(this.eventType).events = this.events.events.slice();
+        });
+        this.events.reset();
+        
+
+        // for (let i = 0; i < this.events.length; i++) {
+        //     this.sendNextEvent();
+        // }
     }
 
 }
@@ -227,7 +248,6 @@ class EventPublisher{
     }
 
     notifyNextEvent(){
-        // console.log(this.events);
         if(this.events.finish()){
             return false;
         }
@@ -239,25 +259,23 @@ class EventPublisher{
         this.eventLines[eventType].sendNextEvent();
         this.eventLines["generic"].sendNextEvent();
 
-        // console.log("Next dispatched!");
         return true;
     }
 
     notifyAllEvents(){
-        const dispatchedEvents = this.events.length;
 
         while(!this.events.finish()) {
-            const event = this.events.dispatch();
+            const event = this.events.get();
 
-            this.eventLines[event.type].newEvent(event);
-            this.eventLines["generic"].newEvent(event);
+            this.eventLines[event.type].newEvent(this.events.get());
+            this.eventLines["generic"].newEvent(this.events.dispatch());
         }
 
         for(let type in this.eventLines){
             this.eventLines[type].sendAllEvents();
         }
 
-        // console.log("Dispatched: " + dispatchedEvents);
+        
     }
 
     startNotifications(debugDelayMultiplier = 0){
@@ -275,8 +293,8 @@ class EventPublisher{
             thisReference.notifyNextEvent();
         }
 
-        this.enfID = setInterval(notifyAllWrapper, 500 * debugDelayMultiplier);
-        this.ennfID = setInterval(notifyNextWrapper, 50 * debugDelayMultiplier);
+        this.enfID = setInterval(notifyAllWrapper, 5 * debugDelayMultiplier);
+        this.ennfID = setInterval(notifyNextWrapper, 1 * debugDelayMultiplier);
     }
     stopNotifications(){
         clearInterval(this.enfID);
