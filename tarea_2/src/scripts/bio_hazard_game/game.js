@@ -1,111 +1,100 @@
-let publisher = new EventPublisher();
+class game {
+    constructor(width, height){
+        this.width = width;
+        this.height = height;
 
-let player = new PlayerEntity();
-publisher.subscribe(player, "mousemove");
-
-let e1 = new EnemyEntity(player, new Vector3(500, 500), 8, 10);
-let e2 = new EnemyEntity(player, new Vector3(0, 500), 5, 15);
-let e3 = new EnemyEntity(player, new Vector3(500), 12, 3);
-
-
-function generateEnemies(amount){
-    let enemies = [];
-    for (let i = 0; i < amount; i++) {
-        let x = getRandomNumber(0, 1000);
-        let y = getRandomNumber(0, 1000);
-
-        let speed = getRandomNumber(1, 14);
-        let radius = getRandomNumber(5, 50);
-
-        enemies.push(new EnemyEntity(player, new Vector3(x, y), speed, radius));        
-    }
-    return enemies;
-}
-
-
-let enemies = generateEnemies(5);
-
-
-
-document.addEventListener("keypress", (event) => {
-    publisher.newEvent(new GameEvent("keypress", event));
-
-    if(event.key === "s"){
-        publisher.startNotifications();
-        console.log("Notifications enabled!");
-    }
-    if(event.key === "p"){
-        publisher.stopNotifications();
-        console.log("Notifications stopped!");
-    }
-
-    if(event.key === "i"){
-        console.log("In queue: " + publisher.events.events.length);
-        console.log("Events: " + publisher.events.events);
-    }
-});
-
-function draw(pos, ctx) {
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
-    ctx.closePath();
-}
-
-function clear(context, canvas){
-    context.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    let cnv = document.getElementById("game_screen");
-    let ctx = cnv.getContext('2d');
-
-    cnv.addEventListener("mousemove", (event) => {
-        publisher.newEvent(new GameEvent("mousemove", new Vector3(event.x, event.y, 0)));
-    });
+        this.canvas = document.getElementById("game_screen");
+        this.context = cnv.getContext('2d');
     
-    let lastTime = 0;
-    let deleteEnemy = [];
+        cnv.width = 1000;
+        cnv.height = 1000;
 
-    function gameLoop(time){
-        dt = time - lastTime;
-        lastTime = time;
+        this.publisher = new EventPublisher();
+    
+    }
+
+    generateEnemies(normalAmount, suicideAmount){
+        let enemies = [];
+        for (let i = 0; i < normalAmount; i++) {
+            let x = getRandomNumber(0, this.canvas.width);
+            let y = getRandomNumber(0, this.canvas.height);
+    
+            let radius = getRandomNumber(10, 50);
+            let speed = 10 - ((5 / 50) * radius);
+    
+            enemies.push(new EnemyEntity(player, new Vector3(x, y), speed, radius));        
+        }
+        for (let i = 0; i < suicideAmount; i++) {
+            let x = getRandomNumber(0, this.canvas.width);
+            let y = getRandomNumber(0, this.canvas.height);
+    
+            enemies.push(new SuicideEnemy(player, new Vector3(x, y)));        
+        }
+        return enemies;
+    }
+
+    update(timeStamp){
+        let dt = timeStamp - lastTime;
+        lastTime = timeStamp;
     
         clear(ctx, cnv);
 
         player.update(dt * 0.01);
         player.draw(ctx);
-        for (let i = 0; i < enemies.length; i++) {
-            let e = enemies[i];
 
+        enemies.forEach((e) => {
             e.update(dt * 0.01);
             e.draw(ctx);
+        });
 
-            if(!e.isAlive()){
-                deleteEnemy.push(i);
-            }
-            
-        };
-        
-        if(deleteEnemy.length > 0){
-            let aux = [];
-            for (let i = 0; i < deleteEnemy.length; i++) {
-                if(!deleteEnemy.includes(i)){
-                    aux.push(enemies[i]);
-                }
-            }
-            enemies = aux;
-            deleteEnemy = [];
-        }
+        enemies = enemies.filter(e => e.isAlive());
 
-        requestAnimationFrame(gameLoop);
-    
+        requestAnimationFrame(this.update);
     }
 
-    publisher.startNotifications(0);
-    gameLoop(0);
-    
+    draw(){
 
-});
+    }
+
+    clear(){
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    startLoop(){
+        this.player = new PlayerEntity();
+        publisher.subscribe(player, "mousemove");
+
+        this.enemies = generateEnemies(3, 2);
+
+        this.publisher.startNotifications();
+
+        this.canvas.width = 1920;
+        this.canvas.height = 1080;
+    
+        const canvasScaleX = this.canvas.width / this.canvas.clientWidth;
+        const canvasScaleY = this.canvas.height / this.canvas.clientHeight;
+    
+        this.canvas.addEventListener("mousemove", (event) => {
+            console.log("Original:", event.clientX, event.clientY);
+            console.log("Scaled: ",
+                event.clientX * canvasScaleX, 
+                event.clientY * canvasScaleY);
+    
+            publisher.newEvent(new GameEvent(
+                "mousemove", 
+                new Vector3(
+                    event.clientX * canvasScaleX, 
+                    event.clientY * canvasScaleY
+                    )
+                ));
+        });
+
+        this.lastTime = 0;
+        this.update(0);
+
+    }
+    stopLoops(){
+        this.publisher.startNotifications();
+        cancelAnimationFrame(this.update);
+    }
+}

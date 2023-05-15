@@ -24,7 +24,7 @@ class AABB{
         const dy_sqr = (other.center.y - this.center.y) * (other.center.y - this.center.y);
         const dr_sqr = (this.radius + other.radius) * (this.radius + other.radius);
 
-        return (dx_sqr + dy_sqr) <= dr_sqr;
+        return (dx_sqr + dy_sqr) < dr_sqr;
     }
 }
  

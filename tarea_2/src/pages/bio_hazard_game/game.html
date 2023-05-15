@@ -12,22 +12,29 @@
     <script src="../../scripts/bio_hazard_game/graphic_item.js"></script>
     <script src="../../scripts/bio_hazard_game/entity.js"></script>
     <script src="../../scripts/bio_hazard_game/game.js"></script>
+    <script src="../../scripts/bio_hazard_game/main.js"></script>
 
     <style>
         body{
-            display: flex;
             background-color: black;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         #game_screen{
             background-color: #171717;
-            height: 100%;
+            position: absolute;/*
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);*/
+            
+            /*max-width: 100%;*/
+            max-height: 100%;
         }
     </style>
 </head>
 <body>
-    <canvas id="game_screen" width="1080" height="720"></canvas>
+    <canvas id="game_screen" width="1000" height="1000"></canvas>
     
 </body>
 </html>

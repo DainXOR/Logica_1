@@ -7,19 +7,22 @@ class Entity extends GraphicItem{
 
         this.aabb = new AABB(pos, radius);
     
-        this.genericEventList = new EventArray();
+        this.collisionEventList = new EventArray();
     }
 
-    setPos(x = 0, y = 0, z = 0){
-        this.pos = new Vector3(x, y, z);
+    setPos(x = 0, y = 0, z = 0, offset = new Vector3()){
+        this.pos = new Vector3(x + offset.x, y + offset.y, z);
+        this.aabb.center = new Vector3(x + offset.x, y + offset.y, z);
 
-        this.aabb.center.x = this.pos.x + (this.width * 0.5);
-        this.aabb.center.y = this.pos.y + (this.heigh * 0.5);
+
+        // this.aabb.center.x = this.pos.x + (this.width * 0.5);
+        // this.aabb.center.y = this.pos.y + (this.heigh * 0.5);
     }
     setAABBRadius(newRadius){
         this.aabb.radius = newRadius;
     }
 
+    isColliding(otherAABB){return this.aabb.isColliding(otherAABB);}
     isLiving(){return false;}
     isItem(){return false;}
     isStructure(){return false;}
@@ -29,7 +32,187 @@ class Entity extends GraphicItem{
 
 }
 
-let entityCounts = [0, 0, 0, 0, 0];
+class DamageEntity extends Entity{
+    constructor(
+        typeName, 
+        pos = new Vector3(), 
+        radius = new Vector3(), 
+        baseDamage = 0, 
+        timeDuration = -1,
+        damageFormula = (baseDmg)=>{return baseDmg;}, 
+        onImpact = ()=>{}, 
+        onExpire = ()=>{})
+        {
+        super(pos, radius, "DMG" + typeName);
+
+        this.typeName = typeName;
+        this.damageBase = baseDamage;
+        this.damageFormula = damageFormula;
+        this.age = 0;
+        this.duration = timeDuration;
+        this.onImpact = onImpact;
+        this.onExpire = onExpire;
+    }
+
+    draw(ctx){
+
+    }
+
+    update(dt){
+
+    }
+}
+class AreaOfEffect extends DamageEntity {
+
+}
+class Proyectile extends DamageEntity {
+    constructor(pos, speed, uses, damage, radius, 
+        damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
+        onImpact = ()=>{}
+        )
+    {
+        super("-PROY", pos, radius, damage, -1, damageFormula, onImpact);
+
+        this.baseSpeed = speed;
+        this.baseUses = uses;
+        this.usesCount = 0;
+    }
+
+    move(dt){
+        let speed = new Vector3();
+        
+        speed.x = this.baseSpeed.x * dt;
+        speed.y = this.baseSpeed.y * dt;
+
+        this.setPos(this.pos.x + speed.x,
+                    this.pos.y + speed.y);
+        return;
+    }
+
+    draw(ctx){
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#151515";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    update(dt){
+        this.move(dt);
+    }
+
+    isDamaging(){return true;}
+    isProyectile(){return true;}
+
+}
+class PierceProyectile extends Proyectile {
+    constructor(pos, speed, uses, damage, 
+        damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
+        onImpact = ()=>{})
+        {
+        super(pos, 2, damage, -1, damageFormula, onImpact);
+
+        this.baseSpeed = speed;
+        this.baseUses = uses;
+        this.usesCount = 0;
+    }
+
+    isDamaging(){return true;}
+    isProyectile(){return true;}
+}
+class ImpactProyectile extends Proyectile {
+    constructor(pos, speed, damage){
+        super(pos, speed, 1, damage, 2);
+    }
+
+}
+class FollowProyectile extends Proyectile {
+    constructor(pos, speed, damage, target){
+        super(pos, speed, 1, damage, 2);
+    }
+}
+
+const Type = {
+    SINGLE:     0b0_00_0,
+    MULTIPLE:   0b0_00_1,
+
+    LINE:       0b0_00_0,
+    ARCH:       0b0_01_0,
+    CLUSTER:    0b0_10_0,
+    DIAGONAL:   0b0_11_0,
+
+    AOE:        0b1_00_0,
+
+};
+const Direction = {
+    FRONT:      0b00_00,
+    BACK:       0b00_01,
+    SIDES:      0b00_10,
+    DIAGONAL:   0b00_11,
+
+    STATIC:     0b00_00,
+    ROTATE:     0b01_00,
+    OSCILATE:   0b10_00,
+
+};
+
+class Weapon {
+    constructor(
+        attackClass = Proyectile, 
+        cooldown = 200, 
+        attackType = Type.SINGLE | Type.LINE, 
+        count = 1, 
+        attackDirection = Direction.FRONT | Direction.STATIC,
+        ){
+
+        this.attack = attackClass;
+        this.attackType = attackType;
+        this.attackDirection = attackDirection;
+
+        this.cooldown = cooldown;
+        this.downTime = 0;
+
+        this.clusterCount = count;
+    }
+
+    
+    #castAttack(pos, ...args){
+        return new this.attack(pos, ...args);
+    }
+
+    cool(dt){
+        this.downTime > 0 && (this.downTime -= dt);
+    }
+    onDownTime(){
+        return this.downTime === 0;
+    }
+
+    shoot(dtMs, ...attackArgs){
+        if(!this.onDownTime()){
+            this.downTime = this.cooldown;
+            const attack = this.#castAttack(...attackArgs);
+            return attack;
+        }
+        this.cool(dtMs);
+        return null;
+    }
+}
+
+class Item extends Entity {
+    constructor(id){
+        super("i-" + id);
+    }
+
+    isItem(){return true;}
+}
+class Structure extends Entity {
+    constructor(id){
+        super("s-" + id);
+    }
+
+    isStructure(){return true;}
+}
+
 
 class LivingEntity extends Entity {
     static count = 0;
@@ -40,12 +223,21 @@ class LivingEntity extends Entity {
 
         this.maxSpeed = maxSpeed;
         this.hitPoints = hp;
+        this.targetPos = new Vector3();
     }
 
     isLiving(){return true;}
     isAlive(){return this.hitPoints > 0;}
 
-    followTarget(){return new Vector3();}
+    followTarget(){
+        const xDistance = this.targetPos.x - this.pos.x;
+        const yDistance = this.targetPos.y - this.pos.y;
+
+        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
+        new Vector3(xDistance * farEnought, yDistance * farEnought);
+
+        return new Vector3(xDistance * farEnought, yDistance * farEnought);
+    }
     limitSpeed(speedVector){
         let speedSqrX = speedVector.x * speedVector.x;
         let speedSqrY = speedVector.y * speedVector.y;
@@ -61,15 +253,19 @@ class LivingEntity extends Entity {
         return new Vector3(speedVector.x, speedVector.y);
     }
 
-    move(dt){
+    move(dt, offset = new Vector3()){
+        let secondsDt = dt * 0.01;
+
         let speed = this.followTarget();
         speed = this.limitSpeed(speed);
 
-        speed.x *= dt;
-        speed.y *= dt;
+        speed.x *= secondsDt;
+        speed.y *= secondsDt;
 
         this.setPos(this.pos.x + speed.x,
-                    this.pos.y + speed.y);
+                    this.pos.y + speed.y, 
+                    0,
+                    offset);
         return;
     }
     hurt(damage){
@@ -79,120 +275,16 @@ class LivingEntity extends Entity {
         this.hitPoints = 0;
     }
 
-    update(dt){
-        this.isAlive() && this.move(dt);
+    update(dt, offset){
+        this.isAlive() && this.move(dt, offset);
     }
 }
-
-class Item extends Entity {
-    constructor(id){
-        super("i-" + id);
-    }
-
-    isItem(){return true;}
-}
-
-class Structure extends Entity {
-    constructor(id){
-        super("s-" + id);
-    }
-
-    isStructure(){return true;}
-}
-
-class DamageEntity extends Entity{
-    constructor(
-        typeName, 
-        pos = new Vector3(), 
-        radius = new Vector3(), 
-        baseDamage = 0, 
-        duration = -1, 
-        damageChangeFormula = (baseDmg)=>{return baseDmg;}, 
-        onImpact = ()=>{}, 
-        onExpire = ()=>{})
-        {
-        super(pos, radius, "DMG" + typeName);
-
-        this.typeName = typeName;
-        this.damageBase = baseDamage;
-        this.damageFormula = damageChangeFormula;
-        this.age = 0;
-        this.duration = duration;
-        this.onImpact = onImpact;
-        this.onExpire = onExpire;
-    }
-
-    draw(ctx){
-
-    }
-
-    update(dt){
-
-    }
-}
-
-class Proyectile extends DamageEntity {
-    constructor(pos, speed, uses, damage, 
-        damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
-        onImpact = ()=>{})
-    {
-        super("-PRC_PROY", pos, 2, damage, -1, damageFormula, onImpact);
-
-        this.baseSpeed = speed;
-        this.baseUses = uses;
-        this.usesCount = 0;
-    }
-
-    move(dt){
-        let speed = new Vector3();
-        
-        speed.x = this.baseSpeed * dt;
-        speed.y = this.baseSpeed * dt;
-
-        this.setPos(this.pos.x + speed.x,
-                    this.pos.y + speed.y);
-        return;
-    }
-
-    isDamaging(){return true;}
-    isProyectile(){return true;}
-
-}
-class PierceProyectile extends Proyectile {
-    constructor(pos, speed, uses, damage, 
-        damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
-        onImpact = ()=>{})
-        {
-        super("-PRC_PROY", pos, 2, damage, -1, damageFormula, onImpact);
-
-        this.baseSpeed = speed;
-        this.baseUses = uses;
-        this.usesCount = 0;
-    }
-
-    isDamaging(){return true;}
-    isProyectile(){return true;}
-}
-class ImpactProyectile extends Proyectile {
-    constructor(pos, radius){
-        super(pos, radius, "")
-    }
-
-}
-class FollowProyectile extends Proyectile {
-    
-}
-
-
-class AreaOfEffect extends DamageEntity {
-
-}
-
-
 class PlayerEntity extends LivingEntity {
 
     constructor(pos = new Vector3()){
         super(pos, 15, 10, 200, "PE");
+
+        this.color = "#BD93F9";
 
         this.collisionEventList = new EventArray();
         this.mousemoveEventList = new EventArray();
@@ -201,28 +293,28 @@ class PlayerEntity extends LivingEntity {
 
         this.inmunityTime = 60; // Cicles
 
+        this.keydownEventList = new EventArray();
+        this.keyupEventList = new EventArray();
+
+        this.attacks = [new Weapon(ImpactProyectile, 500)];
     }
 
     getEventList(eventName){
         switch(eventName){
             case "collision": return this.collisionEventList;
             case "mousemove": return this.mousemoveEventList;
+            case "keydown": return this.keydownEventList;
+            case "keyup": return this.keyupEventList;
             default: return this.genericEventList;
         }
     }
-
-    followTarget(){
+    updateTarget(){
         if(!this.mousemoveEventList.finish() && 
             this.mousemoveEventList.getLast() !== EventArray.noneEvent){
 
             this.targetPos = this.mousemoveEventList.getLast().eventInfo;
             this.mousemoveEventList.reset();
         }
-        
-        const xDistance = this.targetPos.x - this.pos.x;
-        const yDistance = this.targetPos.y - this.pos.y;
-
-        return new Vector3(xDistance, yDistance, 0);
     }
     /*
     limitSpeed(speedVector){
@@ -244,77 +336,99 @@ class PlayerEntity extends LivingEntity {
 
         return new Vector3(speedVector.x, speedVector.y);
     }*/
+    interactObject(){
+        if(this.collisionEventList.finish()){
+            return;
+        }
+
+    }
+    dxFromRealPos(){
+        return new Vector3(
+            this.pos.x - this.realPos.x,
+            this.pos.y - this.realPos.y
+        );
+    }
+
+    move(dt){
+        let secondsDt = dt * 0.01;
+
+        let speed = this.followTarget();
+        speed = this.limitSpeed(speed);
+
+        speed.x *= secondsDt;
+        speed.y *= secondsDt;
+
+        const offset = new Vector3(-speed.x, -speed.y);
+        return offset;
+    }
 
     hurt(damage){
         if(this.inmunityTime === 0){
             this.hitPoints -= damage;
             this.inmunityTime = 60;
-            console.log(this.hitPoints);
             return;
         }
         return;
     }
-    draw(ctx){
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "red";
-        ctx.fill();
-        ctx.closePath();
-    }
 
     update(dt){
-        this.isAlive() && this.move(dt);
+        let offset = new Vector3();
+
+        this.updateTarget();
+        this.isAlive() && (offset = this.move(dt));
         this.inmunityTime > 0 && (this.inmunityTime -= 1);
+
+        return offset;
     }
 
 }
 
 class EnemyEntity extends LivingEntity {
-    constructor(target = null, pos = new Vector3(), speed = 8, radius = 5, hp = 1){
-        super(pos, speed, radius, hp, "EE");
+    constructor(target = null, pos = new Vector3(), speed = 8, radius = 5, hp = 1, idComponent = ""){
+        super(pos, speed, radius, hp, "E" + idComponent);
         this.target = target;
-        
+        this.targetPos = this.target.pos;
+        this.color = "#00ff00"; // Temporal
     }
 
     setTarget(entity){
         this.target = entity;
     }
-
-    followTarget(){
+    updateTarget(){
         if(this.target === null){
-            return this.pos;
+            this.targetPos = this.pos;
+            return;
         }
-           
-        const xDistance = this.target.pos.x - this.pos.x;
-        const yDistance = this.target.pos.y - this.pos.y;
-
-        return new Vector3(xDistance, yDistance, 0);
+        this.targetPos = this.target.pos;
     }
-
     hurtTarget(){
-        this.target.hurt((this.aabb.radius * this.maxSpeed) / 2);
-        this.die();
+        this.target.hurt(this.aabb.radius + this.maxSpeed);
         return true;
     }
 
     cathTarget(){
-        this.aabb.isColliding(this.target.aabb) &&
+        this.isColliding(this.target.aabb) &&
         this.hurtTarget();
     }
 
-
-    draw(ctx){
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#00ff00";
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    update(dt){
+    update(dt, offset){
         if(this.isAlive()){
-            this.move(dt);
+            this.move(dt, offset);
             this.cathTarget();
         }
+        this.updateTarget();
+    }
+}
+
+class SuicideEnemy extends EnemyEntity {
+    constructor(target = null, pos = new Vector3()){
+        super(target, pos, 15, 10, 10, "K");
+        this.color = "#ff00ff";
+    }
+
+    hurtTarget(){
+        this.target.hurt(this.aabb.radius * this.maxSpeed);
+        this.die();
+        return true;
     }
 }

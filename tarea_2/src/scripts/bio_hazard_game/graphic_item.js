@@ -3,6 +3,7 @@ class GraphicItem{
         this.pos = pos;
         this.heigh = h;
         this.width = w;
+        this.color = "ffffff";
 
         this.texture = "";
         this.textureState = 0;
@@ -44,9 +45,23 @@ class GraphicItem{
     hide() {this.visibilityState = false;}
     toggleVisibility() {this.visibilityState = !this.visibilityState;}
 
-    draw(context){}
+    draw(ctx, showHitBox){
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+
+        if(showHitBox){
+            ctx.beginPath();
+            ctx.arc(this.aabb.center.x, this.aabb.center.y, this.aabb.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffff0099";
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
     
-    update(dt){ // dt = delta seconds, arguments = [canvas, context]
+    update(dt, offset){ // dt = delta seconds, arguments = [canvas, context]
         if(!this.genericEventList.finish()){
             this.onEvent();
         }

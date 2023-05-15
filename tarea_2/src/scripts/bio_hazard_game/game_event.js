@@ -244,7 +244,9 @@ class EventPublisher{
     }
 
     newEvent(event){
-        this.events.push(event);
+        if(this.eventLines[event.type] !== undefined){
+            this.events.push(event);
+        }
     }
 
     notifyNextEvent(){
@@ -265,9 +267,9 @@ class EventPublisher{
     notifyAllEvents(){
 
         while(!this.events.finish()) {
-            const event = this.events.get();
+            const eventType = this.events.get().type;
 
-            this.eventLines[event.type].newEvent(this.events.get());
+            this.eventLines[eventType].newEvent(this.events.get());
             this.eventLines["generic"].newEvent(this.events.dispatch());
         }
 
@@ -297,6 +299,10 @@ class EventPublisher{
         this.ennfID = setInterval(notifyNextWrapper, 1 * debugDelayMultiplier);
     }
     stopNotifications(){
+        if(this.enfID === 0 || this.ennfID === 0){
+            return;
+        }
+
         clearInterval(this.enfID);
         clearInterval(this.ennfID);
     }
