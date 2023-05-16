@@ -45,7 +45,7 @@ class GraphicItem{
     hide() {this.visibilityState = false;}
     toggleVisibility() {this.visibilityState = !this.visibilityState;}
 
-    draw(ctx, showHitBox){
+    draw(ctx, showHitBox, pJoyStick){
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
@@ -55,7 +55,15 @@ class GraphicItem{
         if(showHitBox){
             ctx.beginPath();
             ctx.arc(this.aabb.center.x, this.aabb.center.y, this.aabb.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffff0099";
+            ctx.fillStyle = "#ffff00";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        if(pJoyStick){
+            ctx.beginPath();
+            ctx.arc(this.aabb.center.x, this.aabb.center.y, 200, 0, Math.PI * 2);
+            ctx.fillStyle = "#ff7f0099";
             ctx.fill();
             ctx.closePath();
         }

@@ -60,20 +60,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5));
     publisher.subscribe(player, "mousemove");
 
-    let enemies = generateEnemies(player, 3, 2);
-    //enemies = [];
+    let enemies = generateEnemies(player, 3, 0);
+    // enemies = [];
 
     cnv.addEventListener("mousemove", (event) => {
-        //console.log("Original:", event.clientX, event.clientY);
-        //console.log("Scaled: ",
-        //    event.clientX * canvasScaleX, 
-        //    event.clientY * canvasScaleY);
+        //console.log("Original:", event.x, event.y);
+        //console.log("Scaled:",
+        //    event.x * canvasScaleX, 
+        //    event.y * canvasScaleY);
 
         publisher.newEvent(new GameEvent(
             "mousemove", 
             new Vector3(
-                event.clientX * canvasScaleX, 
-                event.clientY * canvasScaleY
+                event.x * canvasScaleX, 
+                event.y * canvasScaleY
                 )
             ));
     });
@@ -87,11 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
         clear(ctx, cnv);
 
         const offset = player.update(dt);
-        player.draw(ctx, true);
+        player.draw(ctx, false, false);
 
         enemies.forEach((e) => {
             e.update(dt, offset);
-            e.draw(ctx, true);
+            e.draw(ctx, false);
         });
 
         enemies = enemies.filter(e => e.isAlive());

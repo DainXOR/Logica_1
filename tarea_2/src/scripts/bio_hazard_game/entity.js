@@ -22,6 +22,18 @@ class Entity extends GraphicItem{
         this.aabb.radius = newRadius;
     }
 
+    move(dt, offset = new Vector3()){
+        this.setPos(this.pos.x,
+                    this.pos.y, 
+                    0,
+                    offset);
+        return;
+    }
+
+    update(dt, offset){
+        this.move(dt, offset);
+    }
+
     isColliding(otherAABB){return this.aabb.isColliding(otherAABB);}
     isLiving(){return false;}
     isItem(){return false;}
@@ -54,13 +66,23 @@ class DamageEntity extends Entity{
         this.onExpire = onExpire;
     }
 
-    draw(ctx){
+    levelUpgrades(...buffs){
+        this.test = {
+            damageAdd: buffs[0],
+            damageMult: buffs[1],
+            radius: buffs[2],
+            duration: buffs[3],
+        };
+
+        this.levelUpBuff = [...buffs];
 
     }
 
-    update(dt){
-
+    upgrade(){
+        return [];
     }
+
+    isDamaging(){return true;}
 }
 class AreaOfEffect extends DamageEntity {
 
@@ -78,30 +100,31 @@ class Proyectile extends DamageEntity {
         this.usesCount = 0;
     }
 
-    move(dt){
+    move(dt, offset){
         let speed = new Vector3();
         
         speed.x = this.baseSpeed.x * dt;
         speed.y = this.baseSpeed.y * dt;
 
-        this.setPos(this.pos.x + speed.x,
-                    this.pos.y + speed.y);
+         this.setPos(this.pos.x + speed.x,
+                    this.pos.y + speed.y, 
+                    0,
+                    offset);
         return;
     }
 
     draw(ctx){
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#151515";
+        ctx.fillStyle = "#ffffff";
         ctx.fill();
         ctx.closePath();
     }
 
-    update(dt){
-        this.move(dt);
+    update(dt, offset = new Vector3()){
+        this.move(dt, offset);
     }
 
-    isDamaging(){return true;}
     isProyectile(){return true;}
 
 }
@@ -168,6 +191,7 @@ class Weapon {
         this.attack = attackClass;
         this.attackType = attackType;
         this.attackDirection = attackDirection;
+        this.attackLevel = 1;
 
         this.cooldown = cooldown;
         this.downTime = 0;
@@ -185,6 +209,11 @@ class Weapon {
     }
     onDownTime(){
         return this.downTime === 0;
+    }
+
+    upgrade(){
+        this.attackLevel += 1;
+
     }
 
     shoot(dtMs, ...attackArgs){
@@ -282,20 +311,24 @@ class LivingEntity extends Entity {
 class PlayerEntity extends LivingEntity {
 
     constructor(pos = new Vector3()){
-        super(pos, 15, 10, 200, "PE");
+        super(pos, 15, 15, 200, "PE");
 
         this.color = "#BD93F9";
+        this.controlRange = 200;
 
         this.collisionEventList = new EventArray();
         this.mousemoveEventList = new EventArray();
         this.targetPos = new Vector3(pos.x, pos.y, pos.z);
         // You know js is shit when all params are references and need something like this
 
-        this.inmunityTime = 60; // Cicles
+        this.inmunityTime = 0; // Seconds
+        this.help = 0;
 
         this.keydownEventList = new EventArray();
         this.keyupEventList = new EventArray();
 
+        this.level = 0;
+        this.experience = 0;
         this.attacks = [new Weapon(ImpactProyectile, 500)];
     }
 
@@ -348,6 +381,23 @@ class PlayerEntity extends LivingEntity {
             this.pos.y - this.realPos.y
         );
     }
+    limitSpeed(speedVector){
+        const speedSqrX = speedVector.x * speedVector.x;
+        const speedSqrY = speedVector.y * speedVector.y;
+        const rangeSqr = this.controlRange * this.controlRange
+
+        const speedNorm = (speedSqrX + speedSqrY) < rangeSqr ? 
+            this.controlRange : 
+            Math.sqrt(speedSqrX + speedSqrY);
+
+        speedVector.x /= speedNorm;
+        speedVector.y /= speedNorm;
+
+        speedVector.x *= this.maxSpeed;
+        speedVector.y *= this.maxSpeed;
+
+        return new Vector3(speedVector.x, speedVector.y);
+    }
 
     move(dt){
         let secondsDt = dt * 0.01;
@@ -363,20 +413,35 @@ class PlayerEntity extends LivingEntity {
     }
 
     hurt(damage){
-        if(this.inmunityTime === 0){
+        if(this.inmunityTime <= 0){
             this.hitPoints -= damage;
-            this.inmunityTime = 60;
+            this.inmunityTime = 1000;
+            this.color = "#ff0000";
+            this.help = 0;
             return;
         }
         return;
     }
 
+    hurtRecover(dt){
+        if(this.inmunityTime > 0){
+            this.color = "#" + colorFader("ff0000", "BD93F9", this.help / 60);
+            console.log(colorFader("ff0000", "BD93F9", this.help / 60));
+
+            this.inmunityTime -= dt;
+            this.help++;
+        }
+        //this.color = "#BD93F9";
+    }
+
     update(dt){
         let offset = new Vector3();
 
-        this.updateTarget();
-        this.isAlive() && (offset = this.move(dt));
-        this.inmunityTime > 0 && (this.inmunityTime -= 1);
+        if(this.isAlive()){
+            this.updateTarget();
+            offset = this.move(dt);
+            this.hurtRecover(dt);
+        }
 
         return offset;
     }

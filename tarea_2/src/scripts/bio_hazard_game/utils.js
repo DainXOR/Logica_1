@@ -33,3 +33,37 @@ function getRandomAvoid(min, max, ...toAvoid){
 
     return value;
 }
+
+function toRGB(hexNumber){
+    hexNumber = parseInt(hexNumber, 16);
+
+    let r = Math.floor(hexNumber * 0.0625 * 0.0625 * 0.0625 * 0.0625);
+    let g = Math.floor(hexNumber * 0.0625 * 0.0625) - (r * 16 * 16);
+    let b = (hexNumber - (g * 16 * 16)) - (r * 16 * 16 * 16 * 16);
+    
+    return [r / 255, g / 255, b / 255];
+}
+function toHEX(rgbArray){
+    let hexR = Math.floor(rgbArray[0] * 255) // .toString(16);
+    let hexG = Math.floor(rgbArray[1] * 255) // .toString(16);
+    let hexB = Math.floor(rgbArray[2] * 255) // .toString(16);
+
+    hexR = hexR < 16? "0" + hexR.toString(16) : hexR.toString(16);
+    hexG = hexG < 16? "0" + hexG.toString(16) : hexG.toString(16);
+    hexB = hexB < 16? "0" + hexB.toString(16) : hexB.toString(16);
+    
+    return hexR + hexG + hexB;
+}
+
+function colorFader(hex1, hex2, mix = 0){
+    const c1 = toRGB(hex1);
+    const c2 = toRGB(hex2);
+
+    const result = toHEX([
+        (1 - mix) * c1[0] + mix * c2[0],
+        (1 - mix) * c1[1] + mix * c2[1],
+        (1 - mix) * c1[2] + mix * c2[2],
+    ]);
+
+    return result;
+}
