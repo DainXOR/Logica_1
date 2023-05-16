@@ -9,7 +9,7 @@ function generateEnemies(target, normalAmount, suicideAmount){
         let radius = getRandomNumber(10, 50);
         let speed = 10 - ((5 / 50) * radius);
 
-        enemies.push(new EnemyEntity(target, new Vector3(x, y), speed, radius));        
+        enemies.push(new NormalEnemy(target, new Vector3(x, y)));        
     }
     for (let i = 0; i < suicideAmount; i++) {
         let x = getRandomNumber(0, 1000);

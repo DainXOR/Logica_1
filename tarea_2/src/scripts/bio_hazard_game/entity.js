@@ -464,16 +464,15 @@ class PlayerEntity extends LivingEntity {
 }
 
 class EnemyEntity extends LivingEntity {
-    constructor(target = null, pos = new Vector3(), speed = 8, radius = 5, hp = 1, idComponent = ""){
+    constructor(target = null, pos = new Vector3(), damage = 0,  speed = 8, radius = 5, hp = 1, idComponent = ""){
         super(pos, speed, radius, hp, "E" + idComponent);
         this.target = target;
         this.targetPos = this.target.pos;
+        this.baseDamage = damage;
 
-        this.colorNormal = "00ff00";
+        this.setColors("000000", "ffffff");
 
-        this.color = "#" + this.colorNormal; // Temporal
-
-        this.hurtFormula = ()=>{ return this.aabb.radius + this.maxSpeed; };
+        this.damageFormula = ()=>{ return this.baseDamage; };
         this.afterHurt = ()=>{};
     }
 
@@ -488,7 +487,7 @@ class EnemyEntity extends LivingEntity {
         this.targetPos = this.target.pos;
     }
     hurtTarget(){
-        this.target.hurt(this.hurtFormula());
+        this.target.hurt(this.damageFormula());
         this.afterHurt();
         return true;
     }
@@ -507,13 +506,38 @@ class EnemyEntity extends LivingEntity {
     }
 }
 
+class NormalEnemy extends EnemyEntity {
+    constructor(target = null, pos = new Vector3()){
+        super(target, pos, 5, 10, 15, 10, "K");
+
+        this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
+        this.afterHurt = ()=>{ this.die(); };
+    }
+}
+
 class SuicideEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 15, 10, 10, "K");
-        this.colorNormal = "ff00ff";
-        this.color = "#" + this.colorNormal;
+        super(target, pos, 0, 12, 15, 10, "K");
 
-        this.hurtFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
+        this.colorCenter = "ffffff";
+
+        this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
+    }
+
+    hurt(damage){
+        super.hurt(damage);
+        this.maxSpeed = 15;
+        this.colorCenter = "ff0000";
+    }
+
+    draw(ctx, showHitBox = false){
+        super.draw(ctx, showHitBox);
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#" + this.colorCenter;
+        ctx.fill();
+        ctx.closePath();
     }
 }
