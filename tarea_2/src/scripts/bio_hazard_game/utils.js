@@ -67,3 +67,11 @@ function colorFader(hex1, hex2, mix = 0){
 
     return result;
 }
+
+function colorGradient(color1, color2, steps){
+    let gradient = [];
+    for (let i = 0; i < steps; i++) {
+        gradient.push(colorFader(color1, color2, i / steps).toString(16));
+    }
+    return gradient;
+}

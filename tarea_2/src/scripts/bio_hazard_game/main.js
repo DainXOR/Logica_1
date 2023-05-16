@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5));
     publisher.subscribe(player, "mousemove");
 
-    let enemies = generateEnemies(player, 3, 0);
+    let enemies = generateEnemies(player, 3, 2);
     // enemies = [];
 
     cnv.addEventListener("mousemove", (event) => {

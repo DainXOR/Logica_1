@@ -253,10 +253,24 @@ class LivingEntity extends Entity {
         this.maxSpeed = maxSpeed;
         this.hitPoints = hp;
         this.targetPos = new Vector3();
+
+        this.setColors("000000", "ffffff", 30);
+
+        this.inmunityMaxTime = 500; // Seconds
+        this.inmunityTime = 0; // Seconds
     }
 
     isLiving(){return true;}
     isAlive(){return this.hitPoints > 0;}
+
+    setColors(normal, hurt, steps){
+        this.colorNormal = normal;
+        this.colorHurt = hurt;
+        this.gradientSteps = steps;
+        this.hurtGradient = colorGradient(this.colorHurt, this.colorNormal, this.gradientSteps);
+        this.color = "#" + this.colorNormal;
+        this.gradientStep = 0;
+    }
 
     followTarget(){
         const xDistance = this.targetPos.x - this.pos.x;
@@ -297,9 +311,34 @@ class LivingEntity extends Entity {
                     offset);
         return;
     }
+
     hurt(damage){
-        this.hitPoints -= damage;
+        if(this.inmunityTime <= 0){
+            this.hitPoints -= damage;
+            this.inmunityTime = this.inmunityMaxTime;
+            this.color = "#" + this.colorHurt;
+            this.gradientStep = 0;
+            return;
+        }
+        return;
     }
+
+    hurtRecover(dt){
+        if(this.inmunityTime > 0){
+            this.inmunityTime -= dt;
+            
+            if(this.gradientStep < this.gradientSteps){
+                this.color = "#" + this.hurtGradient[this.gradientStep];
+                this.gradientStep++;
+            }
+            else if (this.gradientStep === this.gradientSteps){
+                this.color = "#" + this.colorNormal;
+                this.gradientStep++;
+            }
+        }
+    }
+
+
     die(){
         this.hitPoints = 0;
     }
@@ -313,16 +352,14 @@ class PlayerEntity extends LivingEntity {
     constructor(pos = new Vector3()){
         super(pos, 15, 15, 200, "PE");
 
-        this.color = "#BD93F9";
+        this.setColors("BD93F9", "FF0000", 30);
+
         this.controlRange = 200;
 
         this.collisionEventList = new EventArray();
         this.mousemoveEventList = new EventArray();
         this.targetPos = new Vector3(pos.x, pos.y, pos.z);
         // You know js is shit when all params are references and need something like this
-
-        this.inmunityTime = 0; // Seconds
-        this.help = 0;
 
         this.keydownEventList = new EventArray();
         this.keyupEventList = new EventArray();
@@ -412,28 +449,6 @@ class PlayerEntity extends LivingEntity {
         return offset;
     }
 
-    hurt(damage){
-        if(this.inmunityTime <= 0){
-            this.hitPoints -= damage;
-            this.inmunityTime = 1000;
-            this.color = "#ff0000";
-            this.help = 0;
-            return;
-        }
-        return;
-    }
-
-    hurtRecover(dt){
-        if(this.inmunityTime > 0){
-            this.color = "#" + colorFader("ff0000", "BD93F9", this.help / 60);
-            console.log(colorFader("ff0000", "BD93F9", this.help / 60));
-
-            this.inmunityTime -= dt;
-            this.help++;
-        }
-        //this.color = "#BD93F9";
-    }
-
     update(dt){
         let offset = new Vector3();
 
@@ -453,7 +468,13 @@ class EnemyEntity extends LivingEntity {
         super(pos, speed, radius, hp, "E" + idComponent);
         this.target = target;
         this.targetPos = this.target.pos;
-        this.color = "#00ff00"; // Temporal
+
+        this.colorNormal = "00ff00";
+
+        this.color = "#" + this.colorNormal; // Temporal
+
+        this.hurtFormula = ()=>{ return this.aabb.radius + this.maxSpeed; };
+        this.afterHurt = ()=>{};
     }
 
     setTarget(entity){
@@ -467,7 +488,8 @@ class EnemyEntity extends LivingEntity {
         this.targetPos = this.target.pos;
     }
     hurtTarget(){
-        this.target.hurt(this.aabb.radius + this.maxSpeed);
+        this.target.hurt(this.hurtFormula());
+        this.afterHurt();
         return true;
     }
 
@@ -488,12 +510,10 @@ class EnemyEntity extends LivingEntity {
 class SuicideEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 15, 10, 10, "K");
-        this.color = "#ff00ff";
-    }
+        this.colorNormal = "ff00ff";
+        this.color = "#" + this.colorNormal;
 
-    hurtTarget(){
-        this.target.hurt(this.aabb.radius * this.maxSpeed);
-        this.die();
-        return true;
+        this.hurtFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
+        this.afterHurt = ()=>{ this.die(); };
     }
 }
