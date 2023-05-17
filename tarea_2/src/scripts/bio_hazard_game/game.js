@@ -10,27 +10,60 @@ class game {
         cnv.height = 1000;
 
         this.publisher = new EventPublisher();
+
+
+        this.enemiesGenerate = [1];
+        this.enemieSpawnTime = 1000;
+        this.spawnTimer = 0;
+        this.timesInvoked = 0;
+        this.spawnLevel = 0;        
     
     }
 
-    generateEnemies(normalAmount, suicideAmount){
+    generateEnemies(target, normalAmount, suicideAmount){
         let enemies = [];
+        let minDistance = (x, y)=>{return (x*x)+(y*y) >= 2_250_000;};
+    
         for (let i = 0; i < normalAmount; i++) {
-            let x = getRandomNumber(0, this.canvas.width);
-            let y = getRandomNumber(0, this.canvas.height);
     
-            let radius = getRandomNumber(10, 50);
-            let speed = 10 - ((5 / 50) * radius);
+            let coords = getNRandom(2, -1500, 1500, minDistance);
+            let x = coords[0];
+            let y = coords[1];
     
-            enemies.push(new EnemyEntity(player, new Vector3(x, y), speed, radius));        
+            console.log(x, y, minDistance(x, y));
+    
+            enemies.push(new NormalEnemy(target, new Vector3(x, y)));        
         }
         for (let i = 0; i < suicideAmount; i++) {
-            let x = getRandomNumber(0, this.canvas.width);
-            let y = getRandomNumber(0, this.canvas.height);
     
-            enemies.push(new SuicideEnemy(player, new Vector3(x, y)));        
+            let coords = getNRandom(2, -1500, 1500, minDistance);
+            let x = coords[0];
+            let y = coords[1];
+    
+            console.log(x, y, minDistance(x, y))
+    
+            enemies.push(new SuicideEnemy(target, new Vector3(x, y)));        
         }
         return enemies;
+    }
+
+    createEnemies(target, dt){
+        let newEnemies = [];
+    
+        if(this.spawnTimer >= this.enemieSpawnTime){
+            this.spawnTimer = 0;
+            newEnemies = generateEnemies(target, ...enemiesGenerate);
+    
+            if(this.timesInvoked === 5){
+                enemiesGenerate[getRandomNumber(0, this.spawnLevel)]++;
+                this.spawnLevel++;
+                this.timesInvoked = 0;
+            }
+        }
+    
+        this.spawnTimer += dt;
+    
+        return newEnemies;
     }
 
     update(timeStamp){

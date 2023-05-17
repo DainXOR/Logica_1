@@ -256,7 +256,7 @@ class LivingEntity extends Entity {
 
         this.setColors("000000", "ffffff", 30);
 
-        this.inmunityMaxTime = 500; // Seconds
+        this.inmunityMaxTime = 300; // Miliseconds
         this.inmunityTime = 0; // Seconds
     }
 
@@ -277,7 +277,7 @@ class LivingEntity extends Entity {
         const yDistance = this.targetPos.y - this.pos.y;
 
         const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
-        new Vector3(xDistance * farEnought, yDistance * farEnought);
+        // Mainly for the player to stand still when the mouse is inside its bounding box
 
         return new Vector3(xDistance * farEnought, yDistance * farEnought);
     }
@@ -344,7 +344,10 @@ class LivingEntity extends Entity {
     }
 
     update(dt, offset){
-        this.isAlive() && this.move(dt, offset);
+        if(this.isAlive()) {
+            this.move(dt, offset);
+            this.hurtRecover(dt);
+        }
     }
 }
 class PlayerEntity extends LivingEntity {
@@ -386,26 +389,6 @@ class PlayerEntity extends LivingEntity {
             this.mousemoveEventList.reset();
         }
     }
-    /*
-    limitSpeed(speedVector){
-        const sqrtNormalizer = 7.07; // Sqrt(50) aprox. For 50px radius
-        const isNegativeX = speedVector.x < 0;
-        const isNegativeY = speedVector.y < 0;
-
-        speedVector.x = Math.sqrt(Math.abs(speedVector.x)) / sqrtNormalizer;
-        speedVector.y = Math.sqrt(Math.abs(speedVector.y)) / sqrtNormalizer;
-
-        speedVector.x > 1 && (speedVector.x = 1);
-        speedVector.y > 1 && (speedVector.y = 1);
-
-        speedVector.x *= this.maxSpeed;
-        speedVector.y *= this.maxSpeed;
-
-        isNegativeX && (speedVector.x *= -1);
-        isNegativeY && (speedVector.y *= -1);
-
-        return new Vector3(speedVector.x, speedVector.y);
-    }*/
     interactObject(){
         if(this.collisionEventList.finish()){
             return;
@@ -470,7 +453,7 @@ class EnemyEntity extends LivingEntity {
         this.targetPos = this.target.pos;
         this.baseDamage = damage;
 
-        this.setColors("000000", "ffffff");
+        this.setColors("000000", "ffffff", 20);
 
         this.damageFormula = ()=>{ return this.baseDamage; };
         this.afterHurt = ()=>{};
@@ -491,16 +474,20 @@ class EnemyEntity extends LivingEntity {
         this.afterHurt();
         return true;
     }
-
     cathTarget(){
         this.isColliding(this.target.aabb) &&
         this.hurtTarget();
+    }
+
+    tooFar(){
+        return (this.targetPos.x - this.pos.x > 2000) || (this.targetPos.y - this.pos.y > 2000);
     }
 
     update(dt, offset){
         if(this.isAlive()){
             this.move(dt, offset);
             this.cathTarget();
+            this.hurtRecover(dt);
         }
         this.updateTarget();
     }
@@ -511,33 +498,61 @@ class NormalEnemy extends EnemyEntity {
         super(target, pos, 5, 10, 15, 10, "K");
 
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
-        this.afterHurt = ()=>{ this.die(); };
     }
 }
 
 class SuicideEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 0, 12, 15, 10, "K");
+        super(target, pos, 0, 15, 15, 10, "K");
 
         this.colorCenter = "ffffff";
+        this.rageMode = false;
 
         this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
+
+        this.targetPos = new Vector3(this.target.pos.x, this.target.pos.y);
     }
 
     hurt(damage){
         super.hurt(damage);
-        this.maxSpeed = 15;
+        this.maxSpeed = 18;
         this.colorCenter = "ff0000";
+        this.rageMode = true;
+    }
+
+    updateTarget(){
+        if(this.rageMode){
+            if(this.target === null){
+                this.targetPos = this.pos;
+                return;
+            }
+            this.targetPos = this.target.pos;
+        }
+    }
+
+    followTarget(){
+        const xDistance = this.targetPos.x - this.pos.x;
+        const yDistance = this.targetPos.y - this.pos.y;
+
+        if(!this.rageMode){
+            this.targetPos.x += xDistance / Math.abs(xDistance);
+            this.targetPos.y += yDistance / Math.abs(yDistance);
+        }
+
+        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
+
+        return new Vector3(xDistance * farEnought, yDistance * farEnought);
     }
 
     draw(ctx, showHitBox = false){
         super.draw(ctx, showHitBox);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.5, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.3, 0, Math.PI * 2);
         ctx.fillStyle = "#" + this.colorCenter;
         ctx.fill();
         ctx.closePath();
     }
+
 }

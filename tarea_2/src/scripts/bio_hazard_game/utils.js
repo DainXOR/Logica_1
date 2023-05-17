@@ -33,6 +33,25 @@ function getRandomAvoid(min, max, ...toAvoid){
 
     return value;
 }
+function getConditionateRandom(min, max, predicate){
+    let value = 0;
+    do{
+        value = getRandomNumber(min, max);
+    }while(!predicate(value));
+
+    return value;
+}
+function getNRandom(n, min, max, predicate = ()=>{return true;}){
+    let values = [];
+    do{
+        values = [];
+        for (let i = 0; i < n; i++) {
+            values.push(getRandomNumber(min, max));
+        }
+    }while(!predicate(...values));
+
+    return values;
+}
 
 function toRGB(hexNumber){
     hexNumber = parseInt(hexNumber, 16);
@@ -54,7 +73,6 @@ function toHEX(rgbArray){
     
     return hexR + hexG + hexB;
 }
-
 function colorFader(hex1, hex2, mix = 0){
     const c1 = toRGB(hex1);
     const c2 = toRGB(hex2);
@@ -67,7 +85,6 @@ function colorFader(hex1, hex2, mix = 0){
 
     return result;
 }
-
 function colorGradient(color1, color2, steps){
     let gradient = [];
     for (let i = 0; i < steps; i++) {
