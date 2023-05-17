@@ -326,15 +326,14 @@ class LivingEntity extends Entity {
     hurtRecover(dt){
         if(this.inmunityTime > 0){
             this.inmunityTime -= dt;
-            
-            if(this.gradientStep < this.gradientSteps){
-                this.color = "#" + this.hurtGradient[this.gradientStep];
-                this.gradientStep++;
-            }
-            else if (this.gradientStep === this.gradientSteps){
-                this.color = "#" + this.colorNormal;
-                this.gradientStep++;
-            }
+        }
+        if(this.gradientStep < this.gradientSteps){
+            this.color = "#" + this.hurtGradient[this.gradientStep];
+            this.gradientStep++;
+        }
+        else if (this.gradientStep === this.gradientSteps){
+            this.color = "#" + this.colorNormal;
+            this.gradientStep++;
         }
     }
 
