@@ -357,14 +357,12 @@ class PlayerEntity extends LivingEntity {
         this.setColors("BD93F9", "FF0000", 30);
 
         this.controlRange = 200;
+        this.inmunityMaxTime = 500; // Miliseconds
+        // You know js is shit when all params are references and need something like this
+        this.targetPos = new Vector3(pos.x, pos.y, pos.z);
 
         this.collisionEventList = new EventArray();
         this.mousemoveEventList = new EventArray();
-        this.targetPos = new Vector3(pos.x, pos.y, pos.z);
-        // You know js is shit when all params are references and need something like this
-
-        this.keydownEventList = new EventArray();
-        this.keyupEventList = new EventArray();
 
         this.level = 0;
         this.experience = 0;
@@ -381,6 +379,7 @@ class PlayerEntity extends LivingEntity {
         }
     }
     updateTarget(){
+
         if(!this.mousemoveEventList.finish() && 
             this.mousemoveEventList.getLast() !== EventArray.noneEvent){
 
@@ -494,7 +493,7 @@ class EnemyEntity extends LivingEntity {
 
 class NormalEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 5, 10, 15, 10, "K");
+        super(target, pos, 5, 8, 10, 10, "N");
 
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
@@ -502,7 +501,7 @@ class NormalEnemy extends EnemyEntity {
 
 class SuicideEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 0, 15, 15, 10, "K");
+        super(target, pos, 0, 14, 10, 10, "K");
 
         this.colorCenter = "ffffff";
         this.rageMode = false;
@@ -548,7 +547,7 @@ class SuicideEnemy extends EnemyEntity {
         super.draw(ctx, showHitBox);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.3, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.4, 0, Math.PI * 2);
         ctx.fillStyle = "#" + this.colorCenter;
         ctx.fill();
         ctx.closePath();

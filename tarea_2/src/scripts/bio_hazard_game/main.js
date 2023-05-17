@@ -67,11 +67,6 @@ document.addEventListener("keypress", (event) => {
         console.log("Notifications stopped!");
     }
 
-    if(event.key === "i"){
-        // console.log("In queue: " + publisher.events.events.length);
-        // console.log("Events: " + publisher.events.events);
-        console.log(player.pos);
-    }
 });
 
 function clear(context, canvas){
@@ -98,10 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     //enemies[0].setPos(50, 50);
 
     cnv.addEventListener("mousemove", (event) => {
-        //console.log("Original:", event.x, event.y);
-        //console.log("Scaled:",
-        //    event.x * canvasScaleX, 
-        //    event.y * canvasScaleY);
 
         publisher.newEvent(new GameEvent(
             "mousemove", 

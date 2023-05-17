@@ -175,19 +175,17 @@ class EventBus{
         this.subscribers.forEach(sub => {
             sub.getEventList(this.eventType).push(this.events.get());
         });
+
         this.events.dispatch();
     }
 
     sendAllEvents(){
+
         this.subscribers.forEach(sub => {
             sub.getEventList(this.eventType).events = this.events.events.slice();
         });
-        this.events.reset();
-        
 
-        // for (let i = 0; i < this.events.length; i++) {
-        //     this.sendNextEvent();
-        // }
+        this.events.reset();
     }
 
 }
@@ -295,8 +293,8 @@ class EventPublisher{
             thisReference.notifyNextEvent();
         }
 
-        this.enfID = setInterval(notifyAllWrapper, 5 * debugDelayMultiplier);
-        this.ennfID = setInterval(notifyNextWrapper, 1 * debugDelayMultiplier);
+        this.enfID = setInterval(notifyAllWrapper, 50 * debugDelayMultiplier);
+        this.ennfID = setInterval(notifyNextWrapper, 10 * debugDelayMultiplier);
     }
     stopNotifications(){
         if(this.enfID === 0 || this.ennfID === 0){
