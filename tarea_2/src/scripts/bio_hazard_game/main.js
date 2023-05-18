@@ -2,8 +2,8 @@ let publisher = new EventPublisher();
 
 function generateEnemies(target, normalAmount, suicideAmount){
     let enemies = [];
-    let minDistance = (x, y)=>{
-        return (x * x) + (y * y) >= (target.pos.x * target.pos.x) + (target.pos.y * target.pos.y) + 2_250_000;
+    let minDistance = (x, y) => {
+        return (x * x) + (y * y) >= 2_100_000;
     };
 
     for (let i = 0; i < normalAmount; i++) {
@@ -16,7 +16,7 @@ function generateEnemies(target, normalAmount, suicideAmount){
     }
     for (let i = 0; i < suicideAmount; i++) {
 
-        let coords = getNRandom(2, -1500, 1500);
+        let coords = getNRandom(2, -1500, 1500, minDistance);
         let x = coords[0];
         let y = coords[1];
 
@@ -26,7 +26,8 @@ function generateEnemies(target, normalAmount, suicideAmount){
 }
 
 let enemiesGenerate = [1, 0, 0, 0, 0];
-let enemieSpawnTime = 2000;
+let enemyTypes = 3;
+let enemySpawnTime = 2000;
 let spawnTimer = 0;
 let timesInvoked = 0;
 let spawnLevel = 0;
@@ -35,13 +36,13 @@ function createEnemies(target, dt){
     let newEnemies = [];
     spawnTimer += dt;
 
-    if(spawnTimer >= enemieSpawnTime){
+    if(spawnTimer >= enemySpawnTime){
         spawnTimer = 0;
         timesInvoked += 1;
         newEnemies = generateEnemies(target, ...enemiesGenerate);
 
         if(timesInvoked === 10){
-            enemiesGenerate[getRandomNumber(0, spawnLevel)]++;
+            enemiesGenerate[getRandomNumber(0, Math.min(spawnLevel, enemyTypes))]++;
             spawnLevel++;
             timesInvoked = 0;
         }
@@ -81,8 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
     cnv.width = 1000;
     cnv.height = 1000;
 
-    canvasScaleX = cnv.width / cnv.clientWidth;
-    canvasScaleY = cnv.height / cnv.clientHeight;
+    let canvasScaleX = cnv.width / cnv.clientWidth;
+    let canvasScaleY = cnv.height / cnv.clientHeight;
 
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5));
     publisher.subscribe(player, "mousemove");
@@ -105,6 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let lastTime = 0;
 
+    let playerAttacks = [];
+
     function gameLoop(timeStamp){
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
@@ -114,7 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
         clear(ctx, cnv);
 
         const offset = player.update(dt);
+        playerAttacks.push(...player.shoot(...enemies));
         player.draw(ctx, false, false);
+
+        playerAttacks.forEach((attack) => {
+            attack.update(dt, offset);
+            attack.impact(...enemies);
+            attack.draw(ctx, true);
+        });
+        console.log(playerAttacks.length);
+
+        playerAttacks = playerAttacks.filter(a => a.isActive() && !a.tooFar(player));
 
         enemies.forEach((e) => {
             e.update(dt, offset);
@@ -122,11 +135,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
-        console.log(enemies.length);
 
-        if(getRandomNumber(0, 1000) < 1){
-            enemies.forEach(e => e.hurt(1)); 
-        }
+        //if(getRandomNumber(0, 1000) < 1){
+        //    enemies.forEach(e => e.hurt(1)); 
+        //}
 
         requestAnimationFrame(gameLoop);
     

@@ -20,11 +20,17 @@ class AABB{
     }
 
     isColliding(other){
-        const dx_sqr = (other.center.x - this.center.x) * (other.center.x - this.center.x);
-        const dy_sqr = (other.center.y - this.center.y) * (other.center.y - this.center.y);
+        const de_sqr = this.distanceTo(other);
         const dr_sqr = (this.radius + other.radius) * (this.radius + other.radius);
 
-        return (dx_sqr + dy_sqr) < dr_sqr;
+        return de_sqr < dr_sqr;
+    }
+
+    distanceTo(other){
+        const dx_sqr = (other.center.x - this.center.x) * (other.center.x - this.center.x);
+        const dy_sqr = (other.center.y - this.center.y) * (other.center.y - this.center.y);
+
+        return dx_sqr + dy_sqr;
     }
 }
  

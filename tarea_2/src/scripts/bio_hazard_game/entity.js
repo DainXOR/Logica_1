@@ -49,7 +49,7 @@ class DamageEntity extends Entity{
         typeName, 
         pos = new Vector3(), 
         radius = new Vector3(), 
-        baseDamage = 0, 
+        damageBase = 0, 
         timeDuration = -1,
         damageFormula = (baseDmg)=>{return baseDmg;}, 
         onImpact = ()=>{}, 
@@ -57,13 +57,16 @@ class DamageEntity extends Entity{
         {
         super(pos, radius, "DMG" + typeName);
 
+        
+
         this.typeName = typeName;
-        this.damageBase = baseDamage;
+        this.baseDamage = damageBase;
         this.damageFormula = damageFormula;
         this.age = 0;
         this.duration = timeDuration;
         this.onImpact = onImpact;
         this.onExpire = onExpire;
+        this.state = true;
     }
 
     levelUpgrades(...buffs){
@@ -82,14 +85,29 @@ class DamageEntity extends Entity{
         return [];
     }
 
+    impact(...entities){
+        entities.forEach((e) => {
+            if(this.aabb.isColliding(e.aabb)){
+                e.hurt(this.damageFormula(this.baseDamage));
+                this.state = false;
+                return;
+            }
+        });
+    }
+
+    tooFar(other){
+        this.aabb.distanceTo(other.aabb) >= 4_000_000;
+    }
+
+    isActive(){return this.state;}
     isDamaging(){return true;}
 }
 class AreaOfEffect extends DamageEntity {
 
 }
 class Proyectile extends DamageEntity {
-    constructor(pos, speed, uses, damage, radius, 
-        damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
+    constructor(pos, direction, speed, uses, damage, radius, 
+        damageFormula = (dmg, speed, size)=>{return dmg + (speed * size);}, 
         onImpact = ()=>{}
         )
     {
@@ -97,14 +115,34 @@ class Proyectile extends DamageEntity {
 
         this.baseSpeed = speed;
         this.baseUses = uses;
+        this.origin = new Vector3(this.pos.x, this.pos.y);
+        this.direction = new Vector3(direction.x - this.pos.x, direction.y - this.pos.y);
         this.usesCount = 0;
-    }
+        this.timeAlive = 0;
 
-    move(dt, offset){
-        let speed = new Vector3();
+        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
+
+        this.color = "#ffffff";
+    }
+    limitSpeed(speedVector){
+        let speedSqrX = speedVector.x * speedVector.x;
+        let speedSqrY = speedVector.y * speedVector.y;
         
-        speed.x = this.baseSpeed.x * dt;
-        speed.y = this.baseSpeed.y * dt;
+        // Well, this is weird, but im not complaining (in this use case)
+        const speedNorm = Math.sqrt(speedSqrX + speedSqrY) || 1;
+        speedVector.x /= speedNorm;
+        speedVector.y /= speedNorm;
+
+        speedVector.x *= this.baseSpeed;
+        speedVector.y *= this.baseSpeed;
+
+        return new Vector3(speedVector.x, speedVector.y);
+    }
+    move(dt, offset){
+        let speed = this.limitSpeed(this.direction);
+        
+        speed.x = speed.x * dt * 0.01;
+        speed.y = speed.y * dt * 0.01;
 
          this.setPos(this.pos.x + speed.x,
                     this.pos.y + speed.y, 
@@ -112,28 +150,28 @@ class Proyectile extends DamageEntity {
                     offset);
         return;
     }
-
-    draw(ctx){
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.closePath();
-    }
-
     update(dt, offset = new Vector3()){
         this.move(dt, offset);
+        this.timeAlive += dt;
     }
 
+    impact(...entities){
+        for (let i = 0; i < entities.length; i++) {
+            if(this.aabb.isColliding(entities[i].aabb)) {
+                entities[i].hurt(this.damageFormula(this.baseDamage, this.baseSpeed))
+                this.state = false;
+            }
+        }
+    }
     isProyectile(){return true;}
 
 }
 class PierceProyectile extends Proyectile {
-    constructor(pos, speed, uses, damage, 
+    constructor(pos, direction, speed, uses, damage, 
         damageFormula = (dmg, uses)=>{return dmg * (1 / uses);}, 
         onImpact = ()=>{})
         {
-        super(pos, 2, damage, -1, damageFormula, onImpact);
+        super(pos, direction, 2, damage, -1, damageFormula, onImpact);
 
         this.baseSpeed = speed;
         this.baseUses = uses;
@@ -144,14 +182,14 @@ class PierceProyectile extends Proyectile {
     isProyectile(){return true;}
 }
 class ImpactProyectile extends Proyectile {
-    constructor(pos, speed, damage){
-        super(pos, speed, 1, damage, 2);
+    constructor(pos, direction, speed = 20, damage = 5){
+        super(pos, direction, speed, 1, damage, 2, (dmg) => {return dmg;});
     }
 
 }
 class FollowProyectile extends Proyectile {
-    constructor(pos, speed, damage, target){
-        super(pos, speed, 1, damage, 2);
+    constructor(pos, direction, speed, damage, target){
+        super(pos, direction, speed, 1, damage, 2);
     }
 }
 
@@ -182,7 +220,7 @@ const Direction = {
 class Weapon {
     constructor(
         attackClass = Proyectile, 
-        cooldown = 200, 
+        cooldown = 2000, 
         attackType = Type.SINGLE | Type.LINE, 
         count = 1, 
         attackDirection = Direction.FRONT | Direction.STATIC,
@@ -194,21 +232,21 @@ class Weapon {
         this.attackLevel = 1;
 
         this.cooldown = cooldown;
-        this.downTime = 0;
+        this.downTime = cooldown;
 
         this.clusterCount = count;
     }
 
     
-    #castAttack(pos, ...args){
-        return new this.attack(pos, ...args);
+    #castAttack(pos, dir, ...args){
+        return new this.attack(pos, dir, ...args);
     }
 
     cool(dt){
         this.downTime > 0 && (this.downTime -= dt);
     }
     onDownTime(){
-        return this.downTime === 0;
+        return this.downTime > 0;
     }
 
     upgrade(){
@@ -216,13 +254,12 @@ class Weapon {
 
     }
 
-    shoot(dtMs, ...attackArgs){
+    shoot(pos, dir, ...attackArgs){
         if(!this.onDownTime()){
             this.downTime = this.cooldown;
-            const attack = this.#castAttack(...attackArgs);
+            const attack = this.#castAttack(pos, dir, ...attackArgs);
             return attack;
         }
-        this.cool(dtMs);
         return null;
     }
 }
@@ -366,7 +403,9 @@ class PlayerEntity extends LivingEntity {
 
         this.level = 0;
         this.experience = 0;
-        this.attacks = [new Weapon(ImpactProyectile, 500)];
+        this.attacks = [new Weapon(ImpactProyectile, 1500)];
+        this.attacksArgs = [20, 5];
+        this.attackEntities = [];
     }
 
     getEventList(eventName){
@@ -378,6 +417,10 @@ class PlayerEntity extends LivingEntity {
             default: return this.genericEventList;
         }
     }
+    getAttackEntities(){
+        return this.attackEntities;
+    }
+
     updateTarget(){
 
         if(!this.mousemoveEventList.finish() && 
@@ -417,6 +460,31 @@ class PlayerEntity extends LivingEntity {
         return new Vector3(speedVector.x, speedVector.y);
     }
 
+    shoot(...enemies){
+        const avaible = this.attacks.filter(a => !a.onDownTime());
+        let closer = 1_000_000_000;
+        let closerEnemy = null;
+        this.attackEntities = [];
+
+        enemies.forEach(e => { // pos, speed, damage
+            const de = this.aabb.distanceTo(e.aabb);
+            if(de <= closer){
+                closer = de;
+                closerEnemy = e;
+            } 
+        });
+
+        if(closerEnemy !== null){
+            avaible.forEach(a => {
+                this.attackEntities.push(
+                    a.shoot(this.pos, closerEnemy.pos, ...this.attacksArgs)
+                );
+            });
+        }
+
+        this.attackEntities = this.attackEntities.filter(a => a !== null);
+        return this.attackEntities;
+    }
     move(dt){
         let secondsDt = dt * 0.01;
 
@@ -437,6 +505,12 @@ class PlayerEntity extends LivingEntity {
             this.updateTarget();
             offset = this.move(dt);
             this.hurtRecover(dt);
+            this.attacks.forEach(a => a.cool(dt));
+
+            //for (let i = 0; i < this.attacks.length; i++) {
+            //    this.attackEntities.push(this.attacks[i].shoot(this.pos));
+            //    
+            //}
         }
 
         return offset;

@@ -3,7 +3,7 @@ class GraphicItem{
         this.pos = pos;
         this.heigh = h;
         this.width = w;
-        this.color = "ffffff";
+        this.color = "#ffffff";
 
         this.texture = "";
         this.textureState = 0;
