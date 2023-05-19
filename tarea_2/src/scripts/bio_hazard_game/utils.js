@@ -92,3 +92,7 @@ function colorGradient(color1, color2, steps){
     }
     return gradient;
 }
+
+function onlyUnique(value, index, array) {
+    return array.indexOf(value) === index;
+  }
