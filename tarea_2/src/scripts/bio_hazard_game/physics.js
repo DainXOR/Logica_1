@@ -186,3 +186,113 @@ class Quad {
                 _vector.y <= this.botRight.y);
     }
 };
+
+
+class QuadTree {
+    constructor(center, w, h, capacity = 8){
+        this.center = center;
+        this.width = w;
+        this.heigth = h;
+
+        this.capacity = capacity;
+
+        this.elements = [];
+
+        this.divided = false;
+    }
+
+
+
+    contains(elementPos){
+        const inLeftBoundary = elementPos.x > (this.center.x - this.width);
+        const inRightBoundary = elementPos.x < (this.center.x + this.width);
+
+        const inTopBoundary = elementPos.y > (this.center.y - this.heigth);
+        const inBottomBoundary = elementPos.y < (this.center.y + this.heigth);    
+
+        return inLeftBoundary && inRightBoundary && inTopBoundary && inBottomBoundary;
+    }
+
+    subdivide(){
+        this.divided = true;
+
+        this.qtTopLeft = new QuadTree(
+            new Vector3(
+                this.center.x - (this.width * 0.5),
+                this.center.y - (this.heigth * 0.5)),
+            this.width * 0.5, 
+            this.heigth * 0.5,
+            this.capacity
+        );
+
+        this.qtTopRight = new QuadTree(
+            new Vector3(
+                this.center.x + (this.width * 0.5),
+                this.center.y - (this.heigth * 0.5)),
+            this.width * 0.5, 
+            this.heigth * 0.5,
+            this.capacity
+        );
+
+        this.qtBottomLeft = new QuadTree(
+            new Vector3(
+                this.center.x - (this.width * 0.5),
+                this.center.y + (this.heigth * 0.5)),
+            this.width * 0.5, 
+            this.heigth * 0.5,
+            this.capacity
+        );
+
+        this.qtBottomRight = new QuadTree(
+            new Vector3(
+                this.center.x + (this.width * 0.5),
+                this.center.y + (this.heigth * 0.5)),
+            this.width * 0.5, 
+            this.heigth * 0.5,
+            this.capacity
+        );
+    }
+
+    insert(graphicItem){
+        if(!this.contains(graphicItem.pos)){
+            return false;
+        }
+
+        if((this.elements.length < this.capacity)){
+            this.elements.push(graphicItem);
+            return true;
+        }
+        else if(!this.divided) {
+            this.subdivide();
+            this.divided = true;
+        }
+
+        this.qtTopLeft.insert(graphicItem) ||
+        this.qtTopRight.insert(graphicItem) ||
+        this.qtBottomLeft.insert(graphicItem) ||
+        this.qtBottomRight.insert(graphicItem);
+
+        return true;
+
+    }
+
+    draw(ctx){
+
+        ctx.beginPath();
+        ctx.rect(this.center.x - this.width, this.center.y - this.heigth, this.width * 2, this.heigth * 2);
+        ctx.fillStyle = getRandomColor();
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(this.center.x, this.center.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff0000";
+        ctx.fill();
+        ctx.closePath();
+
+        this.qtTopLeft?.draw(ctx);
+        this.qtTopRight?.draw(ctx);
+        this.qtBottomLeft?.draw(ctx);
+        this.qtBottomRight?.draw(ctx);
+    }
+}

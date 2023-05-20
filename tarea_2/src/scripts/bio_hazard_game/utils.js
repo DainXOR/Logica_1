@@ -92,3 +92,12 @@ function colorGradient(color1, color2, steps){
     }
     return gradient;
 }
+function getRandomColor() {
+    let letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    // color += "A7"; // Opacity 
+    return color;
+}

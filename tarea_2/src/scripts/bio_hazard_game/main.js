@@ -1,11 +1,11 @@
 let publisher = new EventPublisher();
 
-function newEnemy(enemyClass, amount, target, radius = 1000, center = 500, 
+function newEnemy(enemyClass, amount, target, radius = 1000, center = 1000, 
     predicate = (x, y) => {return ((x * x) + (y * y) >= 1_500_000);}){
     let enemies = [];
     for (let i = 0; i < amount; i++) {
 
-        let coords = getNRandom(2, -center - radius, center + radius, predicate);
+        let coords = getNRandom(2, -center - radius, center + radius, ()=>true);
         let x = coords[0];
         let y = coords[1];
 
@@ -17,18 +17,18 @@ function newEnemy(enemyClass, amount, target, radius = 1000, center = 500,
 function createEnemies(target, ...amounts){
     let enemies = [];
 
-    //enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
-    enemies.push(...newEnemy(SuicideEnemy, amounts[1], target));
-    //enemies.push(...newEnemy(TankyEnemy, amounts[2], target, 1500));
-    //enemies.push(...newEnemy(NormalBigEnemy, amounts[3], target, 1500));
-    //enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target, 1500));
+    enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
+    enemies.push(...newEnemy(TankyEnemy, amounts[1], target, 1500));
+    enemies.push(...newEnemy(NormalBigEnemy, amounts[2], target, 1500));
+    enemies.push(...newEnemy(SuicideEnemy, amounts[3], target));
+    enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target, 1500));
     enemies.push(...newEnemy(RevengefulEnemy, amounts[5], target, 1500));
-    //enemies.push(...newEnemy(GiantEnemy, amounts[6], target, 3000));
+    enemies.push(...newEnemy(GiantEnemy, amounts[6], target, 3000));
 
     return enemies;
 }
 
-let enemiesGenerate = [0, 10, 0, 0, 0, 10, 0];
+let enemiesGenerate = [10, 0, 0, 0, 0, 0, 0];
 let enemyTypes = enemiesGenerate.length;
 let enemySpawnTime = 1000 * 2;
 let spawnTimer = 0;
@@ -49,41 +49,23 @@ function generateEnemies(target, dt){
             spawnLevel++;
             timesInvoked = 0;
             
-            if(getRandomNumber(0, 100) > 20){
+            if(getRandomNumber(0, 1000) > 850){
                 target.newAttack(ImpactProyectile, [50, 10], 680);
-
-                //target.attacks.push(new Weapon(ImpactProyectile, 680));
-                //target.attacksArgs.push([50, 10]);
             }
-            if(getRandomNumber(0, 100) > 20){
+            if(getRandomNumber(0, 1000) > 900){
                 target.newAttack(PierceProyectile, [60, 5, 2], 1000);
-
-                //target.attacks.push(new Weapon(PierceProyectile, 1000));
-                //target.attacksArgs.push([60, 5, 2]);
             }
-            if(getRandomNumber(0, 100) > 20){
+            if(getRandomNumber(0, 1000) > 900){
                 target.newAttack(FollowProyectile, [20, 8], 1000);
-
-                //target.attacks.push(new Weapon(FollowProyectile, 1000));
-                //target.attacksArgs.push([20, 8]);
             }
-            if(getRandomNumber(0, 100) > 20){
+            if(getRandomNumber(0, 1000) > 850){
                 target.newAttack(RicochetProyectile, [60, 2, 5], 1500);
-
-                //target.attacks.push(new Weapon(RicochetProyectile, 1500));
-                //target.attacksArgs.push([60, 2, 5]);
             }
-            if(getRandomNumber(0, 100) > 50){
+            if(getRandomNumber(0, 1000) > 950){
                 target.newAttack(Magma, [], 5000, Type.AOE);
-
-                //target.attacks.push(new Weapon(Magma, 5000, Type.AOE));
-                //target.attacksArgs.push([0]);
             }
-            if(getRandomNumber(0, 100) > 10){
+            if(getRandomNumber(0, 1000) > 990){
                 target.newAttack(Void, [], 8000, Type.AOE);
-
-                //target.attacks.push(new Weapon(Void, 8000, Type.AOE));
-                //target.attacksArgs.push([0]);
             }
         }
     }
@@ -178,8 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 1000;
-    cnv.height = 1000;
+    cnv.width = 3000;
+    cnv.height = 3000;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -209,17 +191,42 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalTime = 0;
     let playerAttacks = [];
 
+    let exp = 0;
+
+    let e = createEnemies(player, 1000);
+
+    let qt = new QuadTree(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 500, 500);
+    for (let i = 0; i < e.length; i++) {
+        qt.insert(e[i]) && (e[i].color = "#00ff00");
+    }
+    qt.draw(ctx);
+    e.forEach((en) => {
+        en.draw(ctx);
+    });
+
     function gameLoop(timeStamp){
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
+
+        exp = 0;
 
         //enemies.push(...generateEnemies(player, dt));
         orbs.push(...generateOrbs(dt));
     
         clear(ctx, cnv);
 
+        player.addExperience(exp);
         const offset = player.update(dt);
         playerAttacks.push(...player.shoot(...enemies));
+
+
+        e.forEach((en) => {
+            en.move(0, offset);
+            en.draw(ctx);
+        });
+
+
+
 
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
         orbs.forEach((o) => {
@@ -241,6 +248,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         player.draw(ctx, cnv, false, false);
         
+
+        let killed = enemies.filter(e => !e.isAlive());
+        killed.forEach(e => {
+            exp += e.claimExp();
+        });
+
         enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         enemies.forEach((e) => {
             e.update(dt, offset);
@@ -264,20 +277,18 @@ document.addEventListener("DOMContentLoaded", () => {
             a.target = closerEnemy;
         });
         
-        
-        totalTime += dt;
+        //totalTime += dt;
 
-        if(totalTime > 30_000){
-            enemies.forEach(e => e.hurt(0)); 
-            totalTime *= -1;
-        }
+        //if(totalTime > 30_000){
+        //    enemies.forEach(e => e.hurt(0)); 
+        //    totalTime *= -1;
+        //}
 
         requestAnimationFrame(gameLoop);
     
     }
 
-    publisher.startNotifications(1);
-    gameLoop(0);
-    
+    //publisher.startNotifications(1);
+    //gameLoop(0);
 
 });

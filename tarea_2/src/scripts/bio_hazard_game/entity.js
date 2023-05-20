@@ -611,7 +611,7 @@ class LivingEntity extends Entity {
         const xDistance = this.targetPos.x - this.pos.x;
         const yDistance = this.targetPos.y - this.pos.y;
 
-        return new Vector3(xDistance * farEnought, yDistance * farEnought);
+        return new Vector3(xDistance, yDistance);
     }
     limitSpeed(speedVector){
         let speedSqrX = speedVector.x * speedVector.x;
@@ -737,6 +737,10 @@ class PlayerEntity extends LivingEntity {
     }
 
     addExperience(amout){
+        if(!this.isAlive()){
+            return false;
+        }
+
         this.experience += amout;
 
         while(this.levelRequirement <= this.experience){
@@ -753,8 +757,7 @@ class PlayerEntity extends LivingEntity {
             this.expBarColor = this.normalLevelColor;
         }
 
-
-        return;
+        return this.levelUp;
     }
 
     newAttack(attackClass, attackArgs, cooldown, ...weaponArgs){
@@ -927,6 +930,8 @@ class EnemyEntity extends LivingEntity {
         this.targetPos = this.target.pos;
         this.baseDamage = damage;
 
+        this.deathExp = 0;
+
         this.setColors("000000", "ffffff", 5);
 
         this.damageFormula = ()=>{ return this.baseDamage; };
@@ -952,9 +957,11 @@ class EnemyEntity extends LivingEntity {
         this.isColliding(this.target.aabb) &&
         this.hurtTarget();
     }
-
     tooFar(){
         return (Math.abs(this.target.pos.x - this.pos.x) > 20_000) || (Math.abs(this.target.pos.y - this.pos.y) > 20_000);
+    }
+    claimExp(){
+        return this.deathExp;
     }
 
     update(dt, offset){
@@ -970,6 +977,7 @@ class NormalEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 10, 12, 10, 10, "N");
 
+        this.deathExp = 1;
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
 }
@@ -980,6 +988,7 @@ class SuicideEnemy extends EnemyEntity {
         this.colorCenter = "ffffff";
         this.centerRadius = this.aabb.radius * 0.7;
         this.rageMode = false;
+        this.deathExp = 2;
 
         this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
@@ -1034,6 +1043,7 @@ class TankyEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 5, 12, 15, 30, "N");
 
+        this.deathExp = 2;
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
 
@@ -1052,6 +1062,7 @@ class NormalBigEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 15, 12, 50, 70, "N");
 
+        this.deathExp = 5;
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
 }
@@ -1059,6 +1070,7 @@ class TankyBigEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 25, 10, 50, 300, "N");
 
+        this.deathExp = 8;
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
 
@@ -1080,6 +1092,7 @@ class RevengefulEnemy extends EnemyEntity {
         this.colorCenter = "ffffff";
         this.centerRadius = this.aabb.radius * 0.7;
         this.rageMode = false;
+        this.deathExp = 15;
 
         this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
@@ -1139,6 +1152,7 @@ class GiantEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 20, 0, 300, 100_000, "N");
 
+        this.deathExp = 50;
         this.damageFormula = ()=>{ return this.baseDamage; };
         this.setColors("101010", "151515", 10);
     }

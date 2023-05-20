@@ -10,13 +10,18 @@ class game {
         cnv.height = 1000;
 
         this.publisher = new EventPublisher();
-
+        
+        this.isPaused = false;
+        this.onPauseScreen = false;
+        this.onLevelScreen = false;
+        this.onArtifactScreen = false;
 
         this.enemiesGenerate = [1];
         this.enemieSpawnTime = 1000;
         this.spawnTimer = 0;
         this.timesInvoked = 0;
-        this.spawnLevel = 0;        
+        this.spawnLevel = 0;
+
     
     }
 
