@@ -14,7 +14,7 @@ function newEnemy(enemyClass, amount, target, radius = 1000, center = 500,
     return enemies;
 }
 
-function generateEnemies(target, ...amounts){
+function createEnemies(target, ...amounts){
     let enemies = [];
 
     //enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
@@ -35,43 +35,55 @@ let spawnTimer = 0;
 let timesInvoked = 0;
 let spawnLevel = 3;
 
-function createEnemies(target, dt){
+function generateEnemies(target, dt){
     let newEnemies = [];
     spawnTimer += dt;
 
     if(spawnTimer >= enemySpawnTime){
         spawnTimer = 0;
         timesInvoked += 1;
-        newEnemies = generateEnemies(target, ...enemiesGenerate);
+        newEnemies = createEnemies(target, ...enemiesGenerate);
 
-        if(timesInvoked === 1000000){
+        if(timesInvoked >= 1){
             enemiesGenerate[getRandomNumber(0, Math.min(spawnLevel, enemyTypes - 1))]++;
             spawnLevel++;
             timesInvoked = 0;
             
-            if(getRandomNumber(0, 100) > 15){
-                target.attacks.push(new Weapon(ImpactProyectile, 680));
-                target.attacksArgs.push([50, 10]);
+            if(getRandomNumber(0, 100) > 20){
+                target.newAttack(ImpactProyectile, [50, 10], 680);
+
+                //target.attacks.push(new Weapon(ImpactProyectile, 680));
+                //target.attacksArgs.push([50, 10]);
             }
             if(getRandomNumber(0, 100) > 20){
-                target.attacks.push(new Weapon(PierceProyectile, 1000));
-                target.attacksArgs.push([60, 5, 2]);
+                target.newAttack(PierceProyectile, [60, 5, 2], 1000);
+
+                //target.attacks.push(new Weapon(PierceProyectile, 1000));
+                //target.attacksArgs.push([60, 5, 2]);
             }
             if(getRandomNumber(0, 100) > 20){
-                target.attacks.push(new Weapon(FollowProyectile, 1000));
-                target.attacksArgs.push([20, 8]);
+                target.newAttack(FollowProyectile, [20, 8], 1000);
+
+                //target.attacks.push(new Weapon(FollowProyectile, 1000));
+                //target.attacksArgs.push([20, 8]);
             }
-            if(getRandomNumber(0, 100) > 30){
-                target.attacks.push(new Weapon(RicochetProyectile, 1500));
-                target.attacksArgs.push([60, 2, 5]);
+            if(getRandomNumber(0, 100) > 20){
+                target.newAttack(RicochetProyectile, [60, 2, 5], 1500);
+
+                //target.attacks.push(new Weapon(RicochetProyectile, 1500));
+                //target.attacksArgs.push([60, 2, 5]);
             }
-            if(getRandomNumber(0, 100) > 70){
-                target.attacks.push(new Weapon(Magma, 5000, Type.AOE));
-                target.attacksArgs.push([]);
+            if(getRandomNumber(0, 100) > 50){
+                target.newAttack(Magma, [], 5000, Type.AOE);
+
+                //target.attacks.push(new Weapon(Magma, 5000, Type.AOE));
+                //target.attacksArgs.push([0]);
             }
-            if(getRandomNumber(0, 100) > 70){
-                target.attacks.push(new Weapon(Void, 8000, Type.AOE));
-                target.attacksArgs.push([]);
+            if(getRandomNumber(0, 100) > 10){
+                target.newAttack(Void, [], 8000, Type.AOE);
+
+                //target.attacks.push(new Weapon(Void, 8000, Type.AOE));
+                //target.attacksArgs.push([0]);
             }
         }
     }
@@ -80,6 +92,68 @@ function createEnemies(target, dt){
     return newEnemies;
 }
 
+const orbType = {
+    blue:   [1, "#0066ff"],
+    yellow: [5, "#ffcc00"],
+    violet: [50, "#ff33cc"],
+    black:  [1000, "#050505"],
+}
+
+function newOrb(type, radius = 3000, center = 500, 
+    predicate = () => {return true;}){
+
+    let coords = getNRandom(2, -center - radius, center + radius, predicate);
+    let x = coords[0];
+    let y = coords[1];
+
+    return new Orb(new Vector3(x, y), 3, ...orbType[type]);
+}
+function createOrbs(...amounts){
+    let orbs = [];
+
+    for (let i = 0; i < amounts[0]; i++) {
+        orbs.push(newOrb("blue"));
+    }
+    for (let i = 0; i < amounts[1]; i++) {
+        orbs.push(newOrb("yellow"));
+    }
+    for (let i = 0; i < amounts[2]; i++) {
+        orbs.push(newOrb("violet"));
+    }
+    for (let i = 0; i < amounts[3]; i++) {
+        orbs.push(newOrb("black"));
+    }
+    
+    return orbs;
+}
+
+let orbsGenerate = [200, 10, 1, 0];
+let orbTypes = orbsGenerate.length;
+let orbSpawnTime = 1000 * 5;
+let orbSpawnTimer = 0;
+let orbTimesInvoked = 0;
+let orbSpawnLevel = 1;
+
+function generateOrbs(dt){
+    let newOrbs = [];
+    orbSpawnTimer += dt;
+
+    if(orbSpawnTimer >= orbSpawnTime){
+        orbSpawnTimer = 0;
+        orbTimesInvoked += 1;
+        newOrbs = createOrbs(...orbsGenerate);
+
+        if(orbTimesInvoked >= 50){
+            console.log("Level up");
+            let random = getRandomNumber(0, Math.min(orbSpawnLevel, orbTypes - 1));
+            orbsGenerate[random] += Math.ceil(50 / ((random * 100) + 1));
+            orbSpawnLevel++;
+            orbTimesInvoked = 0;
+        }
+    }
+
+    return newOrbs;
+}
 
 document.addEventListener("keypress", (event) => {
     publisher.newEvent(new GameEvent("keypress", event));
@@ -113,10 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5));
     publisher.subscribe(player, "mousemove");
 
-    
-    let enemies = [];
-    //enemies = generateEnemies(player, 0, 1);
-    //enemies[0].setPos(50, 50);
 
     cnv.addEventListener("mousemove", (event) => {
 
@@ -128,6 +198,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 )
             ));
     });
+
+    let enemies = [];
+    //enemies = generateEnemies(player, 0, 1);
+    //enemies[0].setPos(50, 50);
+
+    let orbs = createOrbs(2000);
     
     let lastTime = 0;
     let totalTime = 0;
@@ -137,13 +213,24 @@ document.addEventListener("DOMContentLoaded", () => {
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
 
-        enemies.push(...createEnemies(player, dt));
+        //enemies.push(...generateEnemies(player, dt));
+        orbs.push(...generateOrbs(dt));
     
         clear(ctx, cnv);
 
         const offset = player.update(dt);
         playerAttacks.push(...player.shoot(...enemies));
-        
+
+        orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
+        orbs.forEach((o) => {
+            if(o.color === "#050505"){
+                console.log(Math.sqrt(o.aabb.distanceTo(player.aabb)));
+            }
+
+            o.update(dt, offset);
+            o.draw(ctx, false);
+        });
+        player.collect(...orbs);
 
         playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
         playerAttacks.forEach((attack) => {
@@ -152,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
             attack.impact(...enemies);
             attack.draw(ctx, false);
         });
-        player.draw(ctx, false, false);
+        player.draw(ctx, cnv, false, false);
         
         enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         enemies.forEach((e) => {

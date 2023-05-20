@@ -532,12 +532,40 @@ class Weapon {
 }
 
 class Item extends Entity {
-    constructor(id){
-        super("i-" + id);
+    constructor(pos, radius, idComponent = ""){
+        super(pos, radius, "i-" + idComponent);
+
+        this.color = "#ffffff";
     }
 
     isItem(){return true;}
+    isObject(){return false;}
 }
+class Orb extends Item {
+    constructor(pos, radius, exp, color){
+        super(pos, radius, "orb");
+
+        this.exp = exp;
+        this.color = color;
+        this.collected = false;
+    }
+
+    getExperience(){
+        this.collected = true;
+        return this.exp;
+    }
+
+    isCollected(){
+        return this.collected;
+    }
+    tooFar(player){
+        return (Math.abs(player.pos.x - this.pos.x) > 20_000) || (Math.abs(player.pos.y - this.pos.y) > 20_000);
+    }
+}
+class Artifact extends Item {
+
+}
+
 class Structure extends Entity {
     constructor(id){
         super("s-" + id);
@@ -669,13 +697,21 @@ class PlayerEntity extends LivingEntity {
         this.mousemoveEventList = new EventArray();
 
         this.maxHP = this.hitPoints;
+
         this.level = 0;
         this.experience = 0;
+        this.levelRequirement = 10;
+        this.levelUp = false;
+        this.normalLevelColor = "#5c5cff";
+        this.specialLevelColor = "#5cff5c";
+        this.expBarColor = this.normalLevelColor;
+
         this.attacks = [new Weapon(ImpactProyectile, 1000)]; // new Weapon(ImpactProyectile, 1000), new Weapon(PierceProyectile, 1500), new Weapon(FollowProyectile, 1500)
         this.attacksArgs = [[50, 5]]; // [25, 5], [30, 3, 2], [20, 3]
         this.attackEntities = [];
 
-        this.attacks = [];
+        this.interactRange = this.aabb.radius;
+        this.objects = [];
 
         this.setColors("BD93F9", "FF0000", 30);
         this.hpBarAdjust = 5;
@@ -693,6 +729,38 @@ class PlayerEntity extends LivingEntity {
     getAttackEntities(){
         return this.attackEntities;
     }
+    getExpProgress(){
+        return this.experience / this.levelRequirement;
+    }
+    hasLevelUp(){
+        return this.levelUp;
+    }
+
+    addExperience(amout){
+        this.experience += amout;
+
+        while(this.levelRequirement <= this.experience){
+            this.experience -= this.levelRequirement;
+            this.level++;
+            this.levelRequirement = Math.ceil(this.levelRequirement * 1.1);
+            this.levelUp = true;
+            console.log(this.level);
+        }
+
+        if(this.level !== 0 && this.level % 10 === 0){
+            this.expBarColor = this.specialLevelColor;
+        }else{
+            this.expBarColor = this.normalLevelColor;
+        }
+
+
+        return;
+    }
+
+    newAttack(attackClass, attackArgs, cooldown, ...weaponArgs){
+        this.attacks.push(new Weapon(attackClass, cooldown, ...weaponArgs));
+        this.attacksArgs.push(attackArgs);
+    }
 
     updateTarget(){
 
@@ -702,18 +770,6 @@ class PlayerEntity extends LivingEntity {
             this.targetPos = this.mousemoveEventList.getLast().eventInfo;
             this.mousemoveEventList.reset();
         }
-    }
-    interactObject(){
-        if(this.collisionEventList.finish()){
-            return;
-        }
-
-    }
-    dxFromRealPos(){
-        return new Vector3(
-            this.pos.x - this.realPos.x,
-            this.pos.y - this.realPos.y
-        );
     }
     followTarget(){
         const xDistance = this.targetPos.x - this.pos.x;
@@ -742,6 +798,22 @@ class PlayerEntity extends LivingEntity {
         return new Vector3(speedVector.x, speedVector.y);
     }
 
+    interact(...structures){
+        for (let i = 0; i < structures.length; i++) {
+            let result = structures[i].interact();
+            (result.isObject() && this.objects.push(result)) || this.collect(result);
+        }
+
+    }
+    collect(...items){
+        for (let i = 0; i < items.length; i++) {
+            if(this.aabb.distanceTo(items[i].aabb) <= this.interactRange * this.interactRange){
+                this.addExperience(items[i].getExperience());
+            }
+
+            
+        }
+    }
     shoot(...enemies){
         let avaibleIndexes = [];
         const avaible = this.attacks.filter((a, i) => {return !a.onDownTime() && (avaibleIndexes.push(i), true)});
@@ -786,9 +858,10 @@ class PlayerEntity extends LivingEntity {
         const offset = new Vector3(-speed.x, -speed.y);
         return offset;
     }
-    draw(ctx, showHitBox, pJoyStick){
+    draw(ctx, cnv, showHitBox, pJoyStick){
         super.draw(ctx, showHitBox, pJoyStick);
 
+        // Health bar
         const xPos = this.pos.x - this.aabb.radius - this.hpBarAdjust;
         const yPos = this.pos.y + this.aabb.radius + 2;
         const bWidth = (this.aabb.radius + this.hpBarAdjust) * 2;
@@ -809,20 +882,37 @@ class PlayerEntity extends LivingEntity {
             ctx.fill();
             ctx.closePath();
         }
+        // End health bar
+
+        // Experience bar
+        let expX = cnv.width * 0.10; 
+        let expY = 5;
+        let expWidth = cnv.width * 0.80;
+        let expHeight = 25;
+
+        ctx.beginPath();
+        ctx.rect(expX, expY, expWidth, expHeight);
+        ctx.fillStyle = "#000000";
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.rect(expX + 2, expY + 2, (expWidth - 4) * this.getExpProgress(), expHeight - 4);
+        ctx.fillStyle = this.expBarColor;
+        ctx.fill();
+        ctx.closePath();     
+        // End experience bar
+
     }
     update(dt){
         let offset = new Vector3();
 
         if(this.isAlive()){
+            this.levelUp = false;
             this.updateTarget();
             offset = this.move(dt);
             this.hurtRecover(dt);
             this.attacks.forEach(a => a.cool(dt));
-
-            //for (let i = 0; i < this.attacks.length; i++) {
-            //    this.attackEntities.push(this.attacks[i].shoot(this.pos));
-            //    
-            //}
         }
 
         return offset;
@@ -864,7 +954,7 @@ class EnemyEntity extends LivingEntity {
     }
 
     tooFar(){
-        return (Math.abs(this.targetPos.x - this.pos.x) > 20_000) || (Math.abs(this.targetPos.y - this.pos.y) > 20_000);
+        return (Math.abs(this.target.pos.x - this.pos.x) > 20_000) || (Math.abs(this.target.pos.y - this.pos.y) > 20_000);
     }
 
     update(dt, offset){
@@ -876,7 +966,6 @@ class EnemyEntity extends LivingEntity {
         this.updateTarget();
     }
 }
-
 class NormalEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 10, 12, 10, 10, "N");
