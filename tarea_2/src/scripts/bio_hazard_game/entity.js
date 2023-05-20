@@ -25,7 +25,7 @@ class Entity extends GraphicItem{
     move(dt, offset = new Vector3()){
         this.setPos(this.pos.x,
                     this.pos.y, 
-                    0,
+                    this.pos.z,
                     offset);
         return;
     }
@@ -65,9 +65,10 @@ class DamageEntity extends Entity{
         this.onImpact = onImpact;
         this.onExpire = onExpire;
         this.state = true;
+
     }
 
-    levelUpgrades(...buffs){
+    buff(...buffs){
         this.test = {
             damageAdd: buffs[0],
             damageMult: buffs[1],
@@ -101,64 +102,157 @@ class DamageEntity extends Entity{
     isDamaging(){return true;}
 }
 class AreaOfEffect extends DamageEntity {
-    constructor(castPos, spawnPos, damage, damageFrequency, radius, duration, 
-        damageFormula = (dmg, radius)=>{return dmg / radius;}, 
-        onImpact = ()=>{}
+    static args = {
+        damage:     0b00000001,
+        radius:     0b00000010,
+        frequency:  0b00000100,
+        duration:   0b00001000,
+        age:        0b00010000,
+        maxHits:    0b00100000,
+        hits:       0b01000000,
+    }
+
+    constructor(originPos, spawnPos, damage, radius, frequency = 2, duration = 10_000, maxHits = 1_000_000, 
+        damageFormula = (dmg, radius) => {return dmg / radius;}, 
+        onImpact = () => {}
         )
     {
-        super("-AOE", castPos, radius, damage, duration, damageFormula, onImpact);
+        super("-AOE", spawnPos, radius, damage, duration, damageFormula, onImpact);
         
-        this.origin = new Vector3(this.castPos.x, this.castPos.y);
-        this.target = new Vector3(spawnPos.x, spawnPos.y);
-        this.hurtCount = 0;
+        this.castPos = new Vector3(originPos.x, originPos.y);
+        this.spawnPos = new Vector3(spawnPos.x, spawnPos.y, 5);
+
+        this.hitCount = 0;
+        this.maxHits = maxHits;
+
         this.timeAlive = 0;
-        this.damageFrequency = damageFrequency;
+        this.damageFrequency = frequency;
+        this.lastHit = 0;
+        this.msPerHit = 1000 / frequency;
+        this.dt = 0;
 
-        this.damageArguments = dmgArg.damage | dmgArg.radius;
-        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.timeAlive, this.baseUses, this.hurtCount];
+        this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.radius;
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.timeAlive, this.maxHits, this.hitCount];
 
-        this.color = "#ffffff";
+        this.damagePredicate = () => {return true;};
+
+        this.color = "#ffff0010";
     }
-}
 
-const dmgArg = {
-    damage:     0b00000001,
-    speed:      0b00000010,
-    radius:     0b00000100,
-    age:        0b00001000,
-    uses:       0b00010000,
-    usesLeft:   0b00100000,
-}
+    getDamage(posArgs, ...args){
 
-class Proyectile extends DamageEntity {
-    constructor(pos, direction, speed, uses, damage, radius, 
-        damageFormula = (dmg, speed, size)=>{return dmg + (speed * size);}, 
-        onImpact = ()=>{}
-        )
-    {
-        super("-PROY", pos, radius, damage, -1, damageFormula, onImpact);
-
-        this.baseSpeed = speed;
-        this.baseUses = uses;
-        this.origin = new Vector3(this.pos.x, this.pos.y);
-        this.direction = new Vector3(direction.x - this.pos.x, direction.y - this.pos.y);
-        this.usesCount = 0;
-        this.timeAlive = 0;
-
-        this.damageArguments = dmgArg.damage | dmgArg.speed | dmgArg.radius;
-        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
-
-        this.color = "#ffffff";
-    }
-    #getDamage(posArgs, ...args){
+        // Logic to pass the correct arguments to the damage formula callback
         let effectiveIndices = [];
         for (let i = 0; posArgs !== 0; i++) {
             effectiveIndices.push((posArgs & 1) * i);
             posArgs >>= 1; 
         }
-        effectiveIndices.filter(onlyUnique);
 
-        let effectiveArgs = [...args].filter((v, i, a)=>{return effectiveIndices.includes(a.indexOf(v));})
+        let effectiveArgs = [...args].filter((_, i)=>{
+            return effectiveIndices.includes(i);
+        });
+
+        // Return callback result
+        return this.damageFormula(...effectiveArgs);
+    }
+    move(offset){
+        this.setPos(this.pos.x,
+                    this.pos.y,
+                    this.pos.z,
+                    offset);
+        return;
+    }
+
+    update(dt, offset = new Vector3()){
+        this.dt = dt;
+        this.lastHit += dt;
+        this.timeAlive += dt;
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.timeAlive, this.maxHits, this.hitCount];
+        this.move(offset);
+    }
+
+    isActive(){
+        return this.timeAlive < this.duration;
+    }
+
+    impact(...entities){
+        if(this.state && this.lastHit >= this.msPerHit){
+            for (let i = 0; i < entities.length; i++) {
+                if(this.damagePredicate(entities[i], i, entities) && this.aabb.isColliding(entities[i].aabb)) {
+                    entities[i].hurt(this.getDamage(this.damageArguments, ...this.damageFormulaArgs))
+                    this.hitCount++;
+                    (this.hitCount === this.maxHits) && (this.state = false);
+                    this.onImpact(...entities);
+                }
+            }
+            this.lastHit = 0;
+        }
+    }
+    hasTarget(){return true;}
+    isDamaging(){return true;}
+}
+class Magma extends AreaOfEffect{
+    constructor(originPos, spawnPos){
+        super(originPos, spawnPos, 20, 100, 2);
+
+        this.color = "#e46400a2";
+    }
+}
+class Void extends AreaOfEffect {
+    constructor(originPos, spawnPos){
+        super(new Vector3(), spawnPos, 1, 150, 10, 5_000, 1_000_000, 
+            (dmg, hits) => {return dmg + hits;},
+            (_) => {this.aabb.radius += 1;});
+
+        this.originalRadius = this.aabb.radius; 
+        this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.hits;
+        this.color = "#000000";
+    }
+}
+
+class Proyectile extends DamageEntity {
+    static args = {
+        damage:     0b00000001,
+        speed:      0b00000010,
+        radius:     0b00000100,
+        age:        0b00001000,
+        uses:       0b00010000,
+        usesCount:   0b00100000,
+    }
+
+    constructor(pos, direction, speed, uses, damage, radius, 
+        damageFormula = (dmg, speed, size)=>{return dmg + (speed * size);}, 
+        onImpact = ()=>{}
+        )
+    {
+        super("-PROY", new Vector3(pos.x, pos.y, 10), radius, damage, -1, damageFormula, onImpact);
+
+        this.baseSpeed = speed;
+        this.baseUses = uses;
+        this.origin = new Vector3(this.pos.x, this.pos.y, 10);
+        this.direction = new Vector3(direction.x - this.pos.x, direction.y - this.pos.y);
+        this.usesCount = 0;
+        this.timeAlive = 0;
+
+        this.damagePredicate = (entity, index, array) => {return true;};
+
+        this.damageArguments = Proyectile.args.damage | Proyectile.args.speed | Proyectile.args.radius;
+        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
+
+        this.color = "#ffffff";
+    }
+    getDamage(posArgs, ...args){
+
+        // Logic to pass the correct arguments to the damage formula callback
+        let effectiveIndices = [];
+        for (let i = 0; posArgs !== 0; i++) {
+            effectiveIndices.push((posArgs & 1) * i);
+            posArgs >>= 1; 
+        }
+
+        let effectiveArgs = [...args].filter((_, i)=>{return effectiveIndices.includes(i);});
+
+        // Return callback result
         return this.damageFormula(...effectiveArgs);
     }
 
@@ -191,19 +285,20 @@ class Proyectile extends DamageEntity {
 
          this.setPos(this.pos.x + speed.x,
                     this.pos.y + speed.y, 
-                    0,
+                    this.pos.z,
                     offset);
         return;
     }
     update(dt, offset = new Vector3()){
-        this.move(dt, offset);
+        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
         this.timeAlive += dt;
+        this.move(dt, offset);
     }
 
     impact(...entities){
         for (let i = 0; i < entities.length; i++) {
-            if(this.aabb.isColliding(entities[i].aabb)) {
-                entities[i].hurt(this.#getDamage(this.damageArguments, ...this.damageFormulaArgs))
+            if(this.damagePredicate(entities[i], i, entities) && this.aabb.isColliding(entities[i].aabb)) {
+                entities[i].hurt(this.getDamage(this.damageArguments, ...this.damageFormulaArgs))
                 this.usesCount++;
                 (this.usesCount === this.baseUses) && this.setUsed();
                 this.onImpact(...entities);
@@ -219,7 +314,7 @@ class ImpactProyectile extends Proyectile {
     constructor(pos, target, speed = 20, damage = 5){
         super(pos, target.pos, speed, 1, damage, 4, (dmg) => {return dmg;});
 
-        this.damageArguments = dmgArg.damage;
+        this.damageArguments = Proyectile.args.damage;
     }
 
 }
@@ -228,7 +323,7 @@ class PierceProyectile extends Proyectile {
         super(pos, target.pos, speed, uses, damage, 2, 
             (dmg, uses)=>{return dmg * (1 / uses);});
 
-        this.damageArguments = dmgArg.damage | dmgArg.uses;
+        this.damageArguments = Proyectile.args.damage | Proyectile.args.uses;
         this.color = "#0000ff";
     }
 
@@ -240,7 +335,7 @@ class FollowProyectile extends Proyectile {
             (dmg, size) => {return dmg * size;});
 
         this.target = target;
-        this.damageArguments = dmgArg.damage | dmgArg.size;
+        this.damageArguments = Proyectile.args.damage | Proyectile.args.size;
         this.color = "#00ffcf";
     }
 
@@ -267,7 +362,7 @@ class FollowProyectile extends Proyectile {
 
          this.setPos(this.pos.x + speed.x,
                     this.pos.y + speed.y, 
-                    0,
+                    this.pos.z,
                     offset);
         return;
     }
@@ -291,8 +386,10 @@ class RicochetProyectile extends Proyectile {
             }
         );
 
+        this.damagePredicate = (entity) => {return this.target === entity;};
+
         this.target = target;
-        this.damageArguments = dmgArg.damage;
+        this.damageArguments = Proyectile.args.damage;
         this.color = "#ff2a04";
     }
 
@@ -319,7 +416,7 @@ class RicochetProyectile extends Proyectile {
 
          this.setPos(this.pos.x + speed.x,
                     this.pos.y + speed.y, 
-                    0,
+                    this.pos.z,
                     offset);
         return;
     }
@@ -370,8 +467,12 @@ class Weapon {
     }
 
     
-    #castAttack(pos, dir, ...args){
-        return new this.attack(pos, dir, ...args);
+    #castProjectile(pos, dir, ...args){
+        return new this.attack(new Vector3(pos.x, pos.y, 10), dir, ...args);
+    }
+    #castAOE(origin, target, ...args){
+        let coords = getNRandom(2, 0, 1000);
+        return new this.attack(origin, new Vector3(...coords, 5), ...args);
     }
 
     cool(dt){
@@ -389,7 +490,11 @@ class Weapon {
     shoot(pos, dir, ...attackArgs){
         if(!this.onDownTime()){
             this.downTime = this.cooldown;
-            const attack = this.#castAttack(pos, dir, ...attackArgs);
+
+            const attack = this.attackType & Type.AOE? 
+                this.#castAOE(pos, dir, ...attackArgs) :
+                this.#castProjectile(pos, dir, ...attackArgs);
+
             return attack;
         }
         return null;
@@ -423,10 +528,13 @@ class LivingEntity extends Entity {
         this.hitPoints = hp;
         this.targetPos = new Vector3();
 
-        this.setColors("000000", "ffffff", 30);
+        this.setColors("000000", "ffffff", 5);
 
-        this.inmunityMaxTime = 0; // Miliseconds
+        this.inmunityMaxTime = 20; // Miliseconds
         this.inmunityTime = 0; // Seconds
+
+        this.oneTimeAvaible = true;
+        this.oneTimeHurt = () => {};
     }
 
     isLiving(){return true;}
@@ -487,8 +595,10 @@ class LivingEntity extends Entity {
             this.inmunityTime = this.inmunityMaxTime;
             this.color = "#" + this.colorHurt;
             this.gradientStep = 0;
-            return;
         }
+
+        this.oneTimeAvaible && this.oneTimeHurt();
+        this.oneTimeAvaible = false;
         return;
     }
 
@@ -521,7 +631,7 @@ class LivingEntity extends Entity {
 class PlayerEntity extends LivingEntity {
 
     constructor(pos = new Vector3()){
-        super(pos, 15, 15, 200, "PE");
+        super(pos, 20, 15, 200, "PE");
 
         this.controlRange = 100;
         this.inmunityMaxTime = 500; // Miliseconds
@@ -737,7 +847,7 @@ class NormalEnemy extends EnemyEntity {
 }
 class SuicideEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 0, 16, 10, 10, "K");
+        super(target, pos, 0, 21, 10, 6, "K");
 
         this.colorCenter = "ffffff";
         this.centerRadius = this.aabb.radius * 0.7;
@@ -747,14 +857,14 @@ class SuicideEnemy extends EnemyEntity {
         this.afterHurt = ()=>{ this.die(); };
 
         this.targetPos = new Vector3(this.target.pos.x, this.target.pos.y);
-    }
 
-    hurt(damage){
-        super.hurt(damage);
-        this.maxSpeed = 25;
-        this.colorCenter = "ff0000";
-        this.centerRadius = this.aabb.radius * 0.4;
-        this.rageMode = true;
+        this.oneTimeAvaible = true;
+        this.oneTimeHurt = () => {
+            this.colorCenter = "ff0000";
+            this.maxSpeed = 30;
+            this.centerRadius = this.aabb.radius * 0.4;
+            this.rageMode = true;
+        }
     }
 
     updateTarget(){
@@ -812,14 +922,14 @@ class TankyEnemy extends EnemyEntity {
 }
 class NormalBigEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 15, 12, 50, 40, "N");
+        super(target, pos, 15, 12, 50, 70, "N");
 
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
 }
 class TankyBigEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 25, 10, 50, 100, "N");
+        super(target, pos, 25, 10, 50, 300, "N");
 
         this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
     }
@@ -837,7 +947,7 @@ class TankyBigEnemy extends EnemyEntity {
 }
 class RevengefulEnemy extends EnemyEntity {
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 0, 13, 40, 150, "K");
+        super(target, pos, 0, 18, 40, 150, "K");
 
         this.colorCenter = "ffffff";
         this.centerRadius = this.aabb.radius * 0.7;
@@ -847,15 +957,15 @@ class RevengefulEnemy extends EnemyEntity {
         this.afterHurt = ()=>{ this.die(); };
 
         this.targetPos = new Vector3(this.target.pos.x, this.target.pos.y);
-    }
 
-    hurt(damage){
-        super.hurt(damage);
-        this.hitPoints += 150;
-        this.maxSpeed = 30;
-        this.colorCenter = "ff0000";
-        this.centerRadius = this.aabb.radius * 0.3333;
-        this.rageMode = true;
+        this.oneTimeAvaible = true;
+        this.oneTimeHurt = () => {
+            this.colorCenter = "ff0000";
+            this.hitPoints = 200;
+            this.maxSpeed = 35;
+            this.centerRadius = this.aabb.radius * 0.4;
+            this.rageMode = true;
+        }
     }
 
     updateTarget(){
@@ -892,4 +1002,20 @@ class RevengefulEnemy extends EnemyEntity {
         ctx.closePath();
     }
 
+}
+class GiantEnemy extends EnemyEntity {
+    constructor(target = null, pos = new Vector3()){
+        super(target, pos, 20, 0, 300, 100_000, "N");
+
+        this.damageFormula = ()=>{ return this.baseDamage; };
+        this.setColors("101010", "151515", 10);
+    }
+
+    move(_, offset){
+        this.setPos(this.pos.x, this.pos.y, this.pos.z, offset);
+    }
+    hurt(_){
+        super.hurt(1);
+        return;
+    }
 }

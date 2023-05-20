@@ -1,10 +1,10 @@
 let publisher = new EventPublisher();
 
-function newEnemy(enemyClass, amount, target, minCoord = -1500, maxCoord = 1500, predicate = (x, y) => {return (x * x) + (y * y) >= 1_500_000;}){
+function newEnemy(enemyClass, amount, target, radius = 1000, center = 500, predicate = (x, y) => {return (x * x) + (y * y) >= 1_500_000;}){
     let enemies = [];
     for (let i = 0; i < amount; i++) {
 
-        let coords = getNRandom(2, minCoord, maxCoord, predicate);
+        let coords = getNRandom(2, center - radius, center + radius, predicate);
         let x = coords[0];
         let y = coords[1];
 
@@ -18,20 +18,21 @@ function generateEnemies(target, ...amounts){
 
     enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
     enemies.push(...newEnemy(SuicideEnemy, amounts[1], target));
-    enemies.push(...newEnemy(TankyEnemy, amounts[2], target));
-    enemies.push(...newEnemy(NormalBigEnemy, amounts[3], target));
-    enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target));
-    enemies.push(...newEnemy(RevengefulEnemy, amounts[5], target));
+    enemies.push(...newEnemy(TankyEnemy, amounts[2], target, 1500));
+    enemies.push(...newEnemy(NormalBigEnemy, amounts[3], target, 1500));
+    enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target, 1500));
+    enemies.push(...newEnemy(RevengefulEnemy, amounts[5], target, 1500));
+    enemies.push(...newEnemy(GiantEnemy, amounts[6], target, 3000));
 
     return enemies;
 }
 
-let enemiesGenerate = [10, 5, 2, 1, 1, 0];
-let enemyTypes = 6;
-let enemySpawnTime = 2000;
+let enemiesGenerate = [10, 1, 5, 1, 1, 0, 2];
+let enemyTypes = enemiesGenerate.length;
+let enemySpawnTime = 1000 * 2;
 let spawnTimer = 0;
 let timesInvoked = 0;
-let spawnLevel = 5;
+let spawnLevel = 3;
 
 function createEnemies(target, dt){
     let newEnemies = [];
@@ -47,21 +48,29 @@ function createEnemies(target, dt){
             spawnLevel++;
             timesInvoked = 0;
             
-            if(getRandomNumber(0, 100) > 20){
-                target.attacks.push(new Weapon(ImpactProyectile, 680)); // new Weapon(ImpactProyectile, 1000), new Weapon(PierceProyectile, 1500), new Weapon(FollowProyectile, 1500)
+            if(getRandomNumber(0, 100) > 10){
+                target.attacks.push(new Weapon(ImpactProyectile, 680));
                 target.attacksArgs.push([50, 10]);
             }
-            if(getRandomNumber(0, 100) > 40){
+            if(getRandomNumber(0, 100) > 15){
                 target.attacks.push(new Weapon(PierceProyectile, 1000));
                 target.attacksArgs.push([60, 5, 2]);
             }
-            if(getRandomNumber(0, 100) > 30){
+            if(getRandomNumber(0, 100) > 15){
                 target.attacks.push(new Weapon(FollowProyectile, 1000));
                 target.attacksArgs.push([20, 8]);
             }
-            if(getRandomNumber(0, 100) > 60){
-                target.attacks.push(new Weapon(RicochetProyectile, 3000));
+            if(getRandomNumber(0, 100) > 25){
+                target.attacks.push(new Weapon(RicochetProyectile, 1500));
                 target.attacksArgs.push([60, 2, 5]);
+            }
+            if(getRandomNumber(0, 100) > 50){
+                target.attacks.push(new Weapon(Magma, 5000, Type.AOE));
+                target.attacksArgs.push([]);
+            }
+            if(getRandomNumber(0, 100) > 50){
+                target.attacks.push(new Weapon(Void, 8000, Type.AOE));
+                target.attacksArgs.push([]);
             }
         }
     }
@@ -69,9 +78,6 @@ function createEnemies(target, dt){
 
     return newEnemies;
 }
-
-//enemies = [];
-
 
 
 document.addEventListener("keypress", (event) => {
@@ -136,21 +142,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const offset = player.update(dt);
         playerAttacks.push(...player.shoot(...enemies));
-        player.draw(ctx, false, false);
+        
 
+        playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
         playerAttacks.forEach((attack) => {
             attack.checkTooFar(player);
             attack.update(dt, offset);
             attack.impact(...enemies);
             attack.draw(ctx, false);
         });
+        player.draw(ctx, false, false);
         
+        enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         enemies.forEach((e) => {
             e.update(dt, offset);
             e.draw(ctx, false);
         });
         
-        enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         
         playerAttacks = playerAttacks.filter(a => a.isActive());
         let targetless = playerAttacks.filter(a => !a.hasTarget());
@@ -170,9 +178,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         
         totalTime += dt;
-        //console.log(totalTime);
+
         if(totalTime > 30_000){
-            enemies.forEach(e => e.hurt(1)); 
+            enemies.forEach(e => e.hurt(0)); 
             totalTime *= -1;
         }
 
