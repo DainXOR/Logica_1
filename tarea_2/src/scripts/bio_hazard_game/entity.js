@@ -369,7 +369,7 @@ class FollowProyectile extends Proyectile {
 }
 class RicochetProyectile extends Proyectile {
     constructor(pos, target, speed, damage = 2, uses = 5){
-        super(pos, target.pos, speed, uses, damage, 7, 
+        super(pos, target.pos, speed, uses, damage, 12, 
             (dmg) => {return dmg;},
             (...e) => {
                 let dx = 1_000_000;
@@ -390,7 +390,10 @@ class RicochetProyectile extends Proyectile {
 
         this.target = target;
         this.damageArguments = Proyectile.args.damage;
+        this.center = "#ff0000";
         this.color = "#ff2a04";
+        this.midRing = "#ffff00";
+        this.outRing = "#fffff0";
     }
 
     hasTarget(){
@@ -419,6 +422,33 @@ class RicochetProyectile extends Proyectile {
                     this.pos.z,
                     offset);
         return;
+    }
+
+    draw(ctx, hitbox){
+        let or = this.aabb.radius;
+        this.aabb.radius >>= 1;
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, or, 0, Math.PI * 2);
+        ctx.fillStyle = this.outRing;
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, or - 3, 0, Math.PI * 2);
+        ctx.fillStyle = this.midRing;
+        ctx.fill();
+        ctx.closePath();
+
+        super.draw(ctx, hitbox, false);
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, or - 9, 0, Math.PI * 2);
+        ctx.fillStyle = this.center;
+        ctx.fill();
+        ctx.closePath();
+
+        this.aabb.radius = or;
     }
 }
 
@@ -553,9 +583,6 @@ class LivingEntity extends Entity {
         const xDistance = this.targetPos.x - this.pos.x;
         const yDistance = this.targetPos.y - this.pos.y;
 
-        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
-        // Mainly for the player to stand still when the mouse is inside its bounding box
-
         return new Vector3(xDistance * farEnought, yDistance * farEnought);
     }
     limitSpeed(speedVector){
@@ -648,6 +675,8 @@ class PlayerEntity extends LivingEntity {
         this.attacksArgs = [[50, 5]]; // [25, 5], [30, 3, 2], [20, 3]
         this.attackEntities = [];
 
+        this.attacks = [];
+
         this.setColors("BD93F9", "FF0000", 30);
         this.hpBarAdjust = 5;
     }
@@ -685,6 +714,15 @@ class PlayerEntity extends LivingEntity {
             this.pos.x - this.realPos.x,
             this.pos.y - this.realPos.y
         );
+    }
+    followTarget(){
+        const xDistance = this.targetPos.x - this.pos.x;
+        const yDistance = this.targetPos.y - this.pos.y;
+
+        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
+        // Mainly for the player to stand still when the mouse is inside its bounding box
+
+        return new Vector3(xDistance * farEnought, yDistance * farEnought);
     }
     limitSpeed(speedVector){
         const speedSqrX = speedVector.x * speedVector.x;
@@ -739,6 +777,7 @@ class PlayerEntity extends LivingEntity {
         let secondsDt = dt * 0.01;
 
         let speed = this.followTarget();
+        speed
         speed = this.limitSpeed(speed);
 
         speed.x *= secondsDt;
@@ -798,7 +837,7 @@ class EnemyEntity extends LivingEntity {
         this.targetPos = this.target.pos;
         this.baseDamage = damage;
 
-        this.setColors("000000", "ffffff", 20);
+        this.setColors("000000", "ffffff", 5);
 
         this.damageFormula = ()=>{ return this.baseDamage; };
         this.afterHurt = ()=>{};
@@ -825,7 +864,7 @@ class EnemyEntity extends LivingEntity {
     }
 
     tooFar(){
-        return (this.targetPos.x - this.pos.x > 2000) || (this.targetPos.y - this.pos.y > 2000);
+        return (Math.abs(this.targetPos.x - this.pos.x) > 20_000) || (Math.abs(this.targetPos.y - this.pos.y) > 20_000);
     }
 
     update(dt, offset){
@@ -882,23 +921,23 @@ class SuicideEnemy extends EnemyEntity {
         const yDistance = this.targetPos.y - this.pos.y;
 
         if(!this.rageMode){
-            this.targetPos.x += xDistance / Math.abs(xDistance);
-            this.targetPos.y += yDistance / Math.abs(yDistance);
+            const norm = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
+
+            this.targetPos.x += (xDistance / norm) * this.maxSpeed;
+            this.targetPos.y += (yDistance / norm) * this.maxSpeed;
         }
 
-        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
-
-        return new Vector3(xDistance * farEnought, yDistance * farEnought);
+        return new Vector3(xDistance, yDistance);
     }
 
-    draw(ctx, showHitBox = false){
-        super.draw(ctx, showHitBox);
+    draw(ctx, hitbox){
+        super.draw(ctx, hitbox);
 
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
         ctx.fillStyle = "#" + this.colorCenter;
         ctx.fill();
-        ctx.closePath();
+        ctx.closePath();        
     }
 
 }
@@ -982,24 +1021,28 @@ class RevengefulEnemy extends EnemyEntity {
         const xDistance = this.targetPos.x - this.pos.x;
         const yDistance = this.targetPos.y - this.pos.y;
 
-        if(!this.rageMode){
-            this.targetPos.x += xDistance / Math.abs(xDistance);
-            this.targetPos.y += yDistance / Math.abs(yDistance);
+        if(!this.pos.x || !this.pos.y){
+            console.log("f");
         }
 
-        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
+        if(!this.rageMode){
+            const norm = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
 
-        return new Vector3(xDistance * farEnought, yDistance * farEnought);
+            this.targetPos.x += (xDistance / norm) * this.maxSpeed;
+            this.targetPos.y += (yDistance / norm) * this.maxSpeed;
+        }
+
+        return new Vector3(xDistance, yDistance);
     }
 
-    draw(ctx, showHitBox = false){
-        super.draw(ctx, showHitBox);
+    draw(ctx, hitbox){
+        super.draw(ctx, hitbox);
 
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
         ctx.fillStyle = "#" + this.colorCenter;
         ctx.fill();
-        ctx.closePath();
+        ctx.closePath();        
     }
 
 }

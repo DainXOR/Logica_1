@@ -1,10 +1,11 @@
 let publisher = new EventPublisher();
 
-function newEnemy(enemyClass, amount, target, radius = 1000, center = 500, predicate = (x, y) => {return (x * x) + (y * y) >= 1_500_000;}){
+function newEnemy(enemyClass, amount, target, radius = 1000, center = 500, 
+    predicate = (x, y) => {return ((x * x) + (y * y) >= 1_500_000);}){
     let enemies = [];
     for (let i = 0; i < amount; i++) {
 
-        let coords = getNRandom(2, center - radius, center + radius, predicate);
+        let coords = getNRandom(2, -center - radius, center + radius, predicate);
         let x = coords[0];
         let y = coords[1];
 
@@ -16,18 +17,18 @@ function newEnemy(enemyClass, amount, target, radius = 1000, center = 500, predi
 function generateEnemies(target, ...amounts){
     let enemies = [];
 
-    enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
+    //enemies.push(...newEnemy(NormalEnemy, amounts[0], target));
     enemies.push(...newEnemy(SuicideEnemy, amounts[1], target));
-    enemies.push(...newEnemy(TankyEnemy, amounts[2], target, 1500));
-    enemies.push(...newEnemy(NormalBigEnemy, amounts[3], target, 1500));
-    enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target, 1500));
+    //enemies.push(...newEnemy(TankyEnemy, amounts[2], target, 1500));
+    //enemies.push(...newEnemy(NormalBigEnemy, amounts[3], target, 1500));
+    //enemies.push(...newEnemy(TankyBigEnemy, amounts[4], target, 1500));
     enemies.push(...newEnemy(RevengefulEnemy, amounts[5], target, 1500));
-    enemies.push(...newEnemy(GiantEnemy, amounts[6], target, 3000));
+    //enemies.push(...newEnemy(GiantEnemy, amounts[6], target, 3000));
 
     return enemies;
 }
 
-let enemiesGenerate = [10, 1, 5, 1, 1, 0, 2];
+let enemiesGenerate = [0, 10, 0, 0, 0, 10, 0];
 let enemyTypes = enemiesGenerate.length;
 let enemySpawnTime = 1000 * 2;
 let spawnTimer = 0;
@@ -43,32 +44,32 @@ function createEnemies(target, dt){
         timesInvoked += 1;
         newEnemies = generateEnemies(target, ...enemiesGenerate);
 
-        if(timesInvoked === 5){
+        if(timesInvoked === 1000000){
             enemiesGenerate[getRandomNumber(0, Math.min(spawnLevel, enemyTypes - 1))]++;
             spawnLevel++;
             timesInvoked = 0;
             
-            if(getRandomNumber(0, 100) > 10){
+            if(getRandomNumber(0, 100) > 15){
                 target.attacks.push(new Weapon(ImpactProyectile, 680));
                 target.attacksArgs.push([50, 10]);
             }
-            if(getRandomNumber(0, 100) > 15){
+            if(getRandomNumber(0, 100) > 20){
                 target.attacks.push(new Weapon(PierceProyectile, 1000));
                 target.attacksArgs.push([60, 5, 2]);
             }
-            if(getRandomNumber(0, 100) > 15){
+            if(getRandomNumber(0, 100) > 20){
                 target.attacks.push(new Weapon(FollowProyectile, 1000));
                 target.attacksArgs.push([20, 8]);
             }
-            if(getRandomNumber(0, 100) > 25){
+            if(getRandomNumber(0, 100) > 30){
                 target.attacks.push(new Weapon(RicochetProyectile, 1500));
                 target.attacksArgs.push([60, 2, 5]);
             }
-            if(getRandomNumber(0, 100) > 50){
+            if(getRandomNumber(0, 100) > 70){
                 target.attacks.push(new Weapon(Magma, 5000, Type.AOE));
                 target.attacksArgs.push([]);
             }
-            if(getRandomNumber(0, 100) > 50){
+            if(getRandomNumber(0, 100) > 70){
                 target.attacks.push(new Weapon(Void, 8000, Type.AOE));
                 target.attacksArgs.push([]);
             }
@@ -188,8 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     }
 
-    //publisher.startNotifications(1);
-    //gameLoop(0);
+    publisher.startNotifications(1);
+    gameLoop(0);
     
 
 });
