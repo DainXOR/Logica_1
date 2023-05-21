@@ -246,6 +246,9 @@ class EventPublisher{
             this.events.push(event);
         }
     }
+    clearEvents(){
+        this.events = new EventArray();
+    }
 
     notifyNextEvent(){
         if(this.events.finish()){

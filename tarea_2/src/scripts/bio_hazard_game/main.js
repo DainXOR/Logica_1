@@ -191,15 +191,11 @@ function clear(context, canvas){
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    let arr = [];
-    arr.push()
-
-
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 4000;
-    cnv.height = 4000;
+    cnv.width = 1000;
+    cnv.height = 1000;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -224,13 +220,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let enemyFactory = enemy(cnv);
     let enemies = enemyFactory.createMany(player, 1000);
-    enemies = [];
+    //enemies = [];
 
     let timeCounter = 0;
-    let qt = new QuadTree(new Vector3(cnv.width * 0.25, cnv.height * 0.25), cnv.width * 0.5, cnv.height * 0.5);
-    //for (let i = 0; i < enemies.length; i++) {
-    //    qt.insert(enemies[i]) && (enemies[i].color = "#00ff00");
-    //}
+    let qtree = new QuadTree(new Vector3(cnv.width - 500, cnv.height - 500), cnv.width + 500, cnv.height + 500);
+    for (let i = 0; i < enemies.length; i++) {
+        qtree.insert(enemies[i]) && (enemies[i].color = "#ffffff");
+    }
+    let area = new Rectangle(new Vector3(cnv.width * 0.20, cnv.height * 0.20), 100, 100);
 
     let mouseEvent = {
         isPressed: false,
@@ -238,13 +235,13 @@ document.addEventListener("DOMContentLoaded", () => {
         y: 0,
     }
 
-    document.addEventListener("mousedown", (event) => {
+    cnv.addEventListener("mousedown", (event) => {
         mouseEvent.isPressed = true;
         mouseEvent.x = event.x * canvasScaleX;
         mouseEvent.y = event.y * canvasScaleY;
     });
 
-    document.addEventListener("mouseup", (event) => {
+    cnv.addEventListener("mouseup", (event) => {
         mouseEvent.isPressed = false;
     });
 
@@ -254,6 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
             mouseEvent.x = event.x * canvasScaleX;
             mouseEvent.y = event.y * canvasScaleY;
         }
+
+        area.pos.x = (event.x * canvasScaleX) - area.width * 0.5;
+        area.pos.y = (event.y * canvasScaleY) - area.height * 0.5;
 
         publisher.newEvent(new GameEvent(
             "mousemove", 
@@ -273,18 +273,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(mouseEvent.isPressed && (timeCounter >= 100)){
             let newEnemy = new NormalEnemy(player, new Vector3(mouseEvent.x, mouseEvent.y));
-            qt.insert(newEnemy) && (newEnemy.color = "#00ff00");
+            qtree.insert(newEnemy) && (newEnemy.color = "#00ff00");
             enemies.push(newEnemy);
             timeCounter = 0;
         }
 
+        let insidePoints = qtree.getElementsInside(area);
+
+        insidePoints.forEach(e => {
+            e.color = "#00ff00";
+        });
+
         clear(ctx, cnv)
-        qt.draw(ctx);
+        qtree.draw(ctx);
         enemies.forEach((e) => {
             e.draw(ctx);
         });
+        area.draw(ctx);
 
-        console.log(qt.getElements().length);
+        insidePoints.forEach(e => {
+            e.color = "#ffffff";
+        });
 
         requestAnimationFrame(quadTreeTesting);
     }
@@ -293,14 +302,13 @@ document.addEventListener("DOMContentLoaded", () => {
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
 
-        exp = 0;
-
         //enemies = enemies.concat(enemyFactory.generate(player, dt));
         if(orbs.length <= 1500){
             orbs = orbs.concat(orbFactory.generate(dt));
         }
         
         player.addExperience(exp);
+        exp = 0;
         const offset = player.update(dt);
         playerAttacks = playerAttacks.concat(player.shoot(...enemies));
         clear(ctx, cnv);
@@ -364,7 +372,6 @@ document.addEventListener("DOMContentLoaded", () => {
         //    enemies.forEach(e => e.hurt(0)); 
         //    totalTime *= -1;
         //}
-        console.log(orbs.length);
 
         requestAnimationFrame(gameLoop);
     

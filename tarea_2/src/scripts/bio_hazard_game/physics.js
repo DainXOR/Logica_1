@@ -19,6 +19,13 @@ class AABB{
         this.radius = radius;
     }
 
+    haveInside(other){
+        return  other.pos.x >= this.pos.x - this.radius && 
+                other.pos.x <= this.pos.x + this.radius &&
+                other.pos.y >= this.pos.y - this.radius &&
+                other.pos.y <= this.pos.y + this.radius;
+    }
+
     isColliding(other){
         const de_sqr = this.distanceTo(other);
         const dr_sqr = (this.radius + other.radius) * (this.radius + other.radius);
@@ -34,28 +41,18 @@ class AABB{
     }
 }
 class Rectangle{
-    pos = new Vector3();
-    width = 0;
-    heigth = 0;
 
-    constructor(center = new Vector3(), w, h){
-        this.pos = center;
+    constructor(pos = new Vector3(), w, h){
+        this.pos = pos;
         this.width = w;
-        this.heigth = h;
+        this.height = h;
     }
 
-    isColliding(other){
-        const de_sqr = this.distanceTo(other);
-        const dr_sqr = (this.radius + other.radius) * (this.radius + other.radius);
-
-        return de_sqr < dr_sqr;
-    }
-
-    distanceTo(other){
-        const dx_sqr = (other.pos.x - this.pos.x) * (other.center.x - this.pos.x);
-        const dy_sqr = (other.center.y - this.pos.y) * (other.center.y - this.pos.y);
-
-        return dx_sqr + dy_sqr;
+    haveInside(other){
+        return  other.pos.x >= this.pos.x && 
+                other.pos.x <= this.pos.x + this.width &&
+                other.pos.y >= this.pos.y &&
+                other.pos.y <= this.pos.y + this.height;
     }
 
     draw(ctx){
@@ -233,6 +230,8 @@ class QuadTree {
         this.elements = [];
 
         this.divided = false;
+
+        this.color = "#000000";
     }
 
     contains(elementPos){
@@ -243,6 +242,20 @@ class QuadTree {
         const inBottomBoundary = elementPos.y <= (this.pos.y + this.height);    
 
         return inLeftBoundary && inRightBoundary && inTopBoundary && inBottomBoundary;
+    }
+    completelyContained(rect){
+
+        return  rect.pos.x <= this.pos.x &&
+                rect.pos.y <= this.pos.y &&
+                rect.pos.x + rect.width >= this.pos.x + this.width &&
+                rect.pos.y + rect.height >= this.pos.y + this.height;
+
+    }
+    intersects(rect){
+        return !(rect.pos.x + rect.width <= this.pos.x ||
+                 rect.pos.y + rect.height <= this.pos.y ||
+                 rect.pos.x >= this.pos.x + this.width ||
+                 rect.pos.y >= this.pos.y + this.height);
     }
 
     subdivide(){
@@ -300,19 +313,47 @@ class QuadTree {
 
     }
 
-    getElements(){
+    getAllElements(){
         let allElements = this.elements;
 
         if(this.divided){
             allElements = allElements.concat(
-                this.qtTopLeft.getElements(),
-                this.qtTopRight.getElements(),
-                this.qtBottomLeft.getElements(),
-                this.qtBottomRight.getElements()
+                this.qtTopLeft.getAllElements(),
+                this.qtTopRight.getAllElements(),
+                this.qtBottomLeft.getAllElements(),
+                this.qtBottomRight.getAllElements()
             );
         }
 
         return allElements;
+    }
+
+    getElementsInside(area){
+        let containedElements = [];
+
+        if(this.completelyContained(area)){
+            this.color = "#1f1fff";
+            return this.getAllElements();
+        }
+        if(this.intersects(area)){
+            this.color = "#ffff00";
+            for (let i = 0; i < this.elements.length; i++) {
+                area.haveInside(this.elements[i]) &&
+                containedElements.push(this.elements[i]);
+                
+            }
+            if(this.divided){
+                containedElements =  containedElements.concat(
+                    this.qtTopLeft.getElementsInside(area),
+                    this.qtTopRight.getElementsInside(area),
+                    this.qtBottomLeft.getElementsInside(area),
+                    this.qtBottomRight.getElementsInside(area)
+                );
+            }
+            
+        }
+
+        return containedElements;
     }
 
     draw(ctx){
@@ -320,9 +361,11 @@ class QuadTree {
         ctx.beginPath();
         ctx.rect(this.pos.x, this.pos.y, this.width, this.height);
         ctx.lineWidth = "6";
-        ctx.strokeStyle = "#000000";
+        ctx.strokeStyle = this.color;
         ctx.stroke()
         ctx.closePath();
+
+        this.color = "#000000";
 
         //ctx.beginPath();
         //ctx.arc(this.pos.x + this.width * 0.5, this.pos.y + this.height * 0.5, 5, 0, Math.PI * 2);
@@ -330,9 +373,11 @@ class QuadTree {
         //ctx.fill();
         //ctx.closePath();
 
-        this.qtTopLeft?.draw(ctx);
-        this.qtTopRight?.draw(ctx);
-        this.qtBottomLeft?.draw(ctx);
-        this.qtBottomRight?.draw(ctx);
+        if(this.divided){
+            this.qtTopLeft?.draw(ctx);
+            this.qtTopRight?.draw(ctx);
+            this.qtBottomLeft?.draw(ctx);
+            this.qtBottomRight?.draw(ctx);
+        }
     }
 }
