@@ -57,7 +57,7 @@ class EventArray{
         this.ignored.shift();
 
         if(events.length !== 0){
-            this.events = [...events];
+            this.events = [].concat(...events);
         }
     }
 

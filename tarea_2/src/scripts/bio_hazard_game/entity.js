@@ -29,6 +29,22 @@ class Entity extends GraphicItem{
                     offset);
         return;
     }
+    draw(ctx, castShadow, hitboxOn){
+        if(castShadow){
+            ctx.beginPath();
+            ctx.ellipse(
+                this.pos.x - this.aabb.radius * 0.1, 
+                this.pos.y + this.aabb.radius, 
+                this.aabb.radius * 1.2,
+                this.aabb.radius * 0.5, 
+                0, 0, Math.PI * 2);
+            ctx.fillStyle = "#0000007f";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        super.draw(ctx, hitboxOn);
+    }
 
     update(dt, offset){
         this.move(dt, offset);
@@ -50,6 +66,7 @@ class DamageEntity extends Entity{
         pos = new Vector3(), 
         radius = new Vector3(), 
         damageBase = 0, 
+        maxHits = -1,
         timeDuration = -1,
         damageFormula = (baseDmg)=>{return baseDmg;}, 
         onImpact = ()=>{}, 
@@ -60,6 +77,10 @@ class DamageEntity extends Entity{
         this.typeName = typeName;
         this.baseDamage = damageBase;
         this.damageFormula = damageFormula;
+        
+        this.hitCount = 0;
+        this.maxHits = maxHits;
+
         this.age = 0;
         this.duration = timeDuration;
         this.onImpact = onImpact;
@@ -85,13 +106,14 @@ class DamageEntity extends Entity{
     }
 
     impact(...entities){
-        entities.forEach((e) => {
-            if(this.aabb.isColliding(e.aabb)){
-                e.hurt(this.damageFormula(this.baseDamage));
-                this.state = false;
-                return;
+        for (let i = 0; i < entities.length; i++) {
+            if(this.aabb.isColliding(entities[i].aabb)){
+                entities[i].hurt(this.damageFormula(this.baseDamage));
+                this.hitCount++;
+                continue;
             }
-        });
+            
+        }
     }
 
     checkTooFar(other){
@@ -112,7 +134,7 @@ class AreaOfEffect extends DamageEntity {
         hits:       0b01000000,
     }
 
-    constructor(originPos, spawnPos, damage, radius, frequency = 2, duration = 10_000, maxHits = 1_000_000, 
+    constructor(originPos, spawnPos, damage, radius, frequency = 2, duration = -1, maxHits = -1, 
         damageFormula = (dmg, radius) => {return dmg / radius;}, 
         onImpact = () => {}
         )
@@ -122,17 +144,12 @@ class AreaOfEffect extends DamageEntity {
         this.castPos = new Vector3(originPos.x, originPos.y);
         this.spawnPos = new Vector3(spawnPos.x, spawnPos.y, 5);
 
-        this.hitCount = 0;
-        this.maxHits = maxHits;
-
-        this.timeAlive = 0;
         this.damageFrequency = frequency;
         this.lastHit = 0;
         this.msPerHit = 1000 / frequency;
-        this.dt = 0;
 
         this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.radius;
-        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.timeAlive, this.maxHits, this.hitCount];
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.age, this.maxHits, this.hitCount];
 
         this.damagePredicate = () => {return true;};
 
@@ -155,24 +172,16 @@ class AreaOfEffect extends DamageEntity {
         // Return callback result
         return this.damageFormula(...effectiveArgs);
     }
-    move(offset){
-        this.setPos(this.pos.x,
-                    this.pos.y,
-                    this.pos.z,
-                    offset);
-        return;
-    }
 
     update(dt, offset = new Vector3()){
-        this.dt = dt;
         this.lastHit += dt;
-        this.timeAlive += dt;
-        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.timeAlive, this.maxHits, this.hitCount];
-        this.move(offset);
+        this.age += dt;
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.age, this.maxHits, this.hitCount];
+        this.move(dt, offset);
     }
 
     isActive(){
-        return this.timeAlive < this.duration;
+        return this.age < this.duration;
     }
 
     impact(...entities){
@@ -234,7 +243,7 @@ class Proyectile extends DamageEntity {
         this.usesCount = 0;
         this.timeAlive = 0;
 
-        this.damagePredicate = (entity, index, array) => {return true;};
+        this.damagePredicate = () => {return true;};
 
         this.damageArguments = Proyectile.args.damage | Proyectile.args.speed | Proyectile.args.radius;
         this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
@@ -542,24 +551,72 @@ class Item extends Entity {
     isObject(){return false;}
 }
 class Orb extends Item {
-    constructor(pos, radius, exp, color){
+    constructor(pos, radius, exp, color, glowRadius){
         super(pos, radius, "orb");
 
         this.exp = exp;
         this.color = color;
+        this.secondColor = "#" + this.lighterColor(color.replace("#", ""), 20);
+        this.shineColor = "#" + this.lighterColor(color.replace("#", ""), 50);
+        this.glowInner = "#" + this.darkerColor(color.replace("#", ""), 10) + "7f";
+        this.glowMid = "#" + this.darkerColor(color.replace("#", ""), 10) + "3f";
+        this.glowOuter = "#" + this.darkerColor(color.replace("#", ""), 20) + "1f";
+
+        this.glowRadius = glowRadius;
+
         this.collected = false;
+
+        
     }
 
     getExperience(){
         this.collected = true;
         return this.exp;
     }
-
     isCollected(){
         return this.collected;
     }
     tooFar(player){
-        return (Math.abs(player.pos.x - this.pos.x) > 20_000) || (Math.abs(player.pos.y - this.pos.y) > 20_000);
+        return (Math.abs(player.pos.x - this.pos.x) > 5000) || (Math.abs(player.pos.y - this.pos.y) > 5000);
+    }
+
+    draw(ctx){
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + this.glowRadius, 0, Math.PI * 2);
+        ctx.fillStyle = this.glowOuter;
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + (this.glowRadius * 0.66), 0, Math.PI * 2);
+        ctx.fillStyle = this.glowMid;
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + (this.glowRadius * 0.33), 0, Math.PI * 2);
+        ctx.fillStyle = this.glowInner;
+        ctx.fill();
+        ctx.closePath();
+
+
+        super.draw(ctx, false);
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = this.secondColor;
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(
+            this.pos.x + this.aabb.radius * 0.2, 
+            this.pos.y - this.aabb.radius * 0.1, 
+            this.aabb.radius * 0.20, 0, Math.PI * 2);
+        ctx.fillStyle = this.shineColor;
+        ctx.fill();
+        ctx.closePath();
     }
 }
 class Artifact extends Item {
@@ -593,6 +650,7 @@ class LivingEntity extends Entity {
 
         this.oneTimeAvaible = true;
         this.oneTimeHurt = () => {};
+        this.onHurt = () => {};
     }
 
     isLiving(){return true;}
@@ -604,7 +662,7 @@ class LivingEntity extends Entity {
         this.gradientSteps = steps;
         this.hurtGradient = colorGradient(this.colorHurt, this.colorNormal, this.gradientSteps);
         this.color = "#" + this.colorNormal;
-        this.gradientStep = 0;
+        this.gradientStep = steps;
     }
 
     followTarget(){
@@ -639,7 +697,7 @@ class LivingEntity extends Entity {
 
         this.setPos(this.pos.x + speed.x,
                     this.pos.y + speed.y, 
-                    0,
+                    this.pos.z,
                     offset);
         return;
     }
@@ -650,10 +708,13 @@ class LivingEntity extends Entity {
             this.inmunityTime = this.inmunityMaxTime;
             this.color = "#" + this.colorHurt;
             this.gradientStep = 0;
+
+            this.onHurt(damage);
+
+            this.oneTimeAvaible && this.oneTimeHurt(damage);
+            this.oneTimeAvaible = false;
         }
 
-        this.oneTimeAvaible && this.oneTimeHurt();
-        this.oneTimeAvaible = false;
         return;
     }
 
@@ -685,11 +746,12 @@ class LivingEntity extends Entity {
 }
 class PlayerEntity extends LivingEntity {
 
-    constructor(pos = new Vector3()){
+    constructor(pos = new Vector3(), canvas){
         super(pos, 20, 15, 200, "PE");
 
-        this.controlRange = 100;
-        this.inmunityMaxTime = 500; // Miliseconds
+        this.controlRange = 100;    // Distance from mouse for max speed
+        this.inmunityMaxTime = 300; // Miliseconds
+
         // You know js is shit when all params are references and need something like this
         this.targetPos = new Vector3(pos.x, pos.y, pos.z);
 
@@ -697,6 +759,15 @@ class PlayerEntity extends LivingEntity {
         this.mousemoveEventList = new EventArray();
 
         this.maxHP = this.hitPoints;
+        this.hpBar = new ProgressBar(
+            new Vector3(this.pos.x - this.aabb.radius - 5, this.pos.y + this.aabb.radius + 2),
+            (this.aabb.radius + 5) * 2, 5,
+            "#000000", "#ff2020",
+            new Vector3(1, 1)
+        );
+        this.hpBar.progressPercentage(this.hitPoints / this.maxHP);
+        this.onHurt = () => {this.hpBar.progressPercentage(this.hitPoints / this.maxHP);}
+
 
         this.level = 0;
         this.experience = 0;
@@ -704,7 +775,12 @@ class PlayerEntity extends LivingEntity {
         this.levelUp = false;
         this.normalLevelColor = "#5c5cff";
         this.specialLevelColor = "#5cff5c";
-        this.expBarColor = this.normalLevelColor;
+        this.expBar = new ProgressBar(
+            new Vector3(canvas.width * 0.10, 5), 
+            canvas.width * 0.80, 25,
+            "#000000", "#5c5cff",
+            new Vector3(3, 3)
+        );
 
         this.attacks = [new Weapon(ImpactProyectile, 1000)]; // new Weapon(ImpactProyectile, 1000), new Weapon(PierceProyectile, 1500), new Weapon(FollowProyectile, 1500)
         this.attacksArgs = [[50, 5]]; // [25, 5], [30, 3, 2], [20, 3]
@@ -714,7 +790,7 @@ class PlayerEntity extends LivingEntity {
         this.objects = [];
 
         this.setColors("BD93F9", "FF0000", 30);
-        this.hpBarAdjust = 5;
+        
     }
 
     getEventList(eventName){
@@ -748,14 +824,12 @@ class PlayerEntity extends LivingEntity {
             this.level++;
             this.levelRequirement = Math.ceil(this.levelRequirement * 1.1);
             this.levelUp = true;
-            console.log(this.level);
         }
 
-        if(this.level !== 0 && this.level % 10 === 0){
-            this.expBarColor = this.specialLevelColor;
-        }else{
-            this.expBarColor = this.normalLevelColor;
-        }
+        const specialLevel = this.level !== 0 && this.level % 10 === 0;
+        (specialLevel &&
+            this.expBar.changeColor(this.specialLevelColor)) ||
+            this.expBar.changeColor(this.normalLevelColor);
 
         return this.levelUp;
     }
@@ -812,9 +886,8 @@ class PlayerEntity extends LivingEntity {
         for (let i = 0; i < items.length; i++) {
             if(this.aabb.distanceTo(items[i].aabb) <= this.interactRange * this.interactRange){
                 this.addExperience(items[i].getExperience());
+                this.expBar.progressPercentage(this.getExpProgress());
             }
-
-            
         }
     }
     shoot(...enemies){
@@ -864,47 +937,16 @@ class PlayerEntity extends LivingEntity {
     draw(ctx, cnv, showHitBox, pJoyStick){
         super.draw(ctx, showHitBox, pJoyStick);
 
-        // Health bar
-        const xPos = this.pos.x - this.aabb.radius - this.hpBarAdjust;
-        const yPos = this.pos.y + this.aabb.radius + 2;
-        const bWidth = (this.aabb.radius + this.hpBarAdjust) * 2;
-        const bHeight = this.hpBarAdjust + 3;
+        this.hpBar.draw(ctx);
+        this.expBar.draw(ctx);
 
-        ctx.beginPath();
-        ctx.rect(xPos, yPos, bWidth, bHeight);
-        ctx.fillStyle = "#000000";
-        ctx.fill();
-        ctx.closePath();
-
-        let healthFill = bWidth * (this.hitPoints / this.maxHP);
-
-        if(healthFill > 0){
+        if(pJoyStick){
             ctx.beginPath();
-            ctx.rect(xPos, yPos, healthFill, bHeight);
-            ctx.fillStyle = "#ff0000";
+            ctx.arc(this.aabb.center.x, this.aabb.center.y, this.controlRange, 0, Math.PI * 2);
+            ctx.fillStyle = "#ff7f0099";
             ctx.fill();
             ctx.closePath();
         }
-        // End health bar
-
-        // Experience bar
-        let expX = cnv.width * 0.10; 
-        let expY = 5;
-        let expWidth = cnv.width * 0.80;
-        let expHeight = 25;
-
-        ctx.beginPath();
-        ctx.rect(expX, expY, expWidth, expHeight);
-        ctx.fillStyle = "#000000";
-        ctx.fill();
-        ctx.closePath();
-
-        ctx.beginPath();
-        ctx.rect(expX + 2, expY + 2, (expWidth - 4) * this.getExpProgress(), expHeight - 4);
-        ctx.fillStyle = this.expBarColor;
-        ctx.fill();
-        ctx.closePath();     
-        // End experience bar
 
     }
     update(dt){

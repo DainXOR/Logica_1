@@ -20,6 +20,9 @@ function toASCII(char){
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+function getRandomInt(min, max) {
+    return Math.round(Math.random() * (max - min + 1)) + min;
+}
 function pickRandom(...choices){
     const choice = Math.round(getRandomNumber(0, choices.length - 1));
     return choices[choice];

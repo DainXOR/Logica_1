@@ -33,6 +33,40 @@ class AABB{
         return dx_sqr + dy_sqr;
     }
 }
+class Rectangle{
+    pos = new Vector3();
+    width = 0;
+    heigth = 0;
+
+    constructor(center = new Vector3(), w, h){
+        this.pos = center;
+        this.width = w;
+        this.heigth = h;
+    }
+
+    isColliding(other){
+        const de_sqr = this.distanceTo(other);
+        const dr_sqr = (this.radius + other.radius) * (this.radius + other.radius);
+
+        return de_sqr < dr_sqr;
+    }
+
+    distanceTo(other){
+        const dx_sqr = (other.pos.x - this.pos.x) * (other.center.x - this.pos.x);
+        const dy_sqr = (other.center.y - this.pos.y) * (other.center.y - this.pos.y);
+
+        return dx_sqr + dy_sqr;
+    }
+
+    draw(ctx){
+        ctx.beginPath();
+        ctx.rect(this.pos.x, this.pos.y, this.width, this.height);
+        ctx.lineWidth = "3";
+        ctx.strokeStyle = "#00ff00";
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
  
 // The objects that we want stored in the quadtree
 class Node {
@@ -187,12 +221,12 @@ class Quad {
     }
 };
 
-
+// My implementation of quadtree data struct
 class QuadTree {
     constructor(center, w, h, capacity = 8){
-        this.center = center;
+        this.pos = center;
         this.width = w;
-        this.heigth = h;
+        this.height = h;
 
         this.capacity = capacity;
 
@@ -201,14 +235,12 @@ class QuadTree {
         this.divided = false;
     }
 
-
-
     contains(elementPos){
-        const inLeftBoundary = elementPos.x > (this.center.x - this.width);
-        const inRightBoundary = elementPos.x < (this.center.x + this.width);
+        const inLeftBoundary = elementPos.x >= (this.pos.x - this.width * 0.5);
+        const inRightBoundary = elementPos.x <= (this.pos.x + this.width);
 
-        const inTopBoundary = elementPos.y > (this.center.y - this.heigth);
-        const inBottomBoundary = elementPos.y < (this.center.y + this.heigth);    
+        const inTopBoundary = elementPos.y >= (this.pos.y - this.height);
+        const inBottomBoundary = elementPos.y <= (this.pos.y + this.height);    
 
         return inLeftBoundary && inRightBoundary && inTopBoundary && inBottomBoundary;
     }
@@ -217,38 +249,30 @@ class QuadTree {
         this.divided = true;
 
         this.qtTopLeft = new QuadTree(
-            new Vector3(
-                this.center.x - (this.width * 0.5),
-                this.center.y - (this.heigth * 0.5)),
+            new Vector3(this.pos.x, this.pos.y),
             this.width * 0.5, 
-            this.heigth * 0.5,
+            this.height * 0.5,
             this.capacity
         );
 
         this.qtTopRight = new QuadTree(
-            new Vector3(
-                this.center.x + (this.width * 0.5),
-                this.center.y - (this.heigth * 0.5)),
+            new Vector3(this.pos.x + this.width * 0.5, this.pos.y),
             this.width * 0.5, 
-            this.heigth * 0.5,
+            this.height * 0.5,
             this.capacity
         );
 
         this.qtBottomLeft = new QuadTree(
-            new Vector3(
-                this.center.x - (this.width * 0.5),
-                this.center.y + (this.heigth * 0.5)),
+            new Vector3(this.pos.x, this.pos.y + this.height * 0.5),
             this.width * 0.5, 
-            this.heigth * 0.5,
+            this.height * 0.5,
             this.capacity
         );
 
         this.qtBottomRight = new QuadTree(
-            new Vector3(
-                this.center.x + (this.width * 0.5),
-                this.center.y + (this.heigth * 0.5)),
+            new Vector3(this.pos.x + this.width * 0.5, this.pos.y + this.height * 0.5),
             this.width * 0.5, 
-            this.heigth * 0.5,
+            this.height * 0.5,
             this.capacity
         );
     }
@@ -258,7 +282,7 @@ class QuadTree {
             return false;
         }
 
-        if((this.elements.length < this.capacity)){
+        if(this.elements.length < this.capacity){
             this.elements.push(graphicItem);
             return true;
         }
@@ -276,16 +300,32 @@ class QuadTree {
 
     }
 
+    getElements(){
+        let allElements = this.elements;
+
+        if(this.divided){
+            allElements = allElements.concat(
+                this.qtTopLeft.getElements(),
+                this.qtTopRight.getElements(),
+                this.qtBottomLeft.getElements(),
+                this.qtBottomRight.getElements()
+            );
+        }
+
+        return allElements;
+    }
+
     draw(ctx){
 
         ctx.beginPath();
-        ctx.rect(this.center.x - this.width, this.center.y - this.heigth, this.width * 2, this.heigth * 2);
-        ctx.fillStyle = getRandomColor();
-        ctx.fill();
+        ctx.rect(this.pos.x, this.pos.y, this.width, this.height);
+        ctx.lineWidth = "6";
+        ctx.strokeStyle = "#000000";
+        ctx.stroke()
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.arc(this.center.x, this.center.y, 10, 0, Math.PI * 2);
+        ctx.arc(this.pos.x + this.width * 0.5, this.pos.y + this.height * 0.5, 5, 0, Math.PI * 2);
         ctx.fillStyle = "#ff0000";
         ctx.fill();
         ctx.closePath();

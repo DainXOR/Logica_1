@@ -1,7 +1,7 @@
 class GraphicItem{
     constructor(pos = new Vector3(), h = 0, w = 0){
         this.pos = pos;
-        this.heigh = h;
+        this.height = h;
         this.width = w;
         this.color = "#ffffff";
 
@@ -39,13 +39,28 @@ class GraphicItem{
         return false;
     }
 
+    lighterColor(color, level, generated = 60){
+        let gradient = colorGradient(color, "ffffff", generated);
+        return gradient[level];
+    }
+    darkerColor(color, level, generated = 60){
+        let gradient = colorGradient(color, "000000", generated);
+        return gradient[level];
+    }
+
+
+    setPos(x = 0, y = 0, z = 0, offset = new Vector3()){
+        this.pos = new Vector3(x + offset.x, y + offset.y, z + offset.z);
+    }
+
     onEvent(){}
 
     show() {this.visibilityState = true;}
     hide() {this.visibilityState = false;}
     toggleVisibility() {this.visibilityState = !this.visibilityState;}
 
-    draw(ctx, showHitBox, pJoyStick){
+    draw(ctx, showHitBox){
+
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
@@ -55,21 +70,13 @@ class GraphicItem{
         if(showHitBox){
             ctx.beginPath();
             ctx.arc(this.aabb.center.x, this.aabb.center.y, this.aabb.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffff00";
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        if(pJoyStick){
-            ctx.beginPath();
-            ctx.arc(this.aabb.center.x, this.aabb.center.y, 200, 0, Math.PI * 2);
-            ctx.fillStyle = "#ff7f0099";
+            ctx.fillStyle = "#ffff007f";
             ctx.fill();
             ctx.closePath();
         }
     }
     
-    update(dt, offset){ // dt = delta seconds, arguments = [canvas, context]
+    update(dt, offset){ // dt = delta miliseconds
         if(!this.genericEventList.finish()){
             this.onEvent();
         }
@@ -99,6 +106,105 @@ class GraphicItem{
         }
     }
 
+}
+
+class ProgressBar extends GraphicItem {
+    constructor(pos, width, height, bgColor = "#000000", progressColor = "#ffffff", progressMargins = new Vector3(0, 0)){
+        super(pos, height, width);
+
+        this.bg = bgColor;
+        this.color = progressColor;
+        this.margins = progressMargins;
+        this.progress = 0;
+    }
+
+    progressPercentage(progress){
+        this.progress = progress;
+    }
+    changeColor(barColor){
+        this.color = barColor;
+    }
+
+    draw(ctx){
+        ctx.beginPath();
+        ctx.rect(this.pos.x, this.pos.y, this.width, this.height);
+        ctx.fillStyle = this.bg;
+        ctx.fill();
+        ctx.closePath();
+
+
+        ctx.beginPath();
+        ctx.rect(
+            this.pos.x + this.margins.x, 
+            this.pos.y + this.margins.y, 
+            (this.width - (this.margins.x * 2)) * this.progress, 
+            this.height - (this.margins.y * 2));
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    move(dt, offset){
+        this.setPos(this.pos.x, this.pos.y, this.pos.z, offset);
+    }
+    update(dt, offset = new Vector3()){
+        this.move(dt, offset);
+    }
+}
+
+class Background extends GraphicItem {
+    constructor(gameWidth, gameHeight, imageElementID){
+        super(new Vector3(), gameHeight, gameWidth);
+
+        this.image = document.getElementById(imageElementID);
+
+        this.imageRatio = this.image.width / this.image.height;
+    }
+
+    draw(ctx){
+        ctx.drawImage(this.image, 
+            this.pos.x, this.pos.y, 
+            this.width, this.height / this.imageRatio);
+
+        ctx.drawImage(this.image, 
+            this.pos.x + this.width, this.pos.y, 
+            this.width, this.height / this.imageRatio);
+        ctx.drawImage(this.image, 
+            this.pos.x, this.pos.y + this.height, 
+            this.width, this.height / this.imageRatio);
+        ctx.drawImage(this.image, 
+            this.pos.x + this.width, this.pos.y + this.height, 
+            this.width, this.height / this.imageRatio);
+
+        ctx.drawImage(this.image, 
+            this.pos.x - this.width, this.pos.y, 
+            this.width, this.height / this.imageRatio);
+        ctx.drawImage(this.image, 
+            this.pos.x, this.pos.y - this.height, 
+            this.width, this.height / this.imageRatio);
+        ctx.drawImage(this.image, 
+            this.pos.x - this.width, this.pos.y - this.height, 
+            this.width, this.height / this.imageRatio);
+
+        ctx.drawImage(this.image, 
+            this.pos.x + this.width, this.pos.y - this.height, 
+            this.width, this.height / this.imageRatio);
+        ctx.drawImage(this.image, 
+            this.pos.x - this.width, this.pos.y + this.height, 
+            this.width, this.height / this.imageRatio);
+    }
+    move(_, offset){
+        this.setPos(this.pos.x, this.pos.y, this.pos.z, offset);
+
+        this.pos.x *= !((this.pos.x + this.width < 0) || (this.pos.x - this.width > 0));
+
+        this.pos.y *= !((this.pos.y + this.height < 0) || (this.pos.y - this.height > 0));
+
+    }
+    update(ctx, offset){
+        this.move(0, offset);
+        this.draw(ctx);
+    }
 }
 
 class GUIElement extends GraphicItem{
