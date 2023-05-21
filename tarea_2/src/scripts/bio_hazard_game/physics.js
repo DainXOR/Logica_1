@@ -236,10 +236,10 @@ class QuadTree {
     }
 
     contains(elementPos){
-        const inLeftBoundary = elementPos.x >= (this.pos.x - this.width * 0.5);
+        const inLeftBoundary = elementPos.x >= this.pos.x;
         const inRightBoundary = elementPos.x <= (this.pos.x + this.width);
 
-        const inTopBoundary = elementPos.y >= (this.pos.y - this.height);
+        const inTopBoundary = elementPos.y >= this.pos.y;
         const inBottomBoundary = elementPos.y <= (this.pos.y + this.height);    
 
         return inLeftBoundary && inRightBoundary && inTopBoundary && inBottomBoundary;
@@ -324,11 +324,11 @@ class QuadTree {
         ctx.stroke()
         ctx.closePath();
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x + this.width * 0.5, this.pos.y + this.height * 0.5, 5, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff0000";
-        ctx.fill();
-        ctx.closePath();
+        //ctx.beginPath();
+        //ctx.arc(this.pos.x + this.width * 0.5, this.pos.y + this.height * 0.5, 5, 0, Math.PI * 2);
+        //ctx.fillStyle = "#ff0000";
+        //ctx.fill();
+        //ctx.closePath();
 
         this.qtTopLeft?.draw(ctx);
         this.qtTopRight?.draw(ctx);
