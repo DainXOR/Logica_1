@@ -16,11 +16,17 @@ class BC{
         this.radius = radius;
     }
 
-    contains(other){
-        return  other.pos.x >= this.pos.x - this.radius && 
-                other.pos.x <= this.pos.x + this.radius &&
-                other.pos.y >= this.pos.y - this.radius &&
-                other.pos.y <= this.pos.y + this.radius;
+    containsAABB(other){
+        return  other.pos.x >= this.center.x - this.radius && 
+                other.pos.x <= this.center.x + this.radius &&
+                other.pos.y >= this.center.y - this.radius &&
+                other.pos.y <= this.center.y + this.radius;
+    }
+    containsBC(other){
+        return  other.center.x >= this.center.x - this.radius && 
+                other.center.x <= this.center.x + this.radius &&
+                other.center.y >= this.center.y - this.radius &&
+                other.center.y <= this.center.y + this.radius;
     }
 
     isCollidingBC(other){

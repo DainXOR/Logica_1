@@ -43,14 +43,14 @@ function getConditionateRandom(min, max, predicate){
 
     return value;
 }
-function getNRandom(n, min, max, predicate = ()=>{return true;}){
+function getNRandom(n, min, max, predicate = ()=>{return true;}, ...predArgs){
     let values = [];
     do{
         values = [];
         for (let i = 0; i < n; i++) {
             values.push(getRandomInt(min, max));
         }
-    }while(!predicate(...values));
+    }while(!predicate(...values, ...predArgs));
 
     return values;
 }

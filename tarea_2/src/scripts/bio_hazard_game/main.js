@@ -8,66 +8,51 @@ function enemy(canvas){
     let timesInvoked = 0;
     let spawnLevel = 3;
 
-    function newEnemy(enemyClass, amount, target, radius = 1500, 
-        center = new Vector3(canvas.width * 0.5, canvas.height * 0.5),
-        predicate = (x, y) => {return ((x * x) + (y * y) >= 1_500_000);}){
+    function newEnemy(enemyClass, amount, target, area = new BC(new Vector3(), 1500), predicate = () => true){
+
+        let condition = (x, y) => {return !area.containsBC(new BC(new Vector3(x, y), 1)) && predicate(x, y)};
 
         let enemies = [];
         for (let i = 0; i < amount; i++) {
-            let x = getConditionateRandom(center.x - radius, center.x + radius, () => true);
-            let y = getConditionateRandom(center.y - radius, center.y + radius, () => true);
-    
+            let x = getRandomNumber(area.center.x - area.radius, area.center.x + area.radius);
+            let y = getRandomNumber(area.center.y - area.radius, area.center.y + area.radius);
+
+            if(!condition(x, y)){
+                x += area.radius * (1 + ((x < 0) * -2));
+                y += area.radius * (1 + ((y < 0) * -2));
+            }
             enemies.push(new enemyClass(target, new Vector3(x, y)));
         }
         return enemies;    
     }
-    function createEnemies(target, ...amounts){
+    function createEnemies(target, amounts, area = new BC(new Vector3(), 1500)){
         let enemies = [];
 
         enemies = enemies.concat(
-            newEnemy(NormalEnemy, amounts[0], target),
-            newEnemy(TankyEnemy, amounts[1], target, 1500),
-            newEnemy(NormalBigEnemy, amounts[2], target, 1500),
-            newEnemy(SuicideEnemy, amounts[3], target),
-            newEnemy(TankyBigEnemy, amounts[4], target, 1500),
-            newEnemy(RevengefulEnemy, amounts[5], target, 1500),
-            newEnemy(GiantEnemy, amounts[6], target, 3000)
+            newEnemy(NormalEnemy,       amounts[0], target, area),
+            newEnemy(TankyEnemy,        amounts[1], target, area),
+            newEnemy(NormalBigEnemy,    amounts[2], target, area),
+            newEnemy(SuicideEnemy,      amounts[3], target, area),
+            newEnemy(TankyBigEnemy,     amounts[4], target, area),
+            newEnemy(RevengefulEnemy,   amounts[5], target, area),
+            newEnemy(GiantEnemy,        amounts[6], target, area)
         );
     
         return enemies;
     }
-    function generateEnemies(target, dt){
+    function generateEnemies(target, dt, area = new BC(new Vector3(), 1500)){
         let newEnemies = [];
         spawnTimer += dt;
     
         if(spawnTimer >= enemySpawnTime){
             spawnTimer = 0;
             timesInvoked += 1;
-            newEnemies = createEnemies(target, ...enemiesGenerate);
+            newEnemies = createEnemies(target, enemiesGenerate, area);
     
-            if(timesInvoked >= 1){
+            if(timesInvoked >= 10){
                 enemiesGenerate[getRandomInt(0, Math.min(spawnLevel, enemyTypes - 1))]++;
                 spawnLevel++;
                 timesInvoked = 0;
-                
-                if(getRandomInt(0, 1000) > 850){
-                    target.newAttack(ImpactProyectile, [50, 10], 680);
-                }
-                if(getRandomInt(0, 1000) > 900){
-                    target.newAttack(PierceProyectile, [60, 5, 2], 1000);
-                }
-                if(getRandomInt(0, 1000) > 900){
-                    target.newAttack(FollowProyectile, [20, 8], 1000);
-                }
-                if(getRandomInt(0, 1000) > 850){
-                    target.newAttack(RicochetProyectile, [60, 2, 5], 1500);
-                }
-                if(getRandomInt(0, 1000) > 950){
-                    target.newAttack(Magma, [], 5000, Type.AOE);
-                }
-                if(getRandomInt(0, 1000) > 990){
-                    target.newAttack(Void, [], 8000, Type.AOE);
-                }
             }
         }
     
@@ -92,7 +77,7 @@ function orb(canvas){
         black:  [6, 10000, "#090909", 9],
     }
 
-    let orbsGenerate = [20, 0, 0, 0, 0, 0];
+    let orbsGenerate = [10, 0, 0, 0, 0, 0];
     let orbTypes = orbsGenerate.length;
     let orbSpawnTime = 1000 * 0.5;
     let orbSpawnTimer = 0;
@@ -206,8 +191,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 1500;
-    cnv.height = 1500;
+    cnv.width = 2000;
+    cnv.height = 2000;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -227,7 +212,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let exp = 0;
 
     let enemyFactory = enemy(cnv);
-    let enemies = enemyFactory.createMany(player, 10, 0, 0, 0, 0, 0, 10);
+    let enemies = enemyFactory.createMany(player, [10, 0, 0, 0, 0, 0, 0], 
+                                        new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), cnv.width));
     //enemies = [];
 
     let timeCounter = 0;
@@ -236,34 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < enemies.length; i++) {
         qtree.insert(enemies[i]);
     }
-    let area = new AABB(new Vector3(cnv.width * 0.20, cnv.height * 0.20), 600, 600);
-
-    let mouseEvent = {
-        isPressed: false,
-        x: 0,
-        y: 0,
-    }
-
-    cnv.addEventListener("mousedown", (event) => {
-        mouseEvent.isPressed = true;
-        mouseEvent.x = event.x * canvasScaleX;
-        mouseEvent.y = event.y * canvasScaleY;
-    });
-
-    cnv.addEventListener("mouseup", (event) => {
-        mouseEvent.isPressed = false;
-    });
 
     cnv.addEventListener("mousemove", (event) => {
-
-        if(mouseEvent.isPressed){
-            mouseEvent.x = event.x * canvasScaleX;
-            mouseEvent.y = event.y * canvasScaleY;
-        }
-
-        area.pos.x = (event.x * canvasScaleX) - area.width * 0.5;
-        area.pos.y = (event.y * canvasScaleY) - area.height * 0.5;
-
         publisher.newEvent(new GameEvent(
             "mousemove", 
             new Vector3(
@@ -271,8 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.y * canvasScaleY
                 )
             ));
-
-        
     });
 
     function quadTreeTesting(timeStamp){
@@ -319,15 +277,39 @@ document.addEventListener("DOMContentLoaded", () => {
             qtree.insert(allEntities[i]);
         }
 
-        enemies = enemies.concat(enemyFactory.generate(player, dt));
-        orbs = orbs.concat(orbFactory.generate(dt));
+        enemies.length <= 500 &&
+        (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 2000))));
+
+        orbs.length <= 4000 &&
+        (orbs = orbs.concat(orbFactory.generate(dt)));
         
-        player.addExperience(exp);
-        exp = 0;
+        
+        if(exp !== 0){
+            player.addExperience(exp);
+            exp = 0;
+        }
         
         if(player.hasLevelUp()){
-            console.log("a");
+            console.log("Level up!");
 
+            if(getRandomInt(0, 1000) > 850){
+                player.newAttack(ImpactProyectile, [50, 10], 680);
+            }
+            if(getRandomInt(0, 1000) > 900){
+                player.newAttack(PierceProyectile, [60, 5, 2], 1000);
+            }
+            if(getRandomInt(0, 1000) > 900){
+                player.newAttack(FollowProyectile, [20, 8], 1000);
+            }
+            if(getRandomInt(0, 1000) > 850){
+                player.newAttack(RicochetProyectile, [60, 2, 5], 1500);
+            }
+            if(getRandomInt(0, 1000) > 950){
+                player.newAttack(Magma, [], 5000, Type.AOE);
+            }
+            if(getRandomInt(0, 1000) > 990){
+                player.newAttack(Void, [], 8000, Type.AOE);
+            }
         }
 
         const offset = player.update(dt);
@@ -339,13 +321,13 @@ document.addEventListener("DOMContentLoaded", () => {
         clear(ctx, cnv);
         
         //bg.update(ctx, offset);
-        qtree.draw(ctx);
+        //qtree.draw(ctx);
 
 
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
         orbs.forEach((o) => {
             o.update(dt, offset);
-            o.draw(ctx, false);
+            o.draw(ctx);
         });
         player.collect(...qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 3));
 
@@ -357,11 +339,11 @@ document.addEventListener("DOMContentLoaded", () => {
             let nearbyEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
 
             attack.impact(...nearbyEnemies);
-            attack.draw(ctx, true);
+            attack.draw(ctx, false);
         });
 
 
-        player.draw(ctx, true, false);
+        player.draw(ctx, false, false);
         
 
         let killed = enemies.filter(e => !e.isAlive());
@@ -403,7 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
         //    totalTime *= -1;
         //}
 
-        requestAnimationFrame(gameLoop);
+        if(player.isAlive()){
+            requestAnimationFrame(gameLoop);
+        }
     
     }
 

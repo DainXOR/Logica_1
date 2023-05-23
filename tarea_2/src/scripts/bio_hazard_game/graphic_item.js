@@ -1,5 +1,5 @@
 class GraphicItem{
-    constructor(pos = new Vector3(), h = 0, w = 0){
+    constructor(pos = new Vector3(), w = 0, h = 0){
         this.pos = pos;
         this.height = h;
         this.width = w;
@@ -63,17 +63,17 @@ class GraphicItem{
 
     draw(ctx, showBox = false){
 
-        if(this.texture && !showBox){
-            ctx.drawImage(this.texture, 
-                this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, 
-                this.width, this.height);
-                
-        }else if(showBox){
+        if(showBox){
             ctx.beginPath();
             ctx.rect(this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, this.width * 2, this.height * 2);
             ctx.fillStyle = this.color;
             ctx.fill();
             ctx.closePath();
+        }
+        else if(this.texture){
+            ctx.drawImage(this.texture, 
+                this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, 
+                this.width, this.height);
         }
     }
     
@@ -111,7 +111,7 @@ class GraphicItem{
 
 class ProgressBar extends GraphicItem {
     constructor(pos, width, height, bgColor = "#000000", progressColor = "#ffffff", progressMargins = new Vector3(0, 0)){
-        super(pos, height, width);
+        super(pos, width, height);
 
         this.bg = bgColor;
         this.color = progressColor;
