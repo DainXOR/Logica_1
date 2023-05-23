@@ -10,7 +10,7 @@ class GraphicItem{
         this.textureFrame = 0;
         this.textureStates = 0;
         this.textureMaxFrame = {0: 0};
-        this.textureFrameSize = {h: 0, w: 0};
+        this.textureFrameSize = {w: this.width, h: this.height};
 
         this.genericEventList = new EventArray();
         this.visibilityState = true;
@@ -19,8 +19,20 @@ class GraphicItem{
 
     getEventList(listName){return genericEventList;}
 
-    setTexture(textureID){
+    setTexture(textureID, frames = [1], width = 0, height = 0){
         this.texture = document.getElementById(textureID);
+        this.textureState = 0;
+        this.textureFrame = 0;
+        this.textureStates = frames.length;
+
+        for (let i = 0; i < frames.length; i++) {
+            textureMaxFrame[i] = frames[i];
+            
+        }
+        height > 0 &&
+        (this.textureFrameSize.h = height);
+        width > 0 &&
+        (this.textureFrameSize.w = width);
     }
     setTextureStateData(maxStates, ...maxStateFrames){
         if(maxStates === maxStateFrames.length){
@@ -74,6 +86,7 @@ class GraphicItem{
             ctx.drawImage(this.texture, 
                 this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, 
                 this.width, this.height);
+            //ctx.rotate(15);     
         }
     }
     
@@ -124,6 +137,7 @@ class ProgressBar extends GraphicItem {
     }
     changeColor(barColor){
         this.color = barColor;
+        return true;
     }
 
     draw(ctx){

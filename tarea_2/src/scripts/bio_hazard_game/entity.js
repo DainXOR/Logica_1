@@ -38,9 +38,9 @@ class Entity extends GraphicItem{
         if(castShadow){
             ctx.beginPath();
             ctx.ellipse(
-                this.pos.x + this.width * 0.01, 
-                this.pos.y + this.height * 1.2, 
-                this.bc.width,
+                this.pos.x + this.width * -0.05, 
+                this.pos.y + this.height * 0.5, 
+                this.bc.radius,
                 this.bc.radius * 0.6, 
                 0, 0, Math.PI * 2);
             ctx.fillStyle = "#0000007f";
@@ -161,7 +161,7 @@ class AreaOfEffect extends DamageEntity {
         onImpact = () => {}
         )
     {
-        super("-AOE", spawnPos, radius, damage, duration, damageFormula, onImpact);
+        super("-AOE", spawnPos, radius, damage, maxHits, duration, damageFormula, onImpact);
         
         this.castPos = new Vector3(originPos.x, originPos.y);
         this.spawnPos = new Vector3(spawnPos.x, spawnPos.y, 5);
@@ -224,22 +224,42 @@ class AreaOfEffect extends DamageEntity {
 }
 class Magma extends AreaOfEffect{
     constructor(originPos, spawnPos){
-        super(originPos, spawnPos, 20, 100, 2);
+        super(originPos, spawnPos, 20, 100, 2, 8_000, 1_000_000);
 
         this.setAABBSize(650, 650);
         this.color = "#e46400a2";
+    }
+
+    draw(ctx, showBC = false, showAABB = false){
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+
+        super.draw(ctx, false, showBC, showAABB);
     }
 }
 class Void extends AreaOfEffect {
     constructor(originPos, spawnPos){
         super(new Vector3(), spawnPos, 1, 150, 10, 5_000, 1_000_000, 
             (dmg, hits) => {return dmg + hits;},
-            (_) => {this.bc.radius += 1;});
+            (_) => {this.bc.radius += 1; this.setAABBSize(650 + this.hitCount, 650 + this.hitCount);});
 
         this.setAABBSize(650, 650);
         this.originalRadius = this.bc.radius; 
         this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.hits;
         this.color = "#000000";
+    }
+
+    draw(ctx, showBC = false, showAABB = false){
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+
+        super.draw(ctx, false, showBC, showAABB);
     }
 }
 
@@ -414,7 +434,7 @@ class FollowProyectile extends Proyectile {
     }
 }
 class RicochetProyectile extends Proyectile {
-    constructor(pos, target, speed, damage = 2, uses = 5){
+    constructor(pos, target, speed, damage = 4, uses = 5){
         super(pos, target.pos, speed, uses, damage, 12, 
             (dmg) => {return dmg;},
             (...e) => {
@@ -550,7 +570,7 @@ class Weapon {
         return new this.attack(new Vector3(pos.x, pos.y, 10), dir, ...args);
     }
     #castAOE(origin, target, ...args){
-        let coords = getNRandom(2, 0, 1000);
+        let coords = getNRandom(2, -1000, 1000);
         return new this.attack(origin, new Vector3(...coords, 5), ...args);
     }
 
@@ -582,10 +602,23 @@ class Weapon {
 
 class Item extends Entity {
     constructor(pos, radius, idComponent = ""){
-        super(pos, radius, "i-" + idComponent);
+        super(pos, radius, radius * 2, radius * 2, "i-" + idComponent);
 
         this.type = 3;
         this.color = "#ffffff";
+
+        this.collected = false;
+    }
+
+    isCollected(){
+        return this.collected;
+    }
+    tooFar(player){
+        return (Math.abs(player.pos.x - this.pos.x) > 5000) || (Math.abs(player.pos.y - this.pos.y) > 5000);
+    }
+
+    doEffect(entity){
+
     }
 
     isItem(){return true;}
@@ -604,23 +637,14 @@ class Orb extends Item {
         this.glowOuter = "#" + this.darkerColor(color.replace("#", ""), 20) + "1f";
 
         this.glowRadius = glowRadius;
-
-        this.collected = false;
-
-        
     }
 
-    getExperience(){
+    doEffect(entity){
+        entity.addExperience(this.exp);
         this.collected = true;
-        return this.exp;
+        this.exp = 0;
+        return;
     }
-    isCollected(){
-        return this.collected;
-    }
-    tooFar(player){
-        return (Math.abs(player.pos.x - this.pos.x) > 5000) || (Math.abs(player.pos.y - this.pos.y) > 5000);
-    }
-
     draw(ctx){
 
         ctx.beginPath();
@@ -658,6 +682,22 @@ class Orb extends Item {
         ctx.fillStyle = this.shineColor;
         ctx.fill();
         ctx.closePath();
+    }
+}
+class Hearth extends Item {
+    constructor(pos, radius, heal = 30){
+        super(pos, radius, "hearth");
+
+        this.setTexture("hearth");
+
+        this.healAmount = heal;
+    }
+
+    doEffect(entity){
+        entity.addHitPoints(this.healAmount);
+        this.collected = true;
+        this.healAmount = 0;
+        return;
     }
 }
 class Artifact extends Item {
@@ -817,13 +857,13 @@ class PlayerEntity extends LivingEntity {
             new Vector3(1, 1)
         );
         this.hpBar.progressPercentage(this.hitPoints / this.maxHP);
-        this.onHurt = () => {this.hpBar.progressPercentage(this.hitPoints / this.maxHP);}
+        //this.onHurt = () => {this.hpBar.progressPercentage(this.hitPoints / this.maxHP);}
 
 
         this.level = 0;
         this.experience = 0;
         this.levelRequirement = 10;
-        this.levelUp = false;
+        this.levelsUpgraded = false;
         this.normalLevelColor = "#5c5cff";
         this.specialLevelColor = "#5cff5c";
         this.expBar = new ProgressBar(
@@ -860,22 +900,26 @@ class PlayerEntity extends LivingEntity {
         return this.experience / this.levelRequirement;
     }
     hasLevelUp(){
-        return this.levelUp;
+        return this.levelsUpgraded > 0;
     }
 
-    addExperience(amout){
-        if(!this.isAlive() || amout === 0){
+    updateHP(){
+        this.hpBar.progressPercentage(this.hitPoints / this.maxHP);
+    }
+
+    addExperience(amount){
+        if(!this.isAlive() || amount === 0){
             return false;
         }
 
-        this.experience += amout;
+        this.experience += amount;
         this.expBar.progressPercentage(this.getExpProgress());
 
         while(this.levelRequirement <= this.experience){
             this.experience -= this.levelRequirement;
             this.level++;
             this.levelRequirement = Math.ceil(this.levelRequirement * 1.1);
-            this.levelUp = true;
+            this.levelsUpgraded += 1;
         }
 
         const specialLevel = this.level !== 0 && this.level % 10 === 0;
@@ -883,9 +927,16 @@ class PlayerEntity extends LivingEntity {
             this.expBar.changeColor(this.specialLevelColor)) ||
             this.expBar.changeColor(this.normalLevelColor);
 
-        return this.levelUp;
+        return this.levelsUpgraded;
+    }
+    addHitPoints(amount){
+        this.hitPoints += amount;
+        this.hitPoints > this.maxHP && (this.hitPoints = this.maxHP);
     }
 
+    consumeLevel(){
+        return this.levelsUpgraded > 0 && this.levelsUpgraded--;
+    }
     newAttack(attackClass, attackArgs, cooldown, ...weaponArgs){
         this.attacks.push(new Weapon(attackClass, cooldown, ...weaponArgs));
         this.attacksArgs.push(attackArgs);
@@ -937,7 +988,7 @@ class PlayerEntity extends LivingEntity {
     collect(...items){
         for (let i = 0; i < items.length; i++) {
             if(this.bc.distanceTo(items[i].bc) <= this.interactRange * this.interactRange){
-                this.addExperience(items[i].getExperience());
+                items[i].doEffect(this);
             }
         }
     }
@@ -991,9 +1042,10 @@ class PlayerEntity extends LivingEntity {
     }
     update(dt){
         let offset = new Vector3();
+        this.updateHP();
 
         if(this.isAlive()){
-            this.levelUp = false;
+            this.levelsUpgraded = false;
             this.updateTarget();
             offset = this.move(dt);
             this.hurtRecover(dt);
@@ -1009,7 +1061,7 @@ class EnemyEntity extends LivingEntity { "el-E"
     static target = null;
 
     constructor(target = null, pos = new Vector3(), damage = 0,  speed = 15, radius = 5, hp = 1, idComponent = ""){
-        super(pos, speed, radius, 0, 0, hp, "E" + idComponent);
+        super(pos, speed, radius, radius * 2, radius * 2, hp, "E" + idComponent);
 
         this.type *= 10;
         this.type += 2;
@@ -1063,9 +1115,9 @@ class EnemyEntity extends LivingEntity { "el-E"
         }
         this.updateTarget();
     }
-    draw(ctx){
+    draw(ctx, shadow = true, showBC = false, showAABB = false){
         if(this.texture){
-            super.draw(ctx, false, true);
+            super.draw(ctx, shadow, showBC, showAABB);
         }
         else{
             ctx.beginPath();
@@ -1082,6 +1134,8 @@ class NormalEnemy extends EnemyEntity { "el-EN"
 
         this.deathExp = 1;
         this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
+
+        this.setTexture("en0");
     }
 }
 class SuicideEnemy extends EnemyEntity { "el-EK"
@@ -1099,10 +1153,13 @@ class SuicideEnemy extends EnemyEntity { "el-EK"
         this.oneTimeAvaible = true;
         this.oneTimeHurt = () => {
             this.colorCenter = "ff0000";
+            this.setTexture("esr0");
             this.maxSpeed = 30;
             this.centerRadius = this.bc.radius * 0.4;
             this.rageMode = true;
         }
+
+        this.setTexture("es0");
     }
 
     updateTarget(){
@@ -1129,14 +1186,16 @@ class SuicideEnemy extends EnemyEntity { "el-EK"
         return new Vector3(xDistance, yDistance);
     }
 
-    draw(ctx, hitbox){
-        super.draw(ctx, hitbox);
+    draw(ctx, shadow = true, showBC = false, showAABB = false){
+        super.draw(ctx, shadow, showBC, showAABB);
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#" + this.colorCenter;
-        ctx.fill();
-        ctx.closePath();        
+        if(!this.texture){
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#" + this.colorCenter;
+            ctx.fill();
+            ctx.closePath();
+        }
     }
 
 }
@@ -1146,16 +1205,20 @@ class TankyEnemy extends EnemyEntity { "el-ET"
 
         this.deathExp = 2;
         this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
+
+        this.setTexture("et0");
     }
 
-    draw(ctx, showHitBox = false){
-        super.draw(ctx, showHitBox);
+    draw(ctx, shadow = true, showBC = false, showAABB = false){
+        super.draw(ctx, shadow, showBC, showAABB);
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffff00";
-        ctx.fill();
-        ctx.closePath();
+        if(!this.texture){
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffff00";
+            ctx.fill();
+            ctx.closePath();
+        }
     }
 
 }
@@ -1165,6 +1228,8 @@ class NormalBigEnemy extends EnemyEntity { "el-ENB"
 
         this.deathExp = 5;
         this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
+
+        this.setTexture("en0");
     }
 }
 class TankyBigEnemy extends EnemyEntity { "el-ETB"
@@ -1173,16 +1238,21 @@ class TankyBigEnemy extends EnemyEntity { "el-ETB"
 
         this.deathExp = 8;
         this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
+
+        this.setTexture("et0");
     }
 
-    draw(ctx, showHitBox = false){
-        super.draw(ctx, showHitBox);
+    draw(ctx, shadow = true, showBC = false, showAABB = false){
+        super.draw(ctx, shadow, showBC, showAABB);
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffff00";
-        ctx.fill();
-        ctx.closePath();
+
+        if(!this.texture){
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffff00";
+            ctx.fill();
+            ctx.closePath();
+        }
     }
 
 }
@@ -1201,11 +1271,14 @@ class RevengefulEnemy extends EnemyEntity { "el-EREV"
         this.oneTimeAvaible = true;
         this.oneTimeHurt = () => {
             this.colorCenter = "ff0000";
+            this.setTexture("esr0");
             this.hitPoints = 200;
             this.maxSpeed = 35;
             this.centerRadius = this.bc.radius * 0.4;
             this.rageMode = true;
         }
+
+        this.setTexture("es0");
     }
 
     updateTarget(){
@@ -1232,14 +1305,17 @@ class RevengefulEnemy extends EnemyEntity { "el-EREV"
         return new Vector3(xDistance, yDistance);
     }
 
-    draw(ctx, hitbox){
-        super.draw(ctx, hitbox);
+    draw(ctx, shadow = true, showBC = false, showAABB = false){
+        super.draw(ctx, shadow, showBC, showAABB);
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#" + this.colorCenter;
-        ctx.fill();
-        ctx.closePath();        
+
+        if(!this.texture){
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.centerRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#" + this.colorCenter;
+            ctx.fill();
+            ctx.closePath();
+        }
     }
 
 }
@@ -1250,6 +1326,9 @@ class GiantEnemy extends EnemyEntity { "el-EG"
         this.deathExp = 5000;
         this.damageFormula = ()=>{ return this.baseDamage; };
         this.setColors("101010", "151515", 10);
+        this.setTexture("eg0");
+
+        
     }
 
     move(_, offset){
@@ -1258,5 +1337,8 @@ class GiantEnemy extends EnemyEntity { "el-EG"
     hurt(_){
         super.hurt(1);
         return;
+    }
+    draw(ctx, showBC = false, showAABB = false){
+        super.draw(ctx, false, showBC, showAABB);
     }
 }

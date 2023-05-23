@@ -66,7 +66,6 @@ function enemy(canvas){
         generate: generateEnemies
     }
 }
-
 function orb(canvas){
     const orbType = {
         blue:   [4, 1, "#0066ff", 4],
@@ -163,20 +162,53 @@ function orb(canvas){
         generate: generateOrbs
     }
 }
+function hearth(canvas){
+    let hearthSpawnTime = 1000 * 40;
+    let hearthSpawnTimer = 0;
 
-document.addEventListener("keypress", (event) => {
-    publisher.newEvent(new GameEvent("keypress", event));
+    function newHearth(radius = 3000, 
+        center = new Vector3(canvas.width * 0.5, canvas.height * 0.5),
+        predicate = () => {return true;}){
 
-    if(event.key === "s"){
-        publisher.startNotifications();
-        console.log("Notifications enabled!");
+        let coords = getNRandom(2, center.x - radius, center.y + radius, predicate);
+        let x = coords[0];
+        let y = coords[1];
+    
+        return new Hearth(new Vector3(x, y), 8, 30);
     }
-    if(event.key === "p"){
-        publisher.stopNotifications();
-        console.log("Notifications stopped!");
+    function generateHearth(dt){
+        let hearth = [];
+        hearthSpawnTimer += dt;
+    
+        if(hearthSpawnTimer >= hearthSpawnTime){
+            hearthSpawnTimer = 0;
+            for (let i = 0; i < 5; i++) {
+                hearth.push(newHearth());   
+            }
+        }
+    
+        return hearth;
     }
 
-});
+    return {
+        createNew: newHearth,
+        generate: generateHearth
+    }
+}
+
+//document.addEventListener("keypress", (event) => {
+//    publisher.newEvent(new GameEvent("keypress", event));
+//
+//    if(event.key === "s"){
+//        publisher.startNotifications();
+//        console.log("Notifications enabled!");
+//    }
+//    if(event.key === "p"){
+//        publisher.stopNotifications();
+//        console.log("Notifications stopped!");
+//    }
+//
+//});
 
 function clear(context, canvas){
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -191,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 2000;
-    cnv.height = 2000;
+    cnv.width = 1500;
+    cnv.height = 1500;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -204,6 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let orbFactory = orb(cnv);
     let orbs = orbFactory.createMany(500);
+
+    let hearthFactory = hearth(cnv);
+    let hearths = hearthFactory.generate(0);
     
     let lastTime = 0;
     let totalTime = 0;
@@ -269,12 +304,8 @@ document.addEventListener("DOMContentLoaded", () => {
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
 
-        qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
-
-        let allEntities = [player];
-        allEntities = allEntities.concat(orbs, enemies, playerAttacks);
-        for (let i = 0; i < allEntities.length; i++) {
-            qtree.insert(allEntities[i]);
+        if(!player.isAlive()){
+            dt /= 6;
         }
 
         enemies.length <= 500 &&
@@ -282,6 +313,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         orbs.length <= 4000 &&
         (orbs = orbs.concat(orbFactory.generate(dt)));
+
+        hearths <= 50 &&
+        (hearths = hearths.concat(hearthFactory.generate(dt)));
+
+
+        qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
+        let allEntities = [player];
+        allEntities = allEntities.concat(orbs, enemies, hearths, playerAttacks);
+        for (let i = 0; i < allEntities.length; i++) {
+
+            
+
+            qtree.insert(allEntities[i]);
+        }
         
         
         if(exp !== 0){
@@ -289,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
             exp = 0;
         }
         
-        if(player.hasLevelUp()){
+        while (player.hasLevelUp()) {
             console.log("Level up!");
 
             if(getRandomInt(0, 1000) > 850){
@@ -302,20 +347,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 player.newAttack(FollowProyectile, [20, 8], 1000);
             }
             if(getRandomInt(0, 1000) > 850){
-                player.newAttack(RicochetProyectile, [60, 2, 5], 1500);
+                player.newAttack(RicochetProyectile, [60, 4, 5], 1500);
             }
             if(getRandomInt(0, 1000) > 950){
-                player.newAttack(Magma, [], 5000, Type.AOE);
+                player.newAttack(Magma, [], 9_000, Type.AOE);
             }
             if(getRandomInt(0, 1000) > 990){
-                player.newAttack(Void, [], 8000, Type.AOE);
+                player.newAttack(Void, [], 12_000, Type.AOE);
             }
+
+            player.consumeLevel();
         }
 
         const offset = player.update(dt);
 
         let enemyEntities = qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 12);
-        let giantEnemies = enemyEntities.filter((enemy) => enemy.id === -1971176318);
+        // let giantEnemies = enemyEntities.filter((enemy) => enemy.id === -1971176318);
 
         playerAttacks = playerAttacks.concat(player.shoot(...enemyEntities));
         clear(ctx, cnv);
@@ -329,11 +376,20 @@ document.addEventListener("DOMContentLoaded", () => {
             o.update(dt, offset);
             o.draw(ctx);
         });
+
+        hearths = hearths.filter(o => !o.isCollected() && !o.tooFar(player));
+        hearths.forEach((h) => {
+            h.update(dt, offset);
+            h.draw(ctx, true);
+        });
+
+        
         player.collect(...qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 3));
 
         playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
         playerAttacks.forEach((attack) => {
             attack.checkTooFar(player);
+
             attack.update(dt, offset);
 
             let nearbyEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
@@ -354,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
         enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         enemies.forEach((e) => {
             e.update(dt, offset);
-            e.draw(ctx, false);
+            e.draw(ctx);
         });
         
         
@@ -385,15 +441,13 @@ document.addEventListener("DOMContentLoaded", () => {
         //    totalTime *= -1;
         //}
 
-        if(player.isAlive()){
-            requestAnimationFrame(gameLoop);
-        }
+        requestAnimationFrame(gameLoop);
     
     }
 
     //quadTreeTesting(0);
 
-    publisher.startNotifications(1);
-    gameLoop(0);
+    //publisher.startNotifications(1);
+    //gameLoop(0);
 
 });
