@@ -46,26 +46,26 @@ function enemy(canvas){
             newEnemies = createEnemies(target, ...enemiesGenerate);
     
             if(timesInvoked >= 1){
-                enemiesGenerate[getRandomNumber(0, Math.min(spawnLevel, enemyTypes - 1))]++;
+                enemiesGenerate[getRandomInt(0, Math.min(spawnLevel, enemyTypes - 1))]++;
                 spawnLevel++;
                 timesInvoked = 0;
                 
-                if(getRandomNumber(0, 1000) > 850){
+                if(getRandomInt(0, 1000) > 850){
                     target.newAttack(ImpactProyectile, [50, 10], 680);
                 }
-                if(getRandomNumber(0, 1000) > 900){
+                if(getRandomInt(0, 1000) > 900){
                     target.newAttack(PierceProyectile, [60, 5, 2], 1000);
                 }
-                if(getRandomNumber(0, 1000) > 900){
+                if(getRandomInt(0, 1000) > 900){
                     target.newAttack(FollowProyectile, [20, 8], 1000);
                 }
-                if(getRandomNumber(0, 1000) > 850){
+                if(getRandomInt(0, 1000) > 850){
                     target.newAttack(RicochetProyectile, [60, 2, 5], 1500);
                 }
-                if(getRandomNumber(0, 1000) > 950){
+                if(getRandomInt(0, 1000) > 950){
                     target.newAttack(Magma, [], 5000, Type.AOE);
                 }
-                if(getRandomNumber(0, 1000) > 990){
+                if(getRandomInt(0, 1000) > 990){
                     target.newAttack(Void, [], 8000, Type.AOE);
                 }
             }
@@ -92,7 +92,7 @@ function orb(canvas){
         black:  [6, 10000, "#090909", 9],
     }
 
-    let orbsGenerate = [10, 0, 0, 0, 0, 0];
+    let orbsGenerate = [20, 0, 0, 0, 0, 0];
     let orbTypes = orbsGenerate.length;
     let orbSpawnTime = 1000 * 0.5;
     let orbSpawnTimer = 0;
@@ -149,15 +149,23 @@ function orb(canvas){
             if(orbTimesInvoked >= orbUpgradeInvokes){
                 let random = getRandomInt(minOrbType, Math.min(maxOrbType, orbTypes - 1));
 
-                orbsGenerate[random] += Math.ceil(50 / ((random * 100) + 1));
+                orbsGenerate[random] += Math.ceil(50 / ((random * 10) + 1));
+                if(maxOrbType >= 4 && minOrbType >= 1){
+                    orbsGenerate[0] -= orbsGenerate[0] - 10 >= 50? 10 : 0;
+                }
 
+                orbsGenerate[1] -= getRandomNumber(0, minOrbType) < 1;
+                orbsGenerate[2] -= getRandomNumber(0, minOrbType) < 2;
+                orbsGenerate[3] -= getRandomNumber(0, minOrbType) < 3;
+                orbsGenerate[4] -= getRandomNumber(0, minOrbType) < 4;
+                orbsGenerate[5] -= getRandomNumber(0, minOrbType) < 5;
 
                 orbSpawnLevel++;
                 orbTimesInvoked = 0;
                 orbUpgradeInvokes += 50 * orbSpawnLevel;
 
                 minOrbType += getRandomInt(0, maxOrbType) <= 1;
-                maxOrbType += getRandomInt(0, orbSpawnLevel) <= 1;
+                maxOrbType += orbsGenerate[0] >= 100 && getRandomInt(0, orbSpawnLevel) <= 1;
             }
         }
     
@@ -191,11 +199,15 @@ function clear(context, canvas){
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    let game = new Game(1000, 1000, 1);
+    game.setupCanvas("game_screen");
+    game.setupActors();
+
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 1000;
-    cnv.height = 1000;
+    cnv.width = 1500;
+    cnv.height = 1500;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -203,14 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5), cnv);
     publisher.subscribe(player, "mousemove");
 
-    
-    //enemies = generateEnemies(player, 0, 1);
-    //enemies[0].setPos(50, 50);
-
-    //let bg = new Background(cnv.width, cnv.height, "bg1");
+    let bg = new Background(cnv.width, cnv.height, "bg1");
 
     let orbFactory = orb(cnv);
-    let orbs = orbFactory.createMany(500, 500, 500, 500, 500, 500);
+    let orbs = orbFactory.createMany(500);
     
     let lastTime = 0;
     let totalTime = 0;
@@ -219,15 +227,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let exp = 0;
 
     let enemyFactory = enemy(cnv);
-    let enemies = enemyFactory.createMany(player, 1000);
+    let enemies = enemyFactory.createMany(player, 10, 0, 0, 0, 0, 0, 10);
     //enemies = [];
 
     let timeCounter = 0;
-    let qtree = new QuadTree(new Vector3(cnv.width - 500, cnv.height - 500), cnv.width + 500, cnv.height + 500);
+    let qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
+
     for (let i = 0; i < enemies.length; i++) {
-        qtree.insert(enemies[i]) && (enemies[i].color = "#ffffff");
+        qtree.insert(enemies[i]);
     }
-    let area = new Rectangle(new Vector3(cnv.width * 0.20, cnv.height * 0.20), 100, 100);
+    let area = new AABB(new Vector3(cnv.width * 0.20, cnv.height * 0.20), 600, 600);
 
     let mouseEvent = {
         isPressed: false,
@@ -302,23 +311,35 @@ document.addEventListener("DOMContentLoaded", () => {
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
 
-        //enemies = enemies.concat(enemyFactory.generate(player, dt));
-        if(orbs.length <= 1500){
-            orbs = orbs.concat(orbFactory.generate(dt));
+        qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
+
+        let allEntities = [player];
+        allEntities = allEntities.concat(orbs, enemies, playerAttacks);
+        for (let i = 0; i < allEntities.length; i++) {
+            qtree.insert(allEntities[i]);
         }
+
+        enemies = enemies.concat(enemyFactory.generate(player, dt));
+        orbs = orbs.concat(orbFactory.generate(dt));
         
         player.addExperience(exp);
         exp = 0;
+        
+        if(player.hasLevelUp()){
+            console.log("a");
+
+        }
+
         const offset = player.update(dt);
-        playerAttacks = playerAttacks.concat(player.shoot(...enemies));
+
+        let enemyEntities = qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 12);
+        let giantEnemies = enemyEntities.filter((enemy) => enemy.id === -1971176318);
+
+        playerAttacks = playerAttacks.concat(player.shoot(...enemyEntities));
         clear(ctx, cnv);
         
         //bg.update(ctx, offset);
-
-        enemies.forEach((en) => {
-            en.move(0, offset);
-            en.draw(ctx);
-        });
+        qtree.draw(ctx);
 
 
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
@@ -326,16 +347,21 @@ document.addEventListener("DOMContentLoaded", () => {
             o.update(dt, offset);
             o.draw(ctx, false);
         });
-        player.collect(...orbs);
+        player.collect(...qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 3));
 
         playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
         playerAttacks.forEach((attack) => {
             attack.checkTooFar(player);
             attack.update(dt, offset);
-            attack.impact(...enemies);
-            attack.draw(ctx, false);
+
+            let nearbyEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
+
+            attack.impact(...nearbyEnemies);
+            attack.draw(ctx, true);
         });
-        player.draw(ctx, cnv, false, false);
+
+
+        player.draw(ctx, true, false);
         
 
         let killed = enemies.filter(e => !e.isAlive());
@@ -365,6 +391,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             a.target = closerEnemy;
         });
+
+        
+        player.hpBar.draw(ctx);
+        player.expBar.draw(ctx);
         
         //totalTime += dt;
 
@@ -377,8 +407,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     }
 
-    quadTreeTesting(0);
-    //publisher.startNotifications(1);
-    //gameLoop(0);
+    //quadTreeTesting(0);
+
+    publisher.startNotifications(1);
+    gameLoop(0);
 
 });

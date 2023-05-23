@@ -4,22 +4,30 @@ class Entity extends GraphicItem{
         super(pos, radius * 2, radius * 2);
 
         this.id = generateID("e" + idComponent);
+        this.type = 0;
 
-        this.aabb = new AABB(pos, radius);
+        this.bc = new BC(pos, radius);
+        this.aabbSize = new Vector3(300, 300);
+        this.aabb = new AABB(new Vector3(this.pos.x - this.aabbSize.x, this.pos.y - this.aabbSize.y, this.pos.z), this.aabbSize.x * 2, this.aabbSize.y * 2);
     
         this.collisionEventList = new EventArray();
     }
 
     setPos(x = 0, y = 0, z = 0, offset = new Vector3()){
         this.pos = new Vector3(x + offset.x, y + offset.y, z);
-        this.aabb.center = new Vector3(x + offset.x, y + offset.y, z);
+        this.bc.center = new Vector3(x + offset.x, y + offset.y, z);
+        this.aabb.pos = new Vector3(x - this.aabbSize.x + offset.x, y - this.aabbSize.y + offset.y, z)
 
 
         // this.aabb.center.x = this.pos.x + (this.width * 0.5);
         // this.aabb.center.y = this.pos.y + (this.heigh * 0.5);
     }
-    setAABBRadius(newRadius){
-        this.aabb.radius = newRadius;
+    setBCRadius(newRadius){
+        this.bc.radius = newRadius;
+    }
+    setAABBSize(w, h){
+        this.aabbSize = new Vector3(w, h);
+        this.aabb = new AABB(new Vector3(this.pos.x - this.aabbSize.x, this.pos.y - this.aabbSize.y, this.pos.z), this.aabbSize.x * 2, this.aabbSize.y * 2);
     }
 
     move(dt, offset = new Vector3()){
@@ -29,28 +37,39 @@ class Entity extends GraphicItem{
                     offset);
         return;
     }
-    draw(ctx, castShadow, hitboxOn){
+    draw(ctx, castShadow = true, showBC = false, showAABB = false){
         if(castShadow){
             ctx.beginPath();
             ctx.ellipse(
-                this.pos.x - this.aabb.radius * 0.1, 
-                this.pos.y + this.aabb.radius, 
-                this.aabb.radius * 1.2,
-                this.aabb.radius * 0.5, 
+                this.pos.x + this.bc.radius * 0.01, 
+                this.pos.y + this.bc.radius * 1.2, 
+                this.bc.radius,
+                this.bc.radius * 0.6, 
                 0, 0, Math.PI * 2);
             ctx.fillStyle = "#0000007f";
             ctx.fill();
             ctx.closePath();
         }
+        super.draw(ctx);
 
-        super.draw(ctx, hitboxOn);
+        if(showBC){
+            this.bc.draw(ctx);
+        }
+        if(showAABB){
+            this.aabb.draw(ctx);
+        }
+
     }
 
     update(dt, offset){
         this.move(dt, offset);
     }
 
-    isColliding(otherAABB){return this.aabb.isColliding(otherAABB);}
+    isCollidingBC(otherBC){return this.bc.isCollidingBC(otherBC);}
+    isCollidingAABB(otherAABB){return this.bc.isCollidingAABB(otherAABB);}
+
+    getSearchAABB(){return this.aabb;}
+
     isLiving(){return false;}
     isItem(){return false;}
     isStructure(){return false;}
@@ -62,7 +81,7 @@ class Entity extends GraphicItem{
 
 class DamageEntity extends Entity{
     constructor(
-        typeName, 
+        idComponent, 
         pos = new Vector3(), 
         radius = new Vector3(), 
         damageBase = 0, 
@@ -72,9 +91,10 @@ class DamageEntity extends Entity{
         onImpact = ()=>{}, 
         onExpire = ()=>{})
         {
-        super(pos, radius, "DMG" + typeName);
+        super(pos, radius, "DMG" + idComponent);
 
-        this.typeName = typeName;
+
+        this.type = 2;
         this.baseDamage = damageBase;
         this.damageFormula = damageFormula;
         
@@ -107,7 +127,7 @@ class DamageEntity extends Entity{
 
     impact(...entities){
         for (let i = 0; i < entities.length; i++) {
-            if(this.aabb.isColliding(entities[i].aabb)){
+            if(this.bc.isCollidingBC(entities[i].bc)){
                 entities[i].hurt(this.damageFormula(this.baseDamage));
                 this.hitCount++;
                 continue;
@@ -117,7 +137,12 @@ class DamageEntity extends Entity{
     }
 
     checkTooFar(other){
-        this.state &&= !(this.aabb.distanceTo(other.aabb) >= 4_000_000);
+        this.state &&= !(this.bc.distanceTo(other.bc) >= 4_000_000);
+    }
+
+    draw(ctx, shadow = false, showBC = false, showAABB = false){
+        super.draw(ctx, shadow, showBC, showAABB);
+
     }
 
     isActive(){return this.state;}
@@ -149,7 +174,7 @@ class AreaOfEffect extends DamageEntity {
         this.msPerHit = 1000 / frequency;
 
         this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.radius;
-        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.age, this.maxHits, this.hitCount];
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.bc.radius, this.duration, this.age, this.maxHits, this.hitCount];
 
         this.damagePredicate = () => {return true;};
 
@@ -176,7 +201,7 @@ class AreaOfEffect extends DamageEntity {
     update(dt, offset = new Vector3()){
         this.lastHit += dt;
         this.age += dt;
-        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.aabb.radius, this.duration, this.age, this.maxHits, this.hitCount];
+        this.damageFormulaArgs = [this.baseDamage, this.damageFrequency, this.bc.radius, this.duration, this.age, this.maxHits, this.hitCount];
         this.move(dt, offset);
     }
 
@@ -187,7 +212,7 @@ class AreaOfEffect extends DamageEntity {
     impact(...entities){
         if(this.state && this.lastHit >= this.msPerHit){
             for (let i = 0; i < entities.length; i++) {
-                if(this.damagePredicate(entities[i], i, entities) && this.aabb.isColliding(entities[i].aabb)) {
+                if(this.damagePredicate(entities[i], i, entities) && this.bc.isCollidingBC(entities[i].bc)) {
                     entities[i].hurt(this.getDamage(this.damageArguments, ...this.damageFormulaArgs))
                     this.hitCount++;
                     (this.hitCount === this.maxHits) && (this.state = false);
@@ -204,6 +229,7 @@ class Magma extends AreaOfEffect{
     constructor(originPos, spawnPos){
         super(originPos, spawnPos, 20, 100, 2);
 
+        this.setAABBSize(650, 650);
         this.color = "#e46400a2";
     }
 }
@@ -211,9 +237,10 @@ class Void extends AreaOfEffect {
     constructor(originPos, spawnPos){
         super(new Vector3(), spawnPos, 1, 150, 10, 5_000, 1_000_000, 
             (dmg, hits) => {return dmg + hits;},
-            (_) => {this.aabb.radius += 1;});
+            (_) => {this.bc.radius += 1;});
 
-        this.originalRadius = this.aabb.radius; 
+        this.setAABBSize(650, 650);
+        this.originalRadius = this.bc.radius; 
         this.damageArguments = AreaOfEffect.args.damage | AreaOfEffect.args.hits;
         this.color = "#000000";
     }
@@ -234,8 +261,7 @@ class Proyectile extends DamageEntity {
         onImpact = ()=>{}
         )
     {
-        super("-PROY", new Vector3(pos.x, pos.y, 10), radius, damage, -1, damageFormula, onImpact);
-
+        super("-PROY", new Vector3(pos.x, pos.y, 10), radius, damage, -1, -1, damageFormula, onImpact);
         this.baseSpeed = speed;
         this.baseUses = uses;
         this.origin = new Vector3(this.pos.x, this.pos.y, 10);
@@ -246,7 +272,7 @@ class Proyectile extends DamageEntity {
         this.damagePredicate = () => {return true;};
 
         this.damageArguments = Proyectile.args.damage | Proyectile.args.speed | Proyectile.args.radius;
-        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
+        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.bc.radius, this.timeAlive, this.baseUses, this.usesCount];
 
         this.color = "#ffffff";
     }
@@ -299,14 +325,20 @@ class Proyectile extends DamageEntity {
         return;
     }
     update(dt, offset = new Vector3()){
-        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.aabb.radius, this.timeAlive, this.baseUses, this.usesCount];
+        this.damageFormulaArgs = [this.baseDamage, this.baseSpeed, this.bc.radius, this.timeAlive, this.baseUses, this.usesCount];
         this.timeAlive += dt;
         this.move(dt, offset);
     }
 
     impact(...entities){
         for (let i = 0; i < entities.length; i++) {
-            if(this.damagePredicate(entities[i], i, entities) && this.aabb.isColliding(entities[i].aabb)) {
+
+            if(this instanceof RicochetProyectile && this.damagePredicate(entities[i], i, entities)){
+                console.log(this.bc.isCollidingBC(entities[i].bc));
+            }
+            if(this.damagePredicate(entities[i], i, entities) && this.bc.isCollidingBC(entities[i].bc)) {
+                
+
                 entities[i].hurt(this.getDamage(this.damageArguments, ...this.damageFormulaArgs))
                 this.usesCount++;
                 (this.usesCount === this.baseUses) && this.setUsed();
@@ -315,6 +347,19 @@ class Proyectile extends DamageEntity {
             }
         }
     }
+
+    draw(ctx, shadow = false, showBC = false, showAABB = false){
+
+        ctx.beginPath();
+        ctx.arc(this.bc.center.x, this.bc.center.y, this.bc.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+        
+        //super.draw(ctx, shadow, showBC, showAABB);
+
+    }
+
     isDamaging(){return true;}
     isProyectile(){return true;}
 
@@ -324,6 +369,7 @@ class ImpactProyectile extends Proyectile {
         super(pos, target.pos, speed, 1, damage, 4, (dmg) => {return dmg;});
 
         this.damageArguments = Proyectile.args.damage;
+        this.color = "7c7cff";
     }
 
 }
@@ -333,10 +379,8 @@ class PierceProyectile extends Proyectile {
             (dmg, uses)=>{return dmg * (1 / uses);});
 
         this.damageArguments = Proyectile.args.damage | Proyectile.args.uses;
-        this.color = "#0000ff";
+        this.color = "#ffffff";
     }
-
-
 }
 class FollowProyectile extends Proyectile {
     constructor(pos, target, speed, damage){
@@ -381,9 +425,10 @@ class RicochetProyectile extends Proyectile {
         super(pos, target.pos, speed, uses, damage, 12, 
             (dmg) => {return dmg;},
             (...e) => {
-                let dx = 1_000_000;
+
+                let dx = 500_000;
                 for (let i = 0; i < e.length; i++) {
-                    let posibleDx = this.aabb.distanceTo(e[i].aabb);
+                    let posibleDx = this.bc.distanceTo(e[i].bc);
                     if(posibleDx <= dx && e[i] !== this.target){
                         dx = posibleDx;
                         this.target = e[i];
@@ -433,31 +478,27 @@ class RicochetProyectile extends Proyectile {
         return;
     }
 
-    draw(ctx, hitbox){
-        let or = this.aabb.radius;
-        this.aabb.radius >>= 1;
+    draw(ctx, shadow){
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, or, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.outRing;
         ctx.fill();
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, or - 3, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius - 3, 0, Math.PI * 2);
         ctx.fillStyle = this.midRing;
         ctx.fill();
         ctx.closePath();
 
-        super.draw(ctx, hitbox, false);
+        super.draw(ctx, shadow, true);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, or - 9, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius - 9, 0, Math.PI * 2);
         ctx.fillStyle = this.center;
         ctx.fill();
         ctx.closePath();
-
-        this.aabb.radius = or;
     }
 }
 
@@ -544,6 +585,7 @@ class Item extends Entity {
     constructor(pos, radius, idComponent = ""){
         super(pos, radius, "i-" + idComponent);
 
+        this.type = 3;
         this.color = "#ffffff";
     }
 
@@ -583,19 +625,19 @@ class Orb extends Item {
     draw(ctx){
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + this.glowRadius, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius + this.glowRadius, 0, Math.PI * 2);
         ctx.fillStyle = this.glowOuter;
         ctx.fill();
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + (this.glowRadius * 0.66), 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius + (this.glowRadius * 0.66), 0, Math.PI * 2);
         ctx.fillStyle = this.glowMid;
         ctx.fill();
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius + (this.glowRadius * 0.33), 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius + (this.glowRadius * 0.33), 0, Math.PI * 2);
         ctx.fillStyle = this.glowInner;
         ctx.fill();
         ctx.closePath();
@@ -604,16 +646,16 @@ class Orb extends Item {
         super.draw(ctx, false);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.7, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.7, 0, Math.PI * 2);
         ctx.fillStyle = this.secondColor;
         ctx.fill();
         ctx.closePath();
 
         ctx.beginPath();
         ctx.arc(
-            this.pos.x + this.aabb.radius * 0.2, 
-            this.pos.y - this.aabb.radius * 0.1, 
-            this.aabb.radius * 0.20, 0, Math.PI * 2);
+            this.pos.x + this.bc.radius * 0.2, 
+            this.pos.y - this.bc.radius * 0.1, 
+            this.bc.radius * 0.20, 0, Math.PI * 2);
         ctx.fillStyle = this.shineColor;
         ctx.fill();
         ctx.closePath();
@@ -626,6 +668,7 @@ class Artifact extends Item {
 class Structure extends Entity {
     constructor(id){
         super("s-" + id);
+        this.type = 4;
     }
 
     isStructure(){return true;}
@@ -633,11 +676,9 @@ class Structure extends Entity {
 
 
 class LivingEntity extends Entity {
-    static count = 0;
-
     constructor(pos = new Vector3(), maxSpeed = 10, radius = 10, hp = 1, idComponent = ""){
-        super(pos, radius, "l-" + LivingEntity.count + idComponent);
-        LivingEntity.count += 1;
+        super(pos, radius, "l-" + idComponent);
+        this.type = 1;
 
         this.maxSpeed = maxSpeed;
         this.hitPoints = hp;
@@ -705,6 +746,8 @@ class LivingEntity extends Entity {
     hurt(damage){
         if(this.inmunityTime <= 0){
             this.hitPoints -= damage;
+            !this.isAlive() && this.die();
+
             this.inmunityTime = this.inmunityMaxTime;
             this.color = "#" + this.colorHurt;
             this.gradientStep = 0;
@@ -747,8 +790,17 @@ class LivingEntity extends Entity {
 class PlayerEntity extends LivingEntity {
 
     constructor(pos = new Vector3(), canvas){
-        super(pos, 20, 15, 200, "PE");
+        super(pos, 20, 20, 200, "PE");
 
+        this.type *= 10;
+        this.type += 1;
+
+        //this.aabb = new AABB(this.pos, 600, 600);
+
+        this.setTexture("pc0");
+        this.height = this.height * (this.texture.height / this.texture.width);
+
+        this.setAABBSize(600, 600);
         this.controlRange = 100;    // Distance from mouse for max speed
         this.inmunityMaxTime = 300; // Miliseconds
 
@@ -760,8 +812,8 @@ class PlayerEntity extends LivingEntity {
 
         this.maxHP = this.hitPoints;
         this.hpBar = new ProgressBar(
-            new Vector3(this.pos.x - this.aabb.radius - 5, this.pos.y + this.aabb.radius + 2),
-            (this.aabb.radius + 5) * 2, 5,
+            new Vector3(this.pos.x - this.bc.radius - 5, this.pos.y + this.bc.radius + 20),
+            (this.bc.radius + 5) * 2, 5,
             "#000000", "#ff2020",
             new Vector3(1, 1)
         );
@@ -786,7 +838,7 @@ class PlayerEntity extends LivingEntity {
         this.attacksArgs = [[50, 5]]; // [25, 5], [30, 3, 2], [20, 3]
         this.attackEntities = [];
 
-        this.interactRange = this.aabb.radius;
+        this.interactRange = this.bc.radius;
         this.objects = [];
 
         this.setColors("BD93F9", "FF0000", 30);
@@ -852,7 +904,7 @@ class PlayerEntity extends LivingEntity {
         const xDistance = this.targetPos.x - this.pos.x;
         const yDistance = this.targetPos.y - this.pos.y;
 
-        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.aabb.radius * this.aabb.radius);
+        const farEnought = (xDistance * xDistance) + (yDistance * yDistance) > (this.bc.radius * this.bc.radius);
         // Mainly for the player to stand still when the mouse is inside its bounding box
 
         return new Vector3(xDistance * farEnought, yDistance * farEnought);
@@ -884,7 +936,7 @@ class PlayerEntity extends LivingEntity {
     }
     collect(...items){
         for (let i = 0; i < items.length; i++) {
-            if(this.aabb.distanceTo(items[i].aabb) <= this.interactRange * this.interactRange){
+            if(this.bc.distanceTo(items[i].bc) <= this.interactRange * this.interactRange){
                 this.addExperience(items[i].getExperience());
                 this.expBar.progressPercentage(this.getExpProgress());
             }
@@ -899,7 +951,7 @@ class PlayerEntity extends LivingEntity {
         this.attackEntities = [];
 
         enemies.forEach(e => { // pos, speed, damage
-            const de = this.aabb.distanceTo(e.aabb);
+            const de = this.bc.distanceTo(e.bc);
             if(de <= closer){
                 closer = de;
                 closerEnemy = e;
@@ -934,19 +986,18 @@ class PlayerEntity extends LivingEntity {
         const offset = new Vector3(-speed.x, -speed.y);
         return offset;
     }
-    draw(ctx, cnv, showHitBox, pJoyStick){
-        super.draw(ctx, showHitBox, pJoyStick);
+    draw(ctx, showHitBox, pJoyStick){
+        super.draw(ctx, true, showHitBox);
 
-        this.hpBar.draw(ctx);
-        this.expBar.draw(ctx);
+        this.aabb.draw(ctx);
 
-        if(pJoyStick){
-            ctx.beginPath();
-            ctx.arc(this.aabb.center.x, this.aabb.center.y, this.controlRange, 0, Math.PI * 2);
-            ctx.fillStyle = "#ff7f0099";
-            ctx.fill();
-            ctx.closePath();
-        }
+        // if(pJoyStick){
+        //     ctx.beginPath();
+        //     ctx.arc(this.bc.center.x, this.bc.center.y, this.controlRange, 0, Math.PI * 2);
+        //     ctx.fillStyle = "#ff7f0099";
+        //     ctx.fill();
+        //     ctx.closePath();
+        // }
 
     }
     update(dt){
@@ -965,13 +1016,19 @@ class PlayerEntity extends LivingEntity {
 
 }
 
-class EnemyEntity extends LivingEntity {
+class EnemyEntity extends LivingEntity { "el-E"
+    static target = null;
+
     constructor(target = null, pos = new Vector3(), damage = 0,  speed = 15, radius = 5, hp = 1, idComponent = ""){
         super(pos, speed, radius, hp, "E" + idComponent);
-        this.target = target;
-        this.targetPos = this.target.pos;
-        this.baseDamage = damage;
 
+        this.type *= 10;
+        this.type += 2;
+
+        this.setTarget(target);
+        this.targetPos = new Vector3(this.getTarget().pos.x, this.getTarget().pos.y);
+
+        this.baseDamage = damage;
         this.deathExp = 0;
 
         this.setColors("000000", "ffffff", 5);
@@ -981,26 +1038,29 @@ class EnemyEntity extends LivingEntity {
     }
 
     setTarget(entity){
-        this.target = entity;
+        EnemyEntity.target = entity;
+    }
+    getTarget(){
+        return EnemyEntity.target;
     }
     updateTarget(){
-        if(this.target === null){
+        if(this.getTarget() === null){
             this.targetPos = this.pos;
             return;
         }
-        this.targetPos = this.target.pos;
+        this.targetPos = this.getTarget().pos;
     }
     hurtTarget(){
-        this.target.hurt(this.damageFormula());
+        this.getTarget().hurt(this.damageFormula());
         this.afterHurt();
         return true;
     }
     cathTarget(){
-        this.isColliding(this.target.aabb) &&
+        this.isCollidingBC(this.getTarget().bc) &&
         this.hurtTarget();
     }
     tooFar(){
-        return (Math.abs(this.target.pos.x - this.pos.x) > 20_000) || (Math.abs(this.target.pos.y - this.pos.y) > 20_000);
+        return (Math.abs(this.getTarget().pos.x - this.pos.x) > 20_000) || (Math.abs(this.getTarget().pos.y - this.pos.y) > 20_000);
     }
     claimExp(){
         return this.deathExp;
@@ -1014,45 +1074,55 @@ class EnemyEntity extends LivingEntity {
         }
         this.updateTarget();
     }
+    draw(ctx){
+        if(this.texture){
+            super.draw(ctx, false, true);
+        }
+        else{
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.bc.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
 }
-class NormalEnemy extends EnemyEntity {
+class NormalEnemy extends EnemyEntity { "el-EN"
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 10, 12, 10, 10, "N");
 
         this.deathExp = 1;
-        this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
+        this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
     }
 }
-class SuicideEnemy extends EnemyEntity {
+class SuicideEnemy extends EnemyEntity { "el-EK"
     constructor(target = null, pos = new Vector3()){
         super(target, pos, 0, 21, 10, 6, "K");
 
         this.colorCenter = "ffffff";
-        this.centerRadius = this.aabb.radius * 0.7;
+        this.centerRadius = this.bc.radius * 0.7;
         this.rageMode = false;
         this.deathExp = 2;
 
-        this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
+        this.damageFormula = ()=>{ return this.bc.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
-
-        this.targetPos = new Vector3(this.target.pos.x, this.target.pos.y);
 
         this.oneTimeAvaible = true;
         this.oneTimeHurt = () => {
             this.colorCenter = "ff0000";
             this.maxSpeed = 30;
-            this.centerRadius = this.aabb.radius * 0.4;
+            this.centerRadius = this.bc.radius * 0.4;
             this.rageMode = true;
         }
     }
 
     updateTarget(){
         if(this.rageMode){
-            if(this.target === null){
+            if(this.getTarget() === null){
                 this.targetPos = this.pos;
                 return;
             }
-            this.targetPos = this.target.pos;
+            this.targetPos = this.getTarget().pos;
         }
     }
 
@@ -1081,93 +1151,87 @@ class SuicideEnemy extends EnemyEntity {
     }
 
 }
-class TankyEnemy extends EnemyEntity {
+class TankyEnemy extends EnemyEntity { "el-ET"
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 5, 12, 15, 30, "N");
+        super(target, pos, 5, 12, 15, 30, "T");
 
         this.deathExp = 2;
-        this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
+        this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
     }
 
     draw(ctx, showHitBox = false){
         super.draw(ctx, showHitBox);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.666, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
         ctx.fillStyle = "#ffff00";
         ctx.fill();
         ctx.closePath();
     }
 
 }
-class NormalBigEnemy extends EnemyEntity {
+class NormalBigEnemy extends EnemyEntity { "el-ENB"
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 15, 12, 50, 70, "N");
+        super(target, pos, 15, 12, 50, 70, "NB");
 
         this.deathExp = 5;
-        this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
+        this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
     }
 }
-class TankyBigEnemy extends EnemyEntity {
+class TankyBigEnemy extends EnemyEntity { "el-ETB"
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 25, 10, 50, 300, "N");
+        super(target, pos, 25, 10, 50, 300, "TB");
 
         this.deathExp = 8;
-        this.damageFormula = ()=>{ return this.baseDamage + this.aabb.radius; };
+        this.damageFormula = ()=>{ return this.baseDamage + this.bc.radius; };
     }
 
     draw(ctx, showHitBox = false){
         super.draw(ctx, showHitBox);
 
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius * 0.666, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.bc.radius * 0.666, 0, Math.PI * 2);
         ctx.fillStyle = "#ffff00";
         ctx.fill();
         ctx.closePath();
     }
 
 }
-class RevengefulEnemy extends EnemyEntity {
+class RevengefulEnemy extends EnemyEntity { "el-EREV"
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 0, 18, 40, 150, "K");
+        super(target, pos, 0, 17, 40, 150, "REV");
 
         this.colorCenter = "ffffff";
-        this.centerRadius = this.aabb.radius * 0.7;
+        this.centerRadius = this.bc.radius * 0.7;
         this.rageMode = false;
         this.deathExp = 15;
 
-        this.damageFormula = ()=>{ return this.aabb.radius * this.maxSpeed; };
+        this.damageFormula = ()=>{ return this.bc.radius * this.maxSpeed; };
         this.afterHurt = ()=>{ this.die(); };
-
-        this.targetPos = new Vector3(this.target.pos.x, this.target.pos.y);
 
         this.oneTimeAvaible = true;
         this.oneTimeHurt = () => {
             this.colorCenter = "ff0000";
             this.hitPoints = 200;
             this.maxSpeed = 35;
-            this.centerRadius = this.aabb.radius * 0.4;
+            this.centerRadius = this.bc.radius * 0.4;
             this.rageMode = true;
         }
     }
 
     updateTarget(){
         if(this.rageMode){
-            if(this.target === null){
+            if(this.getTarget() === null){
                 this.targetPos = this.pos;
                 return;
             }
-            this.targetPos = this.target.pos;
+            this.targetPos = this.getTarget().pos;
         }
     }
 
     followTarget(){
         const xDistance = this.targetPos.x - this.pos.x;
         const yDistance = this.targetPos.y - this.pos.y;
-
-        if(!this.pos.x || !this.pos.y){
-            console.log("f");
-        }
 
         if(!this.rageMode){
             const norm = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
@@ -1190,11 +1254,11 @@ class RevengefulEnemy extends EnemyEntity {
     }
 
 }
-class GiantEnemy extends EnemyEntity {
+class GiantEnemy extends EnemyEntity { "el-EG"
     constructor(target = null, pos = new Vector3()){
-        super(target, pos, 20, 0, 300, 100_000, "N");
+        super(target, pos, 20, 0, 300, 100_000, "G");
 
-        this.deathExp = 50;
+        this.deathExp = 5000;
         this.damageFormula = ()=>{ return this.baseDamage; };
         this.setColors("101010", "151515", 10);
     }

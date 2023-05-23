@@ -1,7 +1,6 @@
 function generateID(idString){
-    let result = getRandomNumber(1_000, 9_999);
+    let result = 0b0000_1010_1010_0010_1000_1001;
     result ^= Number(toNumbers(idString));
-    result = Number(String(result) + String(getRandomNumber(1_000, 9_999)));
 
     return result;
 }
@@ -18,20 +17,20 @@ function toASCII(char){
 }
 
 function getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return (Math.random() * (max - min + 1)) + min;
 }
 function getRandomInt(min, max) {
     return Math.round(Math.random() * (max - min + 1)) + min;
 }
 function pickRandom(...choices){
-    const choice = Math.round(getRandomNumber(0, choices.length - 1));
+    const choice = Math.round(getRandomInt(0, choices.length - 1));
     return choices[choice];
 }
 function getRandomAvoid(min, max, ...toAvoid){
     const avoidArray = [...toAvoid];
     let value = 0;
     do{
-        value = getRandomNumber(min, max);
+        value = getRandomInt(min, max);
     }while(avoidArray.includes(value));
 
     return value;
@@ -39,7 +38,7 @@ function getRandomAvoid(min, max, ...toAvoid){
 function getConditionateRandom(min, max, predicate){
     let value = 0;
     do{
-        value = getRandomNumber(min, max);
+        value = getRandomInt(min, max);
     }while(!predicate(value));
 
     return value;
@@ -49,7 +48,7 @@ function getNRandom(n, min, max, predicate = ()=>{return true;}){
     do{
         values = [];
         for (let i = 0; i < n; i++) {
-            values.push(getRandomNumber(min, max));
+            values.push(getRandomInt(min, max));
         }
     }while(!predicate(...values));
 

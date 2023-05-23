@@ -19,7 +19,9 @@ class GraphicItem{
 
     getEventList(listName){return genericEventList;}
 
-    setTexture(texture){this.texture = texture;}
+    setTexture(textureID){
+        this.texture = document.getElementById(textureID);
+    }
     setTextureStateData(maxStates, ...maxStateFrames){
         if(maxStates === maxStateFrames.length){
             for (let i = 0; i < maxStates; i++) {
@@ -29,7 +31,7 @@ class GraphicItem{
         }
         return false;
     }
-    setFrameSize(heigh, width){this.textureFrameSize.h = heigh; this.textureFrameSize.w = width;}
+    setFrameSize(height, width){this.textureFrameSize.h = height; this.textureFrameSize.w = width;}
     setTextureState(state){
         if(this.#isPosibleState(state)){
             this.textureState = state;
@@ -59,18 +61,17 @@ class GraphicItem{
     hide() {this.visibilityState = false;}
     toggleVisibility() {this.visibilityState = !this.visibilityState;}
 
-    draw(ctx, showHitBox){
+    draw(ctx, showBox = false){
 
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.aabb.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.closePath();
-
-        if(showHitBox){
+        if(this.texture && !showBox){
+            ctx.drawImage(this.texture, 
+                this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, 
+                this.width, this.height);
+                
+        }else if(showBox){
             ctx.beginPath();
-            ctx.arc(this.aabb.center.x, this.aabb.center.y, this.aabb.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffff007f";
+            ctx.rect(this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, this.width * 2, this.height * 2);
+            ctx.fillStyle = this.color;
             ctx.fill();
             ctx.closePath();
         }
@@ -164,34 +165,34 @@ class Background extends GraphicItem {
     draw(ctx){
         ctx.drawImage(this.image, 
             this.pos.x, this.pos.y, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
 
         ctx.drawImage(this.image, 
             this.pos.x + this.width, this.pos.y, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
         ctx.drawImage(this.image, 
             this.pos.x, this.pos.y + this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
         ctx.drawImage(this.image, 
             this.pos.x + this.width, this.pos.y + this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
 
         ctx.drawImage(this.image, 
             this.pos.x - this.width, this.pos.y, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
         ctx.drawImage(this.image, 
             this.pos.x, this.pos.y - this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
         ctx.drawImage(this.image, 
             this.pos.x - this.width, this.pos.y - this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
 
         ctx.drawImage(this.image, 
             this.pos.x + this.width, this.pos.y - this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
         ctx.drawImage(this.image, 
             this.pos.x - this.width, this.pos.y + this.height, 
-            this.width, this.height / this.imageRatio);
+            this.width, this.height * this.imageRatio);
     }
     move(_, offset){
         this.setPos(this.pos.x, this.pos.y, this.pos.z, offset);
