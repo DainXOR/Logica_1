@@ -604,7 +604,7 @@ class Weapon {
     }
 }
 
-class Item extends Entity {
+class ItemEntity extends Entity {
     constructor(pos, radius, idComponent = ""){
         super(pos, radius, radius * 2, radius * 2, "i-" + idComponent);
 
@@ -628,7 +628,7 @@ class Item extends Entity {
     isItem(){return true;}
     isObject(){return false;}
 }
-class Orb extends Item {
+class Orb extends ItemEntity {
     constructor(pos, radius, exp, color, glowRadius){
         super(pos, radius, "orb");
 
@@ -688,7 +688,7 @@ class Orb extends Item {
         ctx.closePath();
     }
 }
-class Hearth extends Item {
+class Hearth extends ItemEntity {
     constructor(pos, radius, heal = 30){
         super(pos, radius, "hearth");
 
@@ -708,7 +708,7 @@ class Hearth extends Item {
         super.draw(ctx, true);
     }
 }
-class Artifact extends Item {
+class Artifact extends ItemEntity {
 
 }
 

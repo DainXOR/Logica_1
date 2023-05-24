@@ -16,17 +16,11 @@ class BC{
         this.radius = radius;
     }
 
-    containsAABB(other){
-        return  other.pos.x >= this.center.x - this.radius && 
-                other.pos.x <= this.center.x + this.radius &&
-                other.pos.y >= this.center.y - this.radius &&
-                other.pos.y <= this.center.y + this.radius;
-    }
-    containsBC(other){
-        return  other.center.x >= this.center.x - this.radius && 
-                other.center.x <= this.center.x + this.radius &&
-                other.center.y >= this.center.y - this.radius &&
-                other.center.y <= this.center.y + this.radius;
+    contains(x, y){
+        return  x >= this.center.x - this.radius && 
+                x <= this.center.x + this.radius &&
+                y >= this.center.y - this.radius &&
+                y <= this.center.y + this.radius;
     }
 
     isCollidingBC(other){
@@ -72,11 +66,11 @@ class AABB{
         this.height = h;
     }
 
-    contains(other){
-        return  other.pos.x >= this.pos.x && 
-                other.pos.x <= this.pos.x + this.width &&
-                other.pos.y >= this.pos.y &&
-                other.pos.y <= this.pos.y + this.height;
+    contains(x, y){
+        return  x >= this.pos.x && 
+                x <= this.pos.x + this.width &&
+                y >= this.pos.y &&
+                y <= this.pos.y + this.height;
     }
 
     distanceTo(other){
@@ -115,159 +109,6 @@ class AABB{
         ctx.closePath();
     }
 }
- 
-// The objects that we want stored in the quadtree
-class Node {
-    pos = new Vector3();
-    data = 0;
-
-    constructor(_pos = new Vector3(), _data = 0){
-        this.pos = _pos;
-        this.data = _data;
-    }
-};
- 
-// The main quadtree class
-class Quad {
-    topLeft = new Vector3();
-    botRight = new Vector3();
-
-    constructor(topL = new Vector3(), botR = new Vector3()){ // (Vector, Vector)
-        // Hold details of the boundary of this node
-        this.topLeft = topL;
-        this.botRight = botR;
-
-        // Contains details of node
-        this.n = null;
-
-        // Children of this tree
-        this.topLeftTree = null;
-        this.topRightTree = null;
-        this.botLeftTree = null;
-        this.botRightTree = null;
-    }
-    insert(_node){
-        if (_node == null){
-            return;
-        }
- 
-        // Current quad cannot contain it
-        if (!inBoundary(_node.pos)){
-            return;
-        }
- 
-        // We are at a quad of unit area
-        // We cannot subdivide this quad further
-        if (abs(this.topLeft.x - this.botRight.x) <= 1 && 
-            abs(this.topLeft.y - this.botRight.y) <= 1) {
-            if (this.n === null){
-                this.n = _node;
-            }
-            return;
-        }
- 
-        if ((this.topLeft.x + this.botRight.x) / 2 >= _node.pos.x) {
-            // Indicates topLeftTree
-            if ((this.topLeft.y + this.botRight.y) / 2 >= _node.pos.y) {
-                if (this.topLeftTree == null){
-                    this.topLeftTree = new Quad(
-                        new Vector3(this.topLeft.x, this.topLeft.y),
-                        new Vector3((this.topLeft.x + this.botRight.x) / 2,
-                                (this.topLeft.y + this.botRight.y) / 2)
-                    );
-                }
-                this.topLeftTree.insert(_node);
-            }
-        
-            // Indicates botLeftTree
-            else {
-                if (this.botLeftTree == null){
-                    this.botLeftTree = new Quad(
-                        new Vector3(this.topLeft.x,
-                            (this.topLeft.y + this.botRight.y) / 2),
-                        new Vector3((this.topLeft.x + this.botRight.x) / 2,
-                            this.botRight.y)
-                    );
-                }
-                this.botLeftTree.insert(_node);
-            }
-        }
-        else {
-            // Indicates topRightTree
-            if ((this.topLeft.y + this.botRight.y) / 2 >= _node.pos.y) {
-                if (this.topRightTree == null){
-                    this.topRightTree = new Quad(
-                        new Vector3((this.topLeft.x + this.botRight.x) / 2,
-                                    this.topLeft.y),
-                        new Vector3(this.botRight.x,
-                                    (this.topLeft.y + this.botRight.y) / 2)
-                    );
-                }
-                this.topRightTree.insert(_node);
-            }
-        
-            // Indicates botRightTree
-            else {
-                if (this.botRightTree == null){
-                    this.botRightTree = new Quad(
-                        new Vector3((this.topLeft.x + this.botRight.x) / 2,
-                                    (this.topLeft.y + this.botRight.y) / 2),
-                        new Vector3(this.botRight.x, this.botRight.y)
-                    );
-                }
-                this.botRightTree.insert(_node);
-            }
-        }
-    }
-    search(_vector){ // returns Node*
-            // Current quad cannot contain it
-        if (!inBoundary(_vector)){
-            return null;
-        }
-
-        // We are at a quad of unit length
-        // We cannot subdivide this quad further
-        if (n != null)
-            return n;
-
-        if ((this.topLeft.x + this.botRight.x) / 2 >= _vector.x) {
-            // Indicates topLeftTree
-            if ((this.topLeft.y + this.botRight.y) / 2 >= _vector.y) {
-                if (this.topLeftTree == null)
-                    return null;
-                return this.topLeftTree.search(_vector);
-            }
-        
-            // Indicates botLeftTree
-            else {
-                if (this.botLeftTree == null)
-                    return null;
-                return this.botLeftTree.search(_vector);
-            }
-        }
-        else {
-            // Indicates topRightTree
-            if ((this.topLeft.y + this.botRight.y) / 2 >= _vector.y) {
-                if (this.topRightTree == null)
-                    return null;
-                return this.topRightTree.search(_vector);
-            }
-        
-            // Indicates botRightTree
-            else {
-                if (this.botRightTree == null)
-                    return null;
-                return this.botRightTree.search(_vector);
-            }
-        }
-    }
-    inBoundary(_vector){ // returns Bool
-        return (_vector.x >= this.topLeft.x && 
-                _vector.x <= this.botRight.x && 
-                _vector.y >= this.topLeft.y && 
-                _vector.y <= this.botRight.y);
-    }
-};
 
 // My implementation of quadtree data struct
 class QuadTree {

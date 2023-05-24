@@ -307,11 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lastTime = timeStamp;
 
         if(!player.isAlive()){
-            dt /= 6;
-        }
-
-        if(dt > 20){
-            //console.log(dt);
+            dt *= 0.166666666;
         }
 
         enemies.length <= 500 &&
@@ -450,7 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //quadTreeTesting(0);
 
-    publisher.startNotifications(1);
-    gameLoop(0);
+    //publisher.startNotifications(1);
+    //gameLoop(0);
 
 });
