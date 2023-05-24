@@ -26,7 +26,7 @@ class GraphicItem{
         this.textureStates = frames.length;
 
         for (let i = 0; i < frames.length; i++) {
-            textureMaxFrame[i] = frames[i];
+            this.textureMaxFrame[i] = frames[i];
             
         }
         height > 0 &&
@@ -84,9 +84,11 @@ class GraphicItem{
         }
         else if(this.texture){
             ctx.drawImage(this.texture, 
-                this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, 
-                this.width, this.height);
-            //ctx.rotate(15);     
+                this.pos.x - this.width, this.pos.y - this.height, 
+                this.width * 2, this.height * 2);
+            
+            //this.imageData = ctx.getImageData(this.pos.x - this.width * 0.5, this.pos.y - this.height * 0.5, this.width, this.height);
+
         }
     }
     

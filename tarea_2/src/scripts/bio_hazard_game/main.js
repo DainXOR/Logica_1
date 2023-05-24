@@ -223,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
 
-    cnv.width = 1500;
-    cnv.height = 1500;
+    cnv.width = 1000;
+    cnv.height = 1000;
 
     let canvasScaleX = cnv.width / cnv.clientWidth;
     let canvasScaleY = cnv.height / cnv.clientHeight;
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let player = new PlayerEntity(new Vector3(cnv.width * 0.5, cnv.height * 0.5), cnv);
     publisher.subscribe(player, "mousemove");
 
-    let bg = new Background(cnv.width, cnv.height, "bg1");
+    let bg = new Background(cnv.width, cnv.height, "bg6");
 
     let orbFactory = orb(cnv);
     let orbs = orbFactory.createMany(500);
@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //enemies = [];
 
     let timeCounter = 0;
-    let qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
+    let qtree = new QuadTree(new Vector3(-500, -500), cnv.width + (500 * 2), cnv.height + (500 * 2));
 
     for (let i = 0; i < enemies.length; i++) {
         qtree.insert(enemies[i]);
@@ -300,6 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(quadTreeTesting);
     }
 
+    let offset = new Vector3();
+
     function gameLoop(timeStamp){
         dt = timeStamp - lastTime;
         lastTime = timeStamp;
@@ -308,26 +310,34 @@ document.addEventListener("DOMContentLoaded", () => {
             dt /= 6;
         }
 
+        if(dt > 20){
+            //console.log(dt);
+        }
+
         enemies.length <= 500 &&
-        (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 2000))));
+        (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
+        enemies.filter(e => !e.isAlive())
+               .forEach(e => {exp += e.claimExp();});
+
+        enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
 
         orbs.length <= 4000 &&
         (orbs = orbs.concat(orbFactory.generate(dt)));
+        orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
 
         hearths <= 50 &&
         (hearths = hearths.concat(hearthFactory.generate(dt)));
 
+        offset = player.update(dt);cnv.width
 
-        qtree = new QuadTree(new Vector3(-2000, -2000), 4000, 4000);
-        let allEntities = [player];
-        allEntities = allEntities.concat(orbs, enemies, hearths, playerAttacks);
+        qtree = new QuadTree(new Vector3(-500, -500), cnv.width + (500 * 2), cnv.height + (500 * 2));
+        let allEntities = [];
+        allEntities = allEntities.concat(orbs, enemies, hearths);
         for (let i = 0; i < allEntities.length; i++) {
-
-            
-
             qtree.insert(allEntities[i]);
+            allEntities[i].update(dt, offset);
         }
-        
+
         
         if(exp !== 0){
             player.addExperience(exp);
@@ -335,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         while (player.hasLevelUp()) {
-            console.log("Level up!");
+            console.log(player.levelsUpgraded);
 
             if(getRandomInt(0, 1000) > 850){
                 player.newAttack(ImpactProyectile, [50, 10], 680);
@@ -352,14 +362,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if(getRandomInt(0, 1000) > 950){
                 player.newAttack(Magma, [], 9_000, Type.AOE);
             }
-            if(getRandomInt(0, 1000) > 990){
+            if(getRandomInt(0, 1000) > 500){
                 player.newAttack(Void, [], 12_000, Type.AOE);
             }
-
             player.consumeLevel();
         }
 
-        const offset = player.update(dt);
+        
 
         let enemyEntities = qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 12);
         // let giantEnemies = enemyEntities.filter((enemy) => enemy.id === -1971176318);
@@ -367,19 +376,19 @@ document.addEventListener("DOMContentLoaded", () => {
         playerAttacks = playerAttacks.concat(player.shoot(...enemyEntities));
         clear(ctx, cnv);
         
-        //bg.update(ctx, offset);
+        bg.update(ctx, offset);
         //qtree.draw(ctx);
 
 
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
         orbs.forEach((o) => {
-            o.update(dt, offset);
+            //o.update(dt, offset);
             o.draw(ctx);
         });
 
         hearths = hearths.filter(o => !o.isCollected() && !o.tooFar(player));
         hearths.forEach((h) => {
-            h.update(dt, offset);
+            //h.update(dt, offset);
             h.draw(ctx, true);
         });
 
@@ -395,22 +404,15 @@ document.addEventListener("DOMContentLoaded", () => {
             let nearbyEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
 
             attack.impact(...nearbyEnemies);
-            attack.draw(ctx, false);
+            attack.draw(ctx);
         });
 
 
         player.draw(ctx, false, false);
         
-
-        let killed = enemies.filter(e => !e.isAlive());
-        killed.forEach(e => {
-            exp += e.claimExp();
-        });
-
-        enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
         enemies.forEach((e) => {
-            e.update(dt, offset);
-            e.draw(ctx);
+            //e.update(dt, offset);
+            e.draw(ctx, true);
         });
         
         
@@ -434,6 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
         player.hpBar.draw(ctx);
         player.expBar.draw(ctx);
         
+        //qtree.draw(ctx);
         //totalTime += dt;
 
         //if(totalTime > 30_000){
@@ -447,7 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //quadTreeTesting(0);
 
-    //publisher.startNotifications(1);
-    //gameLoop(0);
+    publisher.startNotifications(1);
+    gameLoop(0);
 
 });
