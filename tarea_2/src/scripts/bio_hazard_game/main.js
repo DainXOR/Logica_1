@@ -10,7 +10,7 @@ function enemy(canvas){
 
     function newEnemy(enemyClass, amount, target, area = new BC(new Vector3(), 1500), predicate = () => true){
 
-        let condition = (x, y) => {return !area.containsBC(new BC(new Vector3(x, y), 1)) && predicate(x, y)};
+        let condition = (x, y) => {return !area.contains(new BC(new Vector3(x, y), 1)) && predicate(x, y)};
 
         let enemies = [];
         for (let i = 0; i < amount; i++) {
@@ -216,9 +216,9 @@ function clear(context, canvas){
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    let game = new Game(1000, 1000, 1);
-    game.setupCanvas("game_screen");
-    game.setupActors();
+    //let game = new Game(1000, 1000, 1);
+    //game.setupCanvas("game_screen");
+    //game.setupActors();
 
     let cnv = document.getElementById("game_screen");
     let ctx = cnv.getContext('2d');
@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //quadTreeTesting(0);
 
-    //publisher.startNotifications(1);
-    //gameLoop(0);
+    publisher.startNotifications(1);
+    gameLoop(0);
 
 });

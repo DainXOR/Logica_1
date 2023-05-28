@@ -155,25 +155,33 @@ class Game {
 }
 
 class Generator {
-    arguments = [];
-    generateAmounts = [1];
-    spawnTime = 1000;
-    timer = 0;
-    succedSpawnsCount = 0;
-    
-    constructor(itemClass, typesArgs = [], minType = 0, maxType = 0, cooldownSeconds = 1, spawnArea = new BC()){
+    constructor(itemClass, typesNames = [], typesArgs = [[]], minType = 0, maxType = 0, cooldownSeconds = 1, spawnArea = new BC()){
+        if(typesNames.length !== typesArgs.length){
+            throw new Error("Arguments amounts missmatch.");
+        }
+
+        this.types = {};
+        this.typesOrder = typesNames;
+        for(let i = 0; i < typesNames.length; i++){
+            this.types[typesNames[i]] = typesArgs[i];
+
+        }
         this.class = itemClass;
-        this.arguments = [typesArgs];
+        generateAmounts = [];
         for (let i = 0; i < this.arguments.length; i++) {
             this.generateAmounts[i] = 1;
             
         }
         this.minSpawnType = minType;
         this.maxSpawnType = maxType;
-        this.spawnTime *= cooldownSeconds;
+        this.spawnTime = 1000 * cooldownSeconds;
+        this.spawnTimer = 0;
+        this.succedSpawnsCount = 0;
 
         this.spawnArea = spawnArea;
         this.spawnPredicate = () => true;
+        this.hasSpawnCallback = false;
+        this.onSpawn = () => {};
     }
 
     setGenAmounts(amounts){
@@ -189,28 +197,73 @@ class Generator {
     setSpawnArea(area){
         this.spawnArea = area;
     }
+    setSpawnPredicate(predicate){
+        this.spawnPredicate = predicate;
+    }
+    setOnSpawnCallback(callback, internalArgs){
+        this.onSpawn = callback;
+        this.internalArgs = internalArgs;
+    }
 
     addType(...objArgs){
         this.arguments.push(objArgs);
         this.generateAmounts.push(0);
-
     }
-    addSpawnPredicate(predicate){
-        this.spawnPredicate = predicate;
+    addSpawnAmount(typeIndex, amount){
+        this.generateAmounts[typeIndex] += amount;
     }
 
-    createNew(typeIndex, zIndex = 0){
+    createNew(typeName, zIndex = 0){
         let coords = getNRandom(2, this.spawnArea.center.x - this.spawnArea.radius, 
                                    this.spawnArea.center.y + this.spawnArea.radius, 
                                    (x, y) => {return this.spawnArea.contains(x, y) && predicate(x, y)});
         let x = coords[0];
         let y = coords[1];
 
-        return new this.class(new Vector3(x, y, zIndex), ...this.arguments[typeIndex]);
+        return new this.class(new Vector3(x, y, zIndex), ...this.types[typeName]);
+    }
+    createMany(amounts, zIndexes){
+        let objects = [];
+
+        for (let i = 0; i < amounts.length; i++) {
+            for (let j = 0; j < amounts[i]; j++) {
+                objects.push(this.createNew(...this.types[this.typesOrder[j]], zIndexes[i]));   
+            }
+        }
+        return objects;
+    }
+
+    generate(dt){
+        let newObjects = [];
+        this.spawnTimer += dt;
+
+        if(this.spawnTimer >= this.spawnTime){
+            this.spawnTimer = 0;
+            this.succedSpawnsCount++;
+            newObjects = this.createMany(this.generateAmounts, 0);
+
+            if(this.hasSpawnCallback){
+
+                let effectiveIndices = [];
+                let posArgs = this.internalArgs;
+                let posibleArgs = [this.minSpawnType, this.maxSpawnType, this.succedSpawnsCount, this.spawnArea];
+
+                for (let i = 0; posArgs !== 0; i++) {
+                    effectiveIndices.push((posArgs & 1) * i);
+                    posArgs >>= 1; 
+                }
+        
+                let effectiveArgs = posibleArgs.filter((_, i)=>{return effectiveIndices.includes(i);});
+
+                this.onSpawn(...effectiveArgs);
+
+            }
+        }
+
+        return newObjects;
     }
 
     orbGenerators(canvas){
-
         function settings(){
             this.orbsGenerate = [20, 0, 0, 0, 0, 0];
             this.orbTypes = orbsGenerate.length;
@@ -233,7 +286,6 @@ class Generator {
                 test: this.Test
             }
         }
-    
         function createNew(type, radius = 3000, 
             center = new Vector3(canvas.width * 0.5, canvas.height * 0.5),
             predicate = () => {return true;}){
@@ -310,7 +362,7 @@ class Generator {
             settings
         };
     }
-    function enemyGenerators(canvas){
+    enemyGenerators(canvas){
         this.enemyStartAmounts = [10, 0, 0, 0, 0, 0, 0];
         this.enemyTypeCount = this.enemyStartAmounts.length;
         this.enemySpawnTime = 1000 * 2;
@@ -372,13 +424,7 @@ class Generator {
             generate: generateEnemies
         }
     }
-    function structureGenerators(canvas){
+    structureGenerators(canvas){
 
-    }
-
-    return {
-        orb: orbGenerators,
-        enemy: enemyGenerators,
-        structs: structureGenerators
     }
 }
