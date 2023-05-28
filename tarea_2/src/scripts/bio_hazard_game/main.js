@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         enemies.length <= 500 &&
-        //(enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
+        (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
         enemies.filter(e => !e.isAlive())
                .forEach(e => {exp += e.claimExp();});
 
