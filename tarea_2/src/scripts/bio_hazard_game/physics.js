@@ -228,10 +228,6 @@ class QuadTree {
         }
         if(this.intersects(area)){
             for (let i = 0; i < this.elements.length; i++) {
-                if(new BC(new Vector3(500, 500), 5).contains(this.elements[i].pos.x, this.elements[i].pos.y)){
-                    console.log(this.elements[i]);
-                }
-
                 area.contains(this.elements[i].pos.x, this.elements[i].pos.y) &&
                 containedElements.push(this.elements[i]);
             }

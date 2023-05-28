@@ -222,6 +222,14 @@ class AreaOfEffect extends DamageEntity {
     hasTarget(){return true;}
     isDamaging(){return true;}
 }
+class NormalAOE extends AreaOfEffect {
+
+}
+class MovableAOE extends AreaOfEffect {
+    
+}
+
+// Normal AOE
 class Magma extends AreaOfEffect{
     constructor(originPos, spawnPos){
         super(originPos, spawnPos, 20, 100, 2, 8_000, 1_000_000);
@@ -240,6 +248,7 @@ class Magma extends AreaOfEffect{
         super.draw(ctx, false, showBC, showAABB);
     }
 }
+// Normal AOE
 class Void extends AreaOfEffect {
     constructor(originPos, spawnPos){
         super(new Vector3(), spawnPos, 1, 150, 10, 5_000, 1_000_000, 
@@ -437,6 +446,11 @@ class FollowProyectile extends Proyectile {
         return;
     }
 }
+class BeamProyectile extends Proyectile {
+
+}
+
+// FollowProyectile
 class RicochetProyectile extends Proyectile {
     constructor(pos, target, speed, damage = 4, uses = 5){
         super(pos, target.pos, speed, uses, damage, 12, 
@@ -611,7 +625,9 @@ class ItemEntity extends Entity {
         this.type = 3;
         this.color = "#ffffff";
 
+        this.statAmount = 0;
         this.collected = false;
+        this.affectEntity = (entity) => {};
     }
 
     isCollected(){
@@ -622,7 +638,10 @@ class ItemEntity extends Entity {
     }
 
     doEffect(entity){
-
+        this.affectEntity(entity);
+        this.collected = true;
+        this.statAmount = 0;
+        return;
     }
 
     isItem(){return true;}
@@ -632,7 +651,9 @@ class Orb extends ItemEntity {
     constructor(pos, radius, exp, color, glowRadius){
         super(pos, radius, "orb");
 
-        this.exp = exp;
+        this.statAmount = exp;
+        this.affectEntity = (entity) => {entity.addExperience(this.statAmount);};
+
         this.color = color;
         this.secondColor = "#" + this.lighterColor(color.replace("#", ""), 20);
         this.shineColor = "#" + this.lighterColor(color.replace("#", ""), 50);
@@ -643,12 +664,6 @@ class Orb extends ItemEntity {
         this.glowRadius = glowRadius;
     }
 
-    doEffect(entity){
-        entity.addExperience(this.exp);
-        this.collected = true;
-        this.exp = 0;
-        return;
-    }
     draw(ctx){
 
         ctx.beginPath();
@@ -694,14 +709,8 @@ class Hearth extends ItemEntity {
 
         this.setTexture("hearth");
 
-        this.healAmount = heal;
-    }
-
-    doEffect(entity){
-        entity.addHitPoints(this.healAmount);
-        this.collected = true;
-        this.healAmount = 0;
-        return;
+        this.statAmount = heal;
+        this.affectEntity = (entity) => {entity.addHitPoints(this.statAmount);};
     }
 
     draw(ctx){
