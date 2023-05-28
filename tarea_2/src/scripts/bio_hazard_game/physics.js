@@ -73,13 +73,6 @@ class AABB{
                 y <= this.pos.y + this.height;
     }
 
-    distanceTo(other){
-        const dx_sqr = ((other.pos.x + other.width * 0.5) - (this.pos.x + this.width * 0.5)) * ((other.pos.x + other.width * 0.5) - (this.pos.x + this.width * 0.5));
-        const dy_sqr = ((other.pos.y + other.height * 0.5) - (this.pos.y + this.height * 0.5)) * ((other.pos.y + other.height * 0.5) - (this.pos.y + this.height * 0.5));
-
-        return dx_sqr + dy_sqr;
-    }
-
     isCollidingBC(other){
         return  ((other.bc.center.x + other.bc.radius >= this.pos.x && 
                 other.bc.center.x + other.bc.radius <= this.pos.x + this.width) 
@@ -98,6 +91,13 @@ class AABB{
                 other.pos.x <= this.pos.x + this.width &&
                 other.pos.y + other.aabb.height >= this.pos.y &&
                 other.pos.y <= this.pos.y + this.height;
+    }
+
+    distanceTo(other){
+        const dx_sqr = ((other.pos.x + other.width * 0.5) - (this.pos.x + this.width * 0.5)) * ((other.pos.x + other.width * 0.5) - (this.pos.x + this.width * 0.5));
+        const dy_sqr = ((other.pos.y + other.height * 0.5) - (this.pos.y + this.height * 0.5)) * ((other.pos.y + other.height * 0.5) - (this.pos.y + this.height * 0.5));
+
+        return dx_sqr + dy_sqr;
     }
 
     draw(ctx){
@@ -228,9 +228,12 @@ class QuadTree {
         }
         if(this.intersects(area)){
             for (let i = 0; i < this.elements.length; i++) {
-                area.contains(this.elements[i]) &&
+                if(new BC(new Vector3(500, 500), 5).contains(this.elements[i].pos.x, this.elements[i].pos.y)){
+                    console.log(this.elements[i]);
+                }
+
+                area.contains(this.elements[i].pos.x, this.elements[i].pos.y) &&
                 containedElements.push(this.elements[i]);
-                
             }
             if(this.divided){
                 containedElements = containedElements.concat(

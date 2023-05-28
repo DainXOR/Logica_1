@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let enemyFactory = enemy(cnv);
     let enemies = enemyFactory.createMany(player, [10, 0, 0, 0, 0, 0, 0], 
                                         new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), cnv.width));
-    //enemies = [];
+    enemies = [];
 
     let timeCounter = 0;
     let qtree = new QuadTree(new Vector3(-500, -500), cnv.width + (500 * 2), cnv.height + (500 * 2));
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         enemies.length <= 500 &&
-        (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
+        //(enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
         enemies.filter(e => !e.isAlive())
                .forEach(e => {exp += e.claimExp();});
 
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         
-        player.collect(...qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 3));
+        player.collect(...qtree.queryElements(player.aabb, "inside", (entity) => entity.type === 3));
 
         playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
         playerAttacks.forEach((attack) => {
