@@ -11,16 +11,16 @@ class Vector3{
 }
 
 class BC{
-    constructor(center = new Vector3(), radius = 0){
-        this.center = center;
+    constructor(pos = new Vector3(), radius = 0){
+        this.pos = pos;
         this.radius = radius;
     }
 
     contains(x, y){
-        return  x >= this.center.x - this.radius && 
-                x <= this.center.x + this.radius &&
-                y >= this.center.y - this.radius &&
-                y <= this.center.y + this.radius;
+        return  x >= this.pos.x - this.radius && 
+                x <= this.pos.x + this.radius &&
+                y >= this.pos.y - this.radius &&
+                y <= this.pos.y + this.radius;
     }
 
     isCollidingBC(other){
@@ -30,29 +30,29 @@ class BC{
         return de_sqr < dr_sqr;
     }
     isCollidingAABB(other){
-        return  ((this.center.x + this.radius >= other.pos.x && 
-            this.center.x + this.radius <= other.pos.x + other.width) 
+        return  ((this.pos.x + this.radius >= other.pos.x && 
+            this.pos.x + this.radius <= other.pos.x + other.width) 
             ||
-            (this.center.x - this.radius >= other.pos.x && 
-            this.center.x - this.radius <= other.pos.x + other.width))
+            (this.pos.x - this.radius >= other.pos.x && 
+            this.pos.x - this.radius <= other.pos.x + other.width))
             &&
-            ((this.center.y + this.radius >= other.pos.y && 
-            this.center.y + this.radius <= other.pos.y + other.height) 
+            ((this.pos.y + this.radius >= other.pos.y && 
+            this.pos.y + this.radius <= other.pos.y + other.height) 
             ||
-            (this.center.y - this.radius >= other.pos.y && 
-            this.center.y - this.radius <= other.pos.y + other.height));
+            (this.pos.y - this.radius >= other.pos.y && 
+            this.pos.y - this.radius <= other.pos.y + other.height));
     }
 
     distanceTo(other){
-        const dx_sqr = (other.center.x - this.center.x) * (other.center.x - this.center.x);
-        const dy_sqr = (other.center.y - this.center.y) * (other.center.y - this.center.y);
+        const dx_sqr = (other.pos.x - this.pos.x) * (other.pos.x - this.pos.x);
+        const dy_sqr = (other.pos.y - this.pos.y) * (other.pos.y - this.pos.y);
 
         return dx_sqr + dy_sqr;
     }
 
     draw(ctx){
         ctx.beginPath();
-        ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+        ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = "#ffff007f";
         ctx.fill();
         ctx.closePath();
@@ -74,17 +74,17 @@ class AABB{
     }
 
     isCollidingBC(other){
-        return  ((other.bc.center.x + other.bc.radius >= this.pos.x && 
-                other.bc.center.x + other.bc.radius <= this.pos.x + this.width) 
+        return  ((other.bc.pos.x + other.bc.radius >= this.pos.x && 
+                other.bc.pos.x + other.bc.radius <= this.pos.x + this.width) 
                 ||
-                (other.bc.center.x - other.bc.radius >= this.pos.x && 
-                other.bc.center.x - other.bc.radius <= this.pos.x + this.width))
+                (other.bc.pos.x - other.bc.radius >= this.pos.x && 
+                other.bc.pos.x - other.bc.radius <= this.pos.x + this.width))
                 &&
-                ((other.bc.center.y + other.bc.radius >= this.pos.y && 
-                other.bc.center.y + other.bc.radius <= this.pos.y + this.height) 
+                ((other.bc.pos.y + other.bc.radius >= this.pos.y && 
+                other.bc.pos.y + other.bc.radius <= this.pos.y + this.height) 
                 ||
-                (other.bc.center.y - other.bc.radius >= this.pos.y && 
-                other.bc.center.y - other.bc.radius <= this.pos.y + this.height));
+                (other.bc.pos.y - other.bc.radius >= this.pos.y && 
+                other.bc.pos.y - other.bc.radius <= this.pos.y + this.height));
     }
     isCollidingAABB(other){
         return  other.pos.x + other.aabb.width >= this.pos.x && 

@@ -14,8 +14,8 @@ function enemy(canvas){
 
         let enemies = [];
         for (let i = 0; i < amount; i++) {
-            let x = getRandomNumber(area.center.x - area.radius, area.center.x + area.radius);
-            let y = getRandomNumber(area.center.y - area.radius, area.center.y + area.radius);
+            let x = getRandomNumber(area.pos.x - area.radius, area.pos.x + area.radius);
+            let y = getRandomNumber(area.pos.y - area.radius, area.pos.y + area.radius);
 
             if(!condition(x, y)){
                 x += area.radius * (1 + ((x < 0) * -2));
@@ -69,14 +69,14 @@ function enemy(canvas){
 function orb(canvas){
     const orbType = {
         blue:   [4, 1, "#0066ff", 4],
-        green:  [4, 10, "#1aff75", 5],
+        green:  [4, 5, "#1aff75", 5],
         yellow: [4, 25, "#ffcc00", 6],
         violet: [5, 100, "#ff33cc", 7],
         red:    [5, 1000, "#ff133c", 8],
         black:  [6, 10000, "#090909", 9],
     }
 
-    let orbsGenerate = [10, 0, 0, 0, 0, 0];
+    let orbsGenerate = [2, 0, 0, 0, 0, 0];
     let orbTypes = orbsGenerate.length;
     let orbSpawnTime = 1000 * 0.5;
     let orbSpawnTimer = 0;
@@ -163,7 +163,7 @@ function orb(canvas){
     }
 }
 function hearth(canvas){
-    let hearthSpawnTime = 1000 * 40;
+    let hearthSpawnTime = 1000 * 30;
     let hearthSpawnTimer = 0;
 
     function newHearth(radius = 3000, 
@@ -310,31 +310,33 @@ document.addEventListener("DOMContentLoaded", () => {
             dt *= 0.166666666;
         }
 
-        enemies.length <= 500 &&
+        enemies.length <= 1000 &&
         (enemies = enemies.concat(enemyFactory.generate(player, dt, new BC(new Vector3(cnv.width * 0.5, cnv.height * 0.5), 1500))));
-        enemies.filter(e => !e.isAlive())
+        
+        enemies.filter(e => !e.isAlive() && !e.tooFar())
                .forEach(e => {exp += e.claimExp();});
 
         enemies = enemies.filter(e => e.isAlive() && !e.tooFar());
 
-        orbs.length <= 4000 &&
+
+        orbs.length <= 3000 &&
         (orbs = orbs.concat(orbFactory.generate(dt)));
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
 
         hearths <= 50 &&
         (hearths = hearths.concat(hearthFactory.generate(dt)));
+        hearths = hearths.filter(h => !h.isCollected() && !h.tooFar(player));
 
-        offset = player.update(dt);cnv.width
+        offset = player.update(dt);
 
         qtree = new QuadTree(new Vector3(-500, -500), cnv.width + (500 * 2), cnv.height + (500 * 2));
-        let allEntities = [];
-        allEntities = allEntities.concat(orbs, enemies, hearths);
+        let allEntities = orbs.concat(enemies, hearths);
         for (let i = 0; i < allEntities.length; i++) {
             qtree.insert(allEntities[i]);
             allEntities[i].update(dt, offset);
         }
 
-        
+        player.collect(...qtree.queryElements(player.aabb, "inside", (entity) => entity.type === 3));
         if(exp !== 0){
             player.addExperience(exp);
             exp = 0;
@@ -344,16 +346,16 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(player.levelsUpgraded);
 
             if(getRandomInt(0, 1000) > 850){
-                player.newAttack(ImpactProyectile, [50, 10], 680);
+                player.newAttack(ImpactProjectile, [50, 10], 680);
             }
             if(getRandomInt(0, 1000) > 900){
-                player.newAttack(PierceProyectile, [60, 5, 2], 1000);
+                player.newAttack(PierceProjectile, [60, 5, 2], 1000);
             }
             if(getRandomInt(0, 1000) > 900){
-                player.newAttack(FollowProyectile, [20, 8], 1000);
+                player.newAttack(FollowProjectile, [20, 8], 1000);
             }
             if(getRandomInt(0, 1000) > 850){
-                player.newAttack(RicochetProyectile, [60, 4, 5], 1500);
+                player.newAttack(RicochetProjectile, [60, 4, 5], 1500);
             }
             if(getRandomInt(0, 1000) > 950){
                 player.newAttack(Magma, [], 9_000, Type.AOE);
@@ -369,37 +371,52 @@ document.addEventListener("DOMContentLoaded", () => {
         let enemyEntities = qtree.queryElements(player.aabb, "collide", (entity) => entity.type === 12);
         // let giantEnemies = enemyEntities.filter((enemy) => enemy.id === -1971176318);
 
-        playerAttacks = playerAttacks.concat(player.shoot(...enemyEntities));
-        clear(ctx, cnv);
+        playerAttacks = playerAttacks.filter(a => a.isActive())
+                                     .concat(player.shoot(...enemyEntities))
+                                     .sort((a, b) => {return a.pos.z - b.pos.z;});
+        playerAttacks.forEach(attack => {
+
+            attack.checkTooFar(player);
+            attack.update(dt, offset);
+            if(attack.isActive()){
+                let closeEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
+
+                if(!attack.hasTarget()){
+                    let closer = 1_000_000;
+                    let closerEnemy = null;
+                    
+    
+                    closeEnemies.forEach(e => { // pos, speed, damage
+                        const de = attack.bc.distanceTo(e.bc);
+                        if(de <= closer){
+                            closer = de;
+                            closerEnemy = e;
+                        } 
+                    });
+                    attack.target = closerEnemy;
+                }
+    
+                attack.impact(closeEnemies);                
+            }
+        });
+
+
+        clear(ctx, cnv); // ------------------------------ Canvas Clear ---------------------------------------
         
         bg.update(ctx, offset);
         //qtree.draw(ctx);
 
-
         orbs = orbs.filter(o => !o.isCollected() && !o.tooFar(player));
         orbs.forEach((o) => {
-            //o.update(dt, offset);
             o.draw(ctx);
         });
 
         hearths = hearths.filter(o => !o.isCollected() && !o.tooFar(player));
         hearths.forEach((h) => {
-            //h.update(dt, offset);
             h.draw(ctx, true);
         });
-
         
-        player.collect(...qtree.queryElements(player.aabb, "inside", (entity) => entity.type === 3));
-
-        playerAttacks = playerAttacks.sort((a, b) => {return a.pos.z - b.pos.z;});
-        playerAttacks.forEach((attack) => {
-            attack.checkTooFar(player);
-
-            attack.update(dt, offset);
-
-            let nearbyEnemies = qtree.queryElements(attack.aabb, "inside", (entity) => entity.type === 12);
-
-            attack.impact(...nearbyEnemies);
+        playerAttacks.forEach(attack => {
             attack.draw(ctx);
         });
 
@@ -407,34 +424,14 @@ document.addEventListener("DOMContentLoaded", () => {
         player.draw(ctx, false, false);
         
         enemies.forEach((e) => {
-            //e.update(dt, offset);
             e.draw(ctx, true);
-        });
-        
-        
-        playerAttacks = playerAttacks.filter(a => a.isActive());
-        let targetless = playerAttacks.filter(a => !a.hasTarget());
-
-        targetless.forEach(a => {
-            let closer = 1_000_000_000;
-            let closerEnemy = null;
-            enemies.forEach(e => { // pos, speed, damage
-                const de = a.aabb.distanceTo(e.aabb);
-                if(de <= closer){
-                    closer = de;
-                    closerEnemy = e;
-                } 
-            });
-            a.target = closerEnemy;
         });
 
         
         player.hpBar.draw(ctx);
         player.expBar.draw(ctx);
-        
-        //qtree.draw(ctx);
-        //totalTime += dt;
 
+        //totalTime += dt;
         //if(totalTime > 30_000){
         //    enemies.forEach(e => e.hurt(0)); 
         //    totalTime *= -1;
